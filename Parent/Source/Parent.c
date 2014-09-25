@@ -269,6 +269,7 @@ void cbToCoNet_vRxEvent(tsRxDataApp *pRx) {
 			vSerOutput_Standard(sRxPktInfo, p);
 		}
 
+		// ToDo: 子機の論理IDをキーに使用して設置場所と子機の対応を容易にする。
 		// データベースへ登録（線形配列に格納している）
 		ADDRKEYA_vAdd(&sEndDevList, sRxPktInfo.u32addr_1st, 0); // アドレスだけ登録。
 	}
@@ -330,6 +331,8 @@ uint8 cbToCoNet_u8HwInt(uint32 u32DeviceId, uint32 u32ItemBitmap) {
 /***        Local Functions                                               ***/
 /****************************************************************************/
 
+// ToDo: 状態レポートのトリガーとなるボタンの割り込みを有効にする。
+// ToDo: LCDキャラクタモジュール SC1602BSのドライバを書く。
 /**
  * ハードウェアの初期化
  * @param f_warm_start
@@ -420,7 +423,7 @@ static void vSerialInit(uint32 u32Baud, tsUartOpt *pUartOpt) {
 	sSerStream.u8Device = UART_PORT;
 }
 
-
+// ToDo: ボタンに応答するレポート処理を追加する。
 /**
  * アプリケーション主要処理
  * - E_STATE_IDLE\n

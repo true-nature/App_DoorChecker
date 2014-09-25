@@ -46,6 +46,7 @@ extern "C" {
 /* Specify which serial port to use when outputting debug information */
 #define UART_PORT			E_AHI_UART_0
 
+// ToDO: 親機シリアル番号に基づいたAPP_IDに変更する
 /* Specify the PAN ID and CHANNEL to be used by tags, readers and gateway */
 #define APP_ID              0x67726305
 #define APP_NAME            "App_DoorChecker"

@@ -94,6 +94,7 @@ PRSEV_HANDLER_DEF(E_STATE_RUNNING, tsEvent *pEv, teEvent eEvent, uint32 u32evarg
 	static bool_t bBuzz;
 	static bool_t bTxCmp;
 
+	// ToDo: ブザーを鳴らさない状態送信だけのモードが必要。
 	/*
 	 * ブザーを鳴らす処理
 	 */
@@ -181,6 +182,7 @@ PRSEV_HANDLER_DEF(E_STATE_APP_SLEEP, tsEvent *pEv, teEvent eEvent, uint32 u32eva
 		// 念のため状態を再チェック
 		bool_t bOpen = (bPortRead(PORT_INPUT1) == FALSE);
 
+		// ToDo: ドア開閉状態に関わらず一定間隔で送信させる。
 		// 周期スリープに入る
 		//  - 初回は一定時間秒あけて、次回以降はスリープ復帰を基点に５秒
 		if (sAppData.bDI1_Now_Opened || bOpen) {
