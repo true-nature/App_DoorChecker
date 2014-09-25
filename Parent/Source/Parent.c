@@ -98,8 +98,7 @@ static void vLcdRefresh(void);
 /****************************************************************************/
 /***        Local Variables                                               ***/
 /****************************************************************************/
-tsAppData_Pa sAppData_Pa; // application information
-
+tsAppData_Pa sAppData; // application information
 tsFILE sSerStream; // serial output context
 tsSerialPortSetup sSerPort; // serial port queue
 
