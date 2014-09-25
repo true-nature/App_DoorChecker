@@ -152,6 +152,7 @@ void cbAppColdStart(bool_t bAfterAhiInit) {
 		vPortAsOutput(DIO_SUPERCAP_CONTROL);
 		vPortDisablePullup(DIO_SUPERCAP_CONTROL);
 
+		// ToDo: プルアップ停止判定はFlashをロードしてからではないか？スリープ中の消費電流で確認する。
 		//	入力ボタンのプルアップを停止する
 		if ((sAppData.sFlash.sData.u8mode == PKT_ID_IO_TIMER)	// ドアタイマー
 			|| (sAppData.sFlash.sData.u8mode == PKT_ID_BOTTON && sAppData.sFlash.sData.i16param == 1 ) ) {	// 押しボタンの立ち上がり検出時
