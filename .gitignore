@@ -26,3 +26,6 @@
 *.exe
 *.out
 *.app
+
+#Firmware binaries
+*.bin
