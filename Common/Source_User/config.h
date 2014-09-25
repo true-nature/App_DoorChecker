@@ -48,7 +48,7 @@ extern "C" {
 
 /* Specify the PAN ID and CHANNEL to be used by tags, readers and gateway */
 #define APP_ID              0x67726305
-#define APP_NAME            "Samp_Monitor"
+#define APP_NAME            "App_DoorChecker"
 #define CHANNEL             15
 //#define CHMASK              ((1UL << CHANNEL) | (1UL << (CHANNEL+5)) | (1UL << (CHANNEL+10)))
 #define CHMASK              (1UL << CHANNEL)
