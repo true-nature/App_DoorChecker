@@ -1,7 +1,8 @@
 VERSION_MAIN = 1
 VERSION_SUB  = 3
-VERSION_VAR  = 2
+VERSION_VAR  = 3
 
+# 1.3.3 マイナーバグフィックス
 # 1.3.2 SDK 2014/06 の修正版での再ビルド
 # 1.3.1 LIS3DH の動作不具合を修正
 # 1.3.0 ソース公開版

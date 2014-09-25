@@ -109,7 +109,7 @@ static void vLcdRefresh(void);
 /***        Local Variables                                               ***/
 /****************************************************************************/
 // Local data used by the tag during operation
-tsAppData_Re sAppData_Re;
+tsAppData_Re sAppData;
 
 PUBLIC tsFILE sSerStream;
 tsSerialPortSetup sSerPort;

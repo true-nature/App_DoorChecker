@@ -101,7 +101,7 @@ void vProcessSerialCmd(tsSerCmd_Context *pCmd);
 /***        Local Variables                                               ***/
 /****************************************************************************/
 // Local data used by the tag during operation
-tsAppData_Ed sAppData_Ed;
+tsAppData_Ed sAppData;
 
 tsFILE sSerStream;
 tsSerialPortSetup sSerPort;
