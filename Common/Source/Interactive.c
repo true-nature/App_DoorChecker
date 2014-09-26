@@ -968,6 +968,7 @@ static void vSerUpdateScreen() {
 		V_PRINTF(")%c" LB,
 					FL_IS_MODIFIED_u8(parity) ? '*' : ' ');
 	}
+	// ToDo: 子機の台数をEEPROMに記憶。
 
 #endif
 

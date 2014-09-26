@@ -25,6 +25,7 @@ typedef struct _tsFlashApp {
 
 	uint32 u32baud_safe;	//!< ボーレート
 	uint8 u8parity;         //!< パリティ 0:none, 1:odd, 2:even
+	// ToDo: 子機の台数をEEPROMに記憶。
 
 	uint32 u32EncKey;		//!< 暗号化キー(128bitだけど、32bitの値から鍵を生成)
 	uint32 u32Opt;			//!< 色々オプション

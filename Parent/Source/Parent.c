@@ -332,7 +332,8 @@ uint8 cbToCoNet_u8HwInt(uint32 u32DeviceId, uint32 u32ItemBitmap) {
 /****************************************************************************/
 
 // ToDo: 状態レポートのトリガーとなるボタンの割り込みを有効にする。
-// ToDo: LCDキャラクタモジュール SC1602BSのドライバを書く。
+// ToDo: LCDキャラクタモジュール ACM1602NI,AQM0802A のドライバを書く。
+// ToDo: 音声合成LSI ATP3011を初期化する。
 /**
  * ハードウェアの初期化
  * @param f_warm_start
@@ -424,6 +425,8 @@ static void vSerialInit(uint32 u32Baud, tsUartOpt *pUartOpt) {
 }
 
 // ToDo: ボタンに応答するレポート処理を追加する。
+// ToDo: 定期ヘルスチェックレポート(電源,通信)。
+// ToDo: 窓状態の変化を検出した時に音声アナウンス。
 /**
  * アプリケーション主要処理
  * - E_STATE_IDLE\n
