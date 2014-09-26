@@ -152,13 +152,6 @@ void cbAppColdStart(bool_t bAfterAhiInit) {
 		vPortAsOutput(DIO_SUPERCAP_CONTROL);
 		vPortDisablePullup(DIO_SUPERCAP_CONTROL);
 
-		// ToDo: プルアップ停止判定はFlashをロードしてからではないか？スリープ中の消費電流で確認する。
-		//	入力ボタンのプルアップを停止する
-		if ((sAppData.sFlash.sData.u8mode == PKT_ID_IO_TIMER)	// ドアタイマー
-			|| (sAppData.sFlash.sData.u8mode == PKT_ID_BOTTON && sAppData.sFlash.sData.i16param == 1 ) ) {	// 押しボタンの立ち上がり検出時
-			vPortDisablePullup(DIO_BUTTON); // 外部プルアップのため
-		}
-
 		// アプリケーション保持構造体の初期化
 		memset(&sAppData, 0x00, sizeof(sAppData));
 
@@ -168,6 +161,12 @@ void cbAppColdStart(bool_t bAfterAhiInit) {
 		// フラッシュメモリからの読み出し
 		//   フラッシュからの読み込みが失敗した場合、ID=15 で設定する
 		sAppData.bFlashLoaded = Config_bLoad(&sAppData.sFlash);
+
+		//	入力ボタンのプルアップを停止する
+		if ((sAppData.sFlash.sData.u8mode == PKT_ID_IO_TIMER)	// ドアタイマー
+			|| (sAppData.sFlash.sData.u8mode == PKT_ID_BOTTON && sAppData.sFlash.sData.i16param == 1 ) ) {	// 押しボタンの立ち上がり検出時
+			vPortDisablePullup(DIO_BUTTON); // 外部プルアップのため
+		}
 
 		// センサー用の制御 (Lo:Active), OPTION による制御を行っているのでフラッシュ読み込み後の制御が必要
 		vPortSetSns(TRUE);
