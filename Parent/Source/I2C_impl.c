@@ -23,7 +23,7 @@
 #include <string.h>
 #include <AppHardwareApi.h>
 
-#include "Master.h"
+#include "Parent.h"
 
 #include "common.h"
 #include "config.h"
@@ -41,8 +41,20 @@
 
 #include "sercmd_gen.h"
 
-// 実験的な実装
-#include "Experimental.h"
+/****************************************************************************/
+/***        実験的な実装定義                                              ***/
+/****************************************************************************/
+
+/** @ingroup MASTER
+ * I2C LCD モジュールテスト用のコード
+ *   本定義が実装されると、I2C 接続の LCD デバイスにテスト文字を表示する
+ *   - IO入力を受け取った時そのボタンに応じたメッセージを表示
+ *   - インタラクティブモードで 1-4 に対応してメッセージを表示
+ */
+#define USE_I2C_LCD_TEST_CODE
+#ifdef USE_I2C_LCD_TEST_CODE
+#warning "EXPERIMENTAL: USE_I2C_LCD_TEST_CODE"
+#endif
 
 /****************************************************************************/
 /***        Macro Definitions                                             ***/
@@ -59,7 +71,7 @@
 /****************************************************************************/
 /***        Exported Variables                                            ***/
 /****************************************************************************/
-extern tsAppData sAppData; //!< アプリケーションデータ  @ingroup MASTER
+extern tsAppData_Pa sAppData; //!< アプリケーションデータ  @ingroup MASTER
 extern tsFILE sSerStream;
 
 /****************************************************************************/
@@ -70,147 +82,6 @@ extern tsFILE sSerStream;
 /***        FUNCTIONS                                                     ***/
 /****************************************************************************/
 
-/** @ingroup MASTER
- * I2C のコマンドを実行して、応答を返します。
- * 無線経由ので要求の場合は、応答は送信元へ無線パケットで戻されます。
- * アドレスが0xDBの場合は、要求は自身のモジュールで実行された上 UART に応答します。
- *
- * - 入力フォーマット
- *   - OCTET: ネットワークアドレス(宛先,0xDBは自身のモジュールで実行してUARTに出力)
- *   - OCTET: 0x88
- *   - OCTET: 要求番号
- *   - OCTET: コマンド (0x1: Write, 0x2: Read, 0x3: Write and Increment, 0x4: Write and Read)
- *   - OCTET: I2Cアドレス
- *   - OCTET: I2Cコマンド
- *   - OCTET: データサイズ (無い時は 0)
- *   - OCTET[N]: データ (データサイズが0のときは、本フィールドは無し)
- *
- * - 出力フォーマット
- *   - OCTET: ネットワークアドレス
- *   - OCTET: 0x89
- *   - OCTET: 要求番号、入力フォーマットの値がコピーされる
- *   - OCTET: コマンド (0x1: Write, 0x2: Read)
- *   - OCTET: 0:FAIL, 1:SUCCESS
- *   - OCTET: データサイズ (無い時は 0)
- *   - OCTET[N]: データ (データサイズが0のときは、本フィールドは無し)
- *
- * @param p 入力書式のバイト列
- * @param u16len バイト列長
- * @param u8AddrSrc 要求元のネットワークアドレス
- */
-void vProcessI2CCommand(uint8 *p, uint16 u16len, uint8 u8AddrSrc) {
-	//uint8 *p_end = p + u16len;
-	uint8 au8OutBuf[256 + 32];
-	uint8 *q = au8OutBuf;
-
-	bool_t bOk = TRUE;
-	uint8 n;
-	static volatile uint16 x;
-
-	// 入力データの解釈
-	uint8 u8Addr = G_OCTET();
-	(void) u8Addr;
-
-	uint8 u8Command = G_OCTET();
-	if (u8Command != SERCMD_ID_I2C_COMMAND) {
-		return;
-	}
-
-	uint8 u8ReqNum = G_OCTET();
-	uint8 u8I2C_Oper = G_OCTET();
-	uint8 u8I2C_Addr = G_OCTET();
-	uint8 u8I2C_Cmd = G_OCTET();
-	uint8 u8DataSize = G_OCTET();
-
-	uint8 *pu8data = p;
-	//uint8 *pu8data_end = p + u8DataSize;
-
-#if 0
-	if (pu8data_end != p_end) {
-		DBGOUT(1, "I2CCMD: incorrect data."LB);
-		return;
-	}
-#endif
-
-	// 出力用のバッファを用意しておく
-	S_OCTET(sAppData.u8AppLogicalId);
-	S_OCTET(SERCMD_ID_I2C_COMMAND_RESP);
-	S_OCTET(u8ReqNum);
-	S_OCTET(u8I2C_Oper);
-	//ここで q[0] 成功失敗フラグ, q[1] データサイズ, q[2]... データ
-	q[0] = FALSE;
-	q[1] = 0;
-
-	DBGOUT(1, "I2CCMD: req#=%d Oper=%d Addr=%02x Cmd=%02x Siz=%d"LB, u8ReqNum,
-			u8I2C_Oper, u8I2C_Addr, u8I2C_Cmd, u8DataSize);
-
-	switch (u8I2C_Oper) {
-	case 1:
-		bOk &= bSMBusWrite(u8I2C_Addr, u8I2C_Cmd, u8DataSize,
-				u8DataSize == 0 ? NULL : pu8data);
-		break;
-
-	case 2:
-		if (u8DataSize > 0) {
-			bOk &= bSMBusSequentialRead(u8I2C_Addr, u8DataSize, &(q[2]));
-			if (bOk)
-				q[1] = u8DataSize;
-		} else {
-			bOk = FALSE;
-		}
-		break;
-
-	case 3:
-		for (n = 0; n < u8DataSize; n++) {
-			bOk &= bSMBusWrite(u8I2C_Addr, u8I2C_Cmd + n, 1, &pu8data[n]);
-			for (x = 0; x < 16000; x++)
-				; //wait (e.g. for memory device)
-		}
-		break;
-
-	case 4:
-		if (u8DataSize > 0) {
-			bOk &= bSMBusWrite(u8I2C_Addr, u8I2C_Cmd, 0, NULL );
-			if (bOk)
-				bOk &= bSMBusSequentialRead(u8I2C_Addr, u8DataSize, &(q[2]));
-			if (bOk)
-				q[1] = u8DataSize;
-		} else {
-			bOk = FALSE;
-		}
-		break;
-
-#ifdef USE_I2C_ACM1620
-	case 0x21: // ACM1620
-		bDraw2LinesLcd_ACM1602((const char *) pu8data,
-				(const char *) (pu8data + 16));
-		break;
-#endif
-
-#ifdef USE_I2C_AQM0802A
-	case 0x22: // ACM1620
-		bDraw2LinesLcd_AQM0802A((const char *) pu8data,
-				(const char *) (pu8data + 8));
-		break;
-#endif
-
-	default:
-		DBGOUT(1, "I2CCMD: unknown operation(%d)."LB, u8I2C_Oper);
-		return;
-	}
-
-	q[0] = bOk; // 成功失敗フラグを書き込む
-	q = q + 2 + q[1]; // ポインタ q を進める（データ末尾+1)
-
-	if (u8AddrSrc == SERCMD_ADDR_TO_MODULE) {
-		SerCmdAscii_Output_AdrCmd(&sSerStream, u8AddrSrc, au8OutBuf[1],
-				au8OutBuf + 2, q - au8OutBuf - 2);
-	} else {
-		i16TransmitSerMsg(au8OutBuf, q - au8OutBuf, ToCoNet_u32GetSerial(),
-				sAppData.u8AppLogicalId, u8AddrSrc, FALSE,
-				sAppData.u8UartReqNum++);
-	}
-}
 
 #ifdef USE_I2C_ACM1620
 /** @ingroup MASTER
@@ -290,7 +161,7 @@ static bool_t bInit2LinesLcd_AQM0802A() {
 	// ディスプレーのクリア
 	const uint8 au8data[] = { 0x38, 0x39, 0x14, 0x70, 0x56, 0x6c, 0x00 };
 	pu8data = au8data;
-	while (*pu8data) {
+	while (*pu8data && bOk) {
 		bOk &= bSMBusWrite(u8addr, 0x00, 1, (uint8*) pu8data);
 		vWait(u32delay);
 
@@ -327,7 +198,7 @@ bool_t bDraw2LinesLcd_AQM0802A(const char *puUpperRow,
 
 	const uint8 au8data2[] = { 0x38, 0x0c, 0x01, 0x06, 0x00 };
 	pu8data = au8data2;
-	while (*pu8data) {
+	while (*pu8data && bOk) {
 		bOk &= bSMBusWrite(u8addr, 0x00, 1, (uint8*) pu8data);
 		vWait(u32delay);
 
@@ -335,7 +206,7 @@ bool_t bDraw2LinesLcd_AQM0802A(const char *puUpperRow,
 	}
 
 	// 上段への書き込み
-	if (puUpperRow) {
+	if (puUpperRow && bOk) {
 		uint8 u8data = 0x80; // 上段のアドレス指定
 		int i = 0;
 
@@ -344,7 +215,7 @@ bool_t bDraw2LinesLcd_AQM0802A(const char *puUpperRow,
 
 		pu8data = (uint8*) puUpperRow;
 
-		while (*pu8data && i < 8) {
+		while (*pu8data && i < 8 && bOk) {
 			bOk &= bSMBusWrite(u8addr, 0x40, 1, (uint8*) pu8data);
 			vWait(u32delay);
 
@@ -354,7 +225,7 @@ bool_t bDraw2LinesLcd_AQM0802A(const char *puUpperRow,
 	}
 
 	// 下段への書き込み
-	if (puLowerRow) {
+	if (puLowerRow && bOk) {
 		uint8 u8data = 0xC0; // 下段のアドレス指定
 		int i = 0;
 
@@ -363,7 +234,7 @@ bool_t bDraw2LinesLcd_AQM0802A(const char *puUpperRow,
 
 		pu8data = (uint8*) puLowerRow;
 
-		while (*pu8data && i < 8) {
+		while (*pu8data && i < 8 && bOk) {
 			bOk &= bSMBusWrite(u8addr, 0x40, 1, (uint8*) pu8data);
 			vWait(u32delay);
 
