@@ -35,7 +35,9 @@ static void Config_vSetDefaults(tsFlashApp *p) {
 #ifdef PARENT
 	p->u32baud_safe = UART_BAUD;
 	p->u8parity = 0;
-	// ToDo: 子機の台数をEEPROMに記憶。デフォルトは1台。
+#ifdef USE_LID_AS_SEARCH_KEY
+	p->u8maxid = 1;
+#endif
 #endif
 
 #ifdef ENDDEVICE_INPUT

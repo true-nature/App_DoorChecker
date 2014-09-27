@@ -128,6 +128,9 @@ enum {
 	E_APPCONF_ENC_KEY,    //!< 暗号化鍵の設定
 	E_APPCONF_SER_MODE,    //!< センサの設定
 	E_APPCONF_SER_PARAM,    //!< センサの固有のパラメータの設定
+#ifdef USE_LID_AS_SEARCH_KEY
+	E_APPCONF_MAX_ID,	//!< 子機論理IDの最大値(子機の数)
+#endif
 	E_APPCONF_TEST
 };
 

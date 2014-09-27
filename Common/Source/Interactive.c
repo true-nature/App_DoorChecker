@@ -26,6 +26,8 @@
 #include <jendefs.h>
 #include <AppHardwareApi.h>
 
+#include "config.h"
+
 #include "appdata.h"
 
 #include "utils.h"
@@ -39,8 +41,6 @@
 #include <sprintf.h>
 
 #include "Interactive.h"
-
-#include "config.h"
 
 #include "sercmd_gen.h"
 #include "sercmd_plus3.h"
@@ -385,6 +385,13 @@ static void vProcessInputByte(uint8 u8Byte) {
 		V_PRINTF("Input UART option (e.g. 8N1): ");
 		INPSTR_vStart(&sSerInpStr, E_INPUTSTRING_DATATYPE_STRING, 3, E_APPCONF_BAUD_PARITY);
 		break;
+
+#ifdef USE_LID_AS_SEARCH_KEY
+	case 'I': // 子機論理IDの最大値の変更
+		V_PRINTF("Input Maximum Device ID (DEC:1-100): ");
+		INPSTR_vStart(&sSerInpStr, E_INPUTSTRING_DATATYPE_DEC, 100, E_APPCONF_MAX_ID);
+		break;
+#endif
 #endif
 
 	case 'k': // オプションビットの設定
@@ -736,6 +743,20 @@ static void vProcessInputString(tsInpStr_Context *pContext) {
 			}
 		}
 		break;
+#ifdef USE_LID_AS_SEARCH_KEY
+	case E_APPCONF_MAX_ID:
+		_C {
+			uint32 u32val = u32string2dec(pu8str, u8idx);
+			V_PRINTF(LB"-> ");
+			if (u32val <= 100) {
+				sConfig_UnSaved.u8maxid = u32val;
+				V_PRINTF("%d"LB, u32val);
+			} else {
+				V_PRINTF("(ignored)"LB);
+			}
+		}
+		break;
+#endif
 #endif
 
 	default:
@@ -808,6 +829,11 @@ static void vConfig_SaveAndReset() {
 	if (sConfig_UnSaved.u8parity != 0xFF) {
 		sFlash.sData.u8parity = sConfig_UnSaved.u8parity;
 	}
+#ifdef USE_LID_AS_SEARCH_KEY
+	if (sConfig_UnSaved.u8maxid != 0xFF) {
+		sFlash.sData.u8maxid = sConfig_UnSaved.u8maxid;
+	}
+#endif
 #endif
 	if (sConfig_UnSaved.u32Opt != 0xFFFFFFFF) {
 		sFlash.sData.u32Opt = sConfig_UnSaved.u32Opt;
@@ -968,7 +994,12 @@ static void vSerUpdateScreen() {
 		V_PRINTF(")%c" LB,
 					FL_IS_MODIFIED_u8(parity) ? '*' : ' ');
 	}
-	// ToDo: 子機の台数をEEPROMに記憶。
+#ifdef USE_LID_AS_SEARCH_KEY
+	// 子機の台数をEEPROMに記憶。
+	V_PRINTF(" I: set max id (%d)%c" LB,
+			FL_IS_MODIFIED_u8(maxid) ? FL_UNSAVE_u8(maxid) : FL_MASTER_u8(maxid),
+			FL_IS_MODIFIED_u8(maxid) ? '*' : ' ');
+#endif
 
 #endif
 
