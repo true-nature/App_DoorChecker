@@ -54,11 +54,6 @@ extern "C" {
  * スイッチ閉⇒開検出後に、周期的にチェックする間隔
  */
 static const uint16 u16_IO_Timer_mini_sleep_dur = 1000;
-// ToDo: ドア開閉状態に関わらず一定間隔で送信させる。
-/**
- * スイッチ開閉に関係なく周期的にチェックする間隔
- */
-static const uint32 u32_IO_Timer_regular_sleep_dur_ms = 30000L;
 
 /**
  * ブザーを鳴らす時間

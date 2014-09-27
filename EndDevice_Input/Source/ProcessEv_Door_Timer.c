@@ -76,7 +76,10 @@ PRSEV_HANDLER_DEF(E_STATE_IDLE, tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 		V_PRINTF(LB "* IO=%d, t=%d, ct=%d", sAppData.bDI1_Now_Opened, sAppData.u32DI1_Dur_Opened_ms, sAppData.u16DI1_Ct_PktFired);
 	}
 
-	ToCoNet_Event_SetState(pEv, E_STATE_RUNNING);
+	// E_IO_TIMER_NWK_NWK_STARTを経てFIREできる状態になる
+	if (eEvent == E_EVENT_TICK_TIMER) {
+		ToCoNet_Event_SetState(pEv, E_STATE_RUNNING);
+	}
 }
 
 /**
@@ -94,12 +97,19 @@ PRSEV_HANDLER_DEF(E_STATE_RUNNING, tsEvent *pEv, teEvent eEvent, uint32 u32evarg
 	static bool_t bBuzz;
 	static bool_t bTxCmp;
 
-	// ToDo: ブザーを鳴らさない状態送信だけのモードが必要。
 	/*
 	 * ブザーを鳴らす処理
 	 */
 	if (eEvent == E_EVENT_NEW_STATE) {
 		bBuzz = FALSE;
+
+		// ToDo: ブザーを鳴らさないIO状態を送信するだけのモードが必要。
+	#ifdef DISABLE_DOOR_ALARM
+		// 送信要求
+		sAppData.u8NwkStat = E_IO_TIMER_NWK_FIRE_REQUEST;
+		sAppData.u16DI1_Ct_PktFired++;
+		bTxCmp = FALSE;
+	#else
 		bTxCmp = TRUE;
 
 		if (sAppData.bDI1_Now_Opened) {
@@ -129,6 +139,7 @@ PRSEV_HANDLER_DEF(E_STATE_RUNNING, tsEvent *pEv, teEvent eEvent, uint32 u32evarg
 		}
 
 		return;
+#endif
 	}
 
 	if (bBuzz && ToCoNet_Event_u32TickFrNewState(pEv) > u16_IO_Timer_buzz_dur) {
@@ -144,16 +155,8 @@ PRSEV_HANDLER_DEF(E_STATE_RUNNING, tsEvent *pEv, teEvent eEvent, uint32 u32evarg
 	}
 
 	if (sAppData.u8NwkStat) { // 送信が実施された時
-		bool_t bCond = FALSE;
-
-		bCond |= (sAppData.u8NwkStat & E_IO_TIMER_NWK_COMPLETE_MASK) != 0;
-		bCond |= (ToCoNet_Event_u32TickFrNewState(pEv) > u16_IO_Timer_buzz_dur + 50); // 50ms 余分にタイムアウトを設定
-
-		if (bCond) {
-			// 送信完了を待ってスリープ
-			bTxCmp = TRUE;
-			V_PRINTF(LB"* TxCmp %d", eEvent);
-		}
+		bTxCmp |= (sAppData.u8NwkStat & E_IO_TIMER_NWK_COMPLETE_MASK) != 0;
+		bTxCmp |= (ToCoNet_Event_u32TickFrNewState(pEv) > u16_IO_Timer_buzz_dur + 50); // 50ms 余分にタイムアウトを設定
 	}
 
 	if (!bBuzz && bTxCmp) { // ブザーが鳴り終わった&&送信し終わった
@@ -177,12 +180,17 @@ PRSEV_HANDLER_DEF(E_STATE_APP_SLEEP, tsEvent *pEv, teEvent eEvent, uint32 u32eva
 		vPortSetSns(FALSE);
 
 		// Sleep は必ず E_EVENT_NEW_STATE 内など１回のみ呼び出される場所で呼び出す。
-		V_PRINTF(LB"Sleeping...");
+		V_PRINTF(LB"* Sleeping... @%dms", u32TickCount_ms);
+		V_FLUSH();
 
+		// ToDo: ドア開閉状態に関わらず一定間隔で送信させる。
+#ifdef DISABLE_DOOR_ALARM
+		// 現在を起点にsleep開始, RAM OFF, DI1立ち上がり割り込み有効
+		vSleep_IO_Timer(sAppData.sFlash.sData.u32Slp, FALSE, TRUE, TRUE);
+#else
 		// 念のため状態を再チェック
 		bool_t bOpen = (bPortRead(PORT_INPUT1) == FALSE);
 
-		// ToDo: ドア開閉状態に関わらず一定間隔で送信させる。
 		// 周期スリープに入る
 		//  - 初回は一定時間秒あけて、次回以降はスリープ復帰を基点に５秒
 		if (sAppData.bDI1_Now_Opened || bOpen) {
@@ -201,6 +209,7 @@ PRSEV_HANDLER_DEF(E_STATE_APP_SLEEP, tsEvent *pEv, teEvent eEvent, uint32 u32eva
 			sAppData.u32DI1_Dur_Opened_ms = 0;
 			vSleep_IO_Timer(60*1000UL, FALSE, FALSE, TRUE); // １分に１回は起きて送信する&割り込み有効
 		}
+#endif
 	}
 }
 
