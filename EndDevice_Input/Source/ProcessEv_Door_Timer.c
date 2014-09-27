@@ -103,13 +103,13 @@ PRSEV_HANDLER_DEF(E_STATE_RUNNING, tsEvent *pEv, teEvent eEvent, uint32 u32evarg
 	if (eEvent == E_EVENT_NEW_STATE) {
 		bBuzz = FALSE;
 
-		// ToDo: ブザーを鳴らさないIO状態を送信するだけのモードが必要。
-	#ifdef DISABLE_DOOR_ALARM
+		// ブザーを鳴らさないIO状態を送信するだけのモードが必要。
+#ifdef DISABLE_DOOR_ALARM
 		// 送信要求
 		sAppData.u8NwkStat = E_IO_TIMER_NWK_FIRE_REQUEST;
 		sAppData.u16DI1_Ct_PktFired++;
 		bTxCmp = FALSE;
-	#else
+#else
 		bTxCmp = TRUE;
 
 		if (sAppData.bDI1_Now_Opened) {
@@ -183,7 +183,7 @@ PRSEV_HANDLER_DEF(E_STATE_APP_SLEEP, tsEvent *pEv, teEvent eEvent, uint32 u32eva
 		V_PRINTF(LB"* Sleeping... @%dms", u32TickCount_ms);
 		V_FLUSH();
 
-		// ToDo: ドア開閉状態に関わらず一定間隔で送信させる。
+		// ドア開閉状態に関わらず一定間隔で送信させる。
 #ifdef DISABLE_DOOR_ALARM
 		// 現在を起点にsleep開始, RAM OFF, DI1立ち上がり割り込み有効
 		vSleep_IO_Timer(sAppData.sFlash.sData.u32Slp, FALSE, TRUE, TRUE);
