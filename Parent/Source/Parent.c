@@ -35,6 +35,9 @@
 #include "common.h"
 #include "AddrKeyAry.h"
 
+#include "SMBus.h"
+#include "I2C_impl.h"
+
 /****************************************************************************/
 /***        ToCoNet Definitions                                           ***/
 /****************************************************************************/
@@ -404,6 +407,8 @@ static void vInitHardware(int f_warm_start) {
 	} else {
 		vSerialInit(u32baud, NULL);
 	}
+	// SMBUS
+	vSMBusInit();
 
 	ToCoNet_vDebugInit(&sSerStream);
 	ToCoNet_vDebugLevel(TOCONET_DEBUG_LEVEL);
@@ -414,6 +419,9 @@ static void vInitHardware(int f_warm_start) {
 
 	vPortSetHi( PORT_OUT2 );
 	vPortAsOutput( PORT_OUT2 );
+
+	// 状態表示トリガー
+	vPortAsInput(PORT_INPUT1);
 
 	// LCD の設定
 #ifdef USE_LCD
@@ -506,7 +514,9 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			// 毎秒ごとのシリアル出力
 			vSerOutput_Secondary();
 #ifdef DISABLE_DOOR_ALARM
-			vRescanDoorStatus();
+				vRescanDoorStatus();
+				if (u32TickCount_ms > 100) {
+			}
 			// display
 #endif
 
@@ -1488,6 +1498,37 @@ void vLED_Toggle( void )
 }
 
 #ifdef DISABLE_DOOR_ALARM
+#define LCD_COLUMNS 8
+#define VOLT_LOW 2300
+uint8 sLcdBuffer[2][LCD_COLUMNS + 1];
+
+static void vInitLcdBuffer() {
+	memset(&sLcdBuffer[0][0], ' ', LCD_COLUMNS);
+	memset(&sLcdBuffer[1][0], ' ', LCD_COLUMNS);
+	sLcdBuffer[0][LCD_COLUMNS] = '\0';
+	sLcdBuffer[1][LCD_COLUMNS] = '\0';
+}
+
+static void vUpdateLcdStr(uint8 idx)
+{
+	if (sEndDevList.au32ScanListKey[idx] != 0) {
+		uint32 key = sEndDevList.au32ScanListKey[idx];
+		uint8 id = AddrKey2Id(key);
+		uint8 status = AddrKey2Status(key);
+		uint16 volt = DECODE_VOLT(AddrKey2Batt(key));
+		uint8 row = (id > LCD_COLUMNS ? 1 : 0);
+		uint8 column = ((id - 1) % LCD_COLUMNS);
+		uint8 chr = '-';
+		if (status != 0) {
+			chr = id + '@';
+		} else if (volt < VOLT_LOW) {
+			chr = id + '`';
+		}
+		sLcdBuffer[row][column] = chr;
+	}
+
+}
+
 static bool_t vRescanDoorStatus()
 {
 	bool_t ret = TRUE;
@@ -1496,28 +1537,38 @@ static bool_t vRescanDoorStatus()
 	int i;
 
 	memset(sAddrKeyIndex, ADDRKEY_NO_DATA, ADDRKEYA_MAX_HISTORY);
+	vInitLcdBuffer();
 	while (bit != 0 && u8id <= ADDRKEYA_MAX_HISTORY)
 	{
 		if (sAppData.sFlash.sData.u32idmask & bit) {
 			for (i = 0; i < ADDRKEYA_MAX_HISTORY; i++) {
 				if (AddrKey2Id(sEndDevList.au32ScanListKey[i]) == u8id) {
-					if (sAddrKeyIndex[u8id] == ADDRKEY_NO_DATA) {
-						sAddrKeyIndex[u8id] = i;
+					if (sAddrKeyIndex[u8id - 1] == ADDRKEY_NO_DATA) {
+						sAddrKeyIndex[u8id - 1] = i;
+						vUpdateLcdStr(i);
 					} else {
 						ret = FALSE;
-						if (sAddrKeyIndex[u8id] < ADDRKEYA_MAX_HISTORY) {
-							A_PRINTF("*** DUPLICATED: ID=%d ADDR1=%08x ADDR2=%08x ***"LB, u8id, sEndDevList.au32ScanListAddr[sAddrKeyIndex[u8id]], sEndDevList.au32ScanListAddr[i]);
+						if (sAddrKeyIndex[u8id - 1] < ADDRKEYA_MAX_HISTORY) {
+							A_PRINTF("*** DUPLICATED: ID=%d ADDR1=%08x ADDR2=%08x ***"LB, u8id, sEndDevList.au32ScanListAddr[sAddrKeyIndex[u8id - 1]], sEndDevList.au32ScanListAddr[i]);
 						} else {
 							A_PRINTF("*** DUPLICATED: ID=%d ADDR1=INVALID ADDR2=%08x ***"LB, u8id, sEndDevList.au32ScanListAddr[i]);
-							sAddrKeyIndex[u8id] = i;
+							sAddrKeyIndex[u8id - 1] = i;
+							vUpdateLcdStr(i);
 						}
 					}
 					break;
 				}
 			}
+			V_FLUSH();
 		}
 		bit <<= 1;
 		u8id++;
+	}
+	if (ret) {
+		ret &= bDraw2LinesLcd_AQM0802A((const char *)&sLcdBuffer[0][0], (const char *)&sLcdBuffer[1][0]);
+#if 0
+		V_PRINTF(LB"[%s][%s] ret=%d", &sLcdBuffer[0][0], &sLcdBuffer[1][0], ret);
+#endif
 	}
 
 	return ret;
