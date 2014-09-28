@@ -39,6 +39,11 @@ typedef struct _tsRxPktInfo{
 	uint8 u8id;				//	ID
 	uint16 u16fct;			//	FCT
 	uint8 u8pkt;			//	子機のセンサモード
+#ifdef DISABLE_DOOR_ALARM
+	uint8 u8stat;
+	uint8 u8batt;
+	uint16 u16adc1;
+#endif
 } tsRxPktInfo;
 
 /****************************************************************************/

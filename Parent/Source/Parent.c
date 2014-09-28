@@ -86,6 +86,8 @@ void vSerInitMessage();
 void vProcessSerialCmd(tsSerCmd_Context *pCmd);
 
 void vLED_Toggle(void);
+static bool_t vRescanDoorStatus();
+
 
 #ifdef USE_LCD
 static void vLcdInit(void);
@@ -105,6 +107,16 @@ tsSerialPortSetup sSerPort; // serial port queue
 tsSerCmd_Context sSerCmdOut; //!< シリアル出力用
 
 tsAdrKeyA_Context sEndDevList; // 子機の発報情報を保存するデータベース
+#ifdef DISABLE_DOOR_ALARM
+/**
+ * 戸締り情報集計
+ */
+uint8 sAddrKeyIndex[ADDRKEYA_MAX_HISTORY]; // 論理IDからデータベースへの索引
+#define ADDRKEY_NO_DATA 0xFF
+#define AddrKey2Id(k) ((k)&0xFF)
+#define AddrKey2Status(k) (((k)>>8)&0xFF)
+#define AddrKey2Batt(k) (((k)>>16)&0xFF)
+#endif
 
 #ifdef USE_LCD
 static tsFILE sLcdStream, sLcdStreamBtm;
@@ -262,16 +274,25 @@ void cbToCoNet_vRxEvent(tsRxDataApp *pRx) {
 
 		// 出力用の関数を呼び出す
 		if (IS_APPCONF_OPT_SHT21()) {
-			vSerOutput_SmplTag3( sRxPktInfo, p);
+			vSerOutput_SmplTag3(sRxPktInfo, p);
 		} else if (IS_APPCONF_OPT_UART()) {
 			vSerOutput_Uart(sRxPktInfo, p);
 		} else {
 			vSerOutput_Standard(sRxPktInfo, p);
 		}
 
-		// ToDo: 子機の論理IDをキーに使用して設置場所と子機の対応を容易にする。
 		// データベースへ登録（線形配列に格納している）
+#ifdef DISABLE_DOOR_ALARM
+		sRxPktInfo.u8stat =  G_OCTET();
+		p += 4;	// skip u32dur
+		sRxPktInfo.u8batt = G_OCTET();
+		sRxPktInfo.u16adc1 = G_BE_WORD();
+		// ID,状態,電源電圧を登録
+		uint32 u32key = (sRxPktInfo.u8id|sRxPktInfo.u8stat<<8|sRxPktInfo.u8batt<<16);
+		ADDRKEYA_vAdd(&sEndDevList, sRxPktInfo.u32addr_1st, u32key);
+#else
 		ADDRKEYA_vAdd(&sEndDevList, sRxPktInfo.u32addr_1st, 0); // アドレスだけ登録。
+#endif
 	}
 }
 
@@ -484,6 +505,10 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 
 			// 毎秒ごとのシリアル出力
 			vSerOutput_Secondary();
+#ifdef DISABLE_DOOR_ALARM
+			vRescanDoorStatus();
+			// display
+#endif
 
 			// 定期クリーン（タイムアウトしたノードを削除する）
 			ADDRKEYA_bFind(&sEndDevList, 0, 0);
@@ -790,7 +815,7 @@ void vSerOutput_Standard(tsRxPktInfo sRxPktInfo, uint8 *p) {
 			uint32 u32dur = G_BE_DWORD();
 #ifdef DISABLE_DOOR_ALARM
 			uint8 u8batt = G_OCTET();
-			uint16	u16adc1 = G_BE_WORD();
+			uint16 u16adc1 = G_BE_WORD();
 			A_PRINTF(":btn=%d:dur=%d:ba=%04d:a1=%04d" LB, u8stat, u32dur / 1000, DECODE_VOLT(u8batt), u16adc1);
 #else
 			A_PRINTF(":btn=%d:dur=%d" LB, u8stat, u32dur / 1000);
@@ -1461,6 +1486,43 @@ void vLED_Toggle( void )
 		u32TempCount_ms = u32TickCount_ms;
 	}
 }
+
+#ifdef DISABLE_DOOR_ALARM
+static bool_t vRescanDoorStatus()
+{
+	bool_t ret = TRUE;
+	uint32 bit = 1;
+	uint8 u8id = 1;
+	int i;
+
+	memset(sAddrKeyIndex, ADDRKEY_NO_DATA, ADDRKEYA_MAX_HISTORY);
+	while (bit != 0 && u8id <= ADDRKEYA_MAX_HISTORY)
+	{
+		if (sAppData.sFlash.sData.u32idmask & bit) {
+			for (i = 0; i < ADDRKEYA_MAX_HISTORY; i++) {
+				if (AddrKey2Id(sEndDevList.au32ScanListKey[i]) == u8id) {
+					if (sAddrKeyIndex[u8id] == ADDRKEY_NO_DATA) {
+						sAddrKeyIndex[u8id] = i;
+					} else {
+						ret = FALSE;
+						if (sAddrKeyIndex[u8id] < ADDRKEYA_MAX_HISTORY) {
+							A_PRINTF("*** DUPLICATED: ID=%d ADDR1=%08x ADDR2=%08x ***"LB, u8id, sEndDevList.au32ScanListAddr[sAddrKeyIndex[u8id]], sEndDevList.au32ScanListAddr[i]);
+						} else {
+							A_PRINTF("*** DUPLICATED: ID=%d ADDR1=INVALID ADDR2=%08x ***"LB, u8id, sEndDevList.au32ScanListAddr[i]);
+							sAddrKeyIndex[u8id] = i;
+						}
+					}
+					break;
+				}
+			}
+		}
+		bit <<= 1;
+		u8id++;
+	}
+
+	return ret;
+}
+#endif
 
 #ifdef USE_LCD
 /**
