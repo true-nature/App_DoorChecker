@@ -31,7 +31,7 @@ typedef struct _tsFlashApp {
 	int16 i16param;
 
 #ifdef USE_LID_AS_SEARCH_KEY
-	uint8 u8maxid;			//!< 子機論理IDの最大値(子機の数)
+	uint32 u32idmask;			//!< 子機論理IDの使用マスク
 #endif
 } tsFlashApp;
 

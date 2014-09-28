@@ -387,14 +387,15 @@ static void vProcessInputByte(uint8 u8Byte) {
 		break;
 
 #ifdef USE_LID_AS_SEARCH_KEY
-	case 'I': // 子機論理IDの最大値の変更
-		V_PRINTF("Input Maximum Device ID (DEC:1-100): ");
-		INPSTR_vStart(&sSerInpStr, E_INPUTSTRING_DATATYPE_DEC, 100, E_APPCONF_MAX_ID);
+	case 'I': // 子機論理IDの使用マスクの変更
+		V_PRINTF("Input Device ID mask (HEX 32bit): ");
+		INPSTR_vStart(&sSerInpStr, E_INPUTSTRING_DATATYPE_HEX, 8,
+				E_APPCONF_ID_MASK);
 		break;
 #endif
 #endif
 
-	case 'k': // オプションビットの設定
+	case 'k': // 暗号化キーの設定
 		V_PRINTF("Input Encription Key (HEX 32bit): ");
 		INPSTR_vStart(&sSerInpStr, E_INPUTSTRING_DATATYPE_HEX, 8,
 				E_APPCONF_ENC_KEY);
@@ -744,16 +745,14 @@ static void vProcessInputString(tsInpStr_Context *pContext) {
 		}
 		break;
 #ifdef USE_LID_AS_SEARCH_KEY
-	case E_APPCONF_MAX_ID:
+	case E_APPCONF_ID_MASK:
 		_C {
-			uint32 u32val = u32string2dec(pu8str, u8idx);
+			uint32 u32val = u32string2hex(pu8str, u8idx);
+
 			V_PRINTF(LB"-> ");
-			if (u32val <= 100) {
-				sConfig_UnSaved.u8maxid = u32val;
-				V_PRINTF("%d"LB, u32val);
-			} else {
-				V_PRINTF("(ignored)"LB);
-			}
+
+			sConfig_UnSaved.u32idmask = u32val;
+			V_PRINTF("0x%08X"LB, u32val);
 		}
 		break;
 #endif
@@ -830,8 +829,8 @@ static void vConfig_SaveAndReset() {
 		sFlash.sData.u8parity = sConfig_UnSaved.u8parity;
 	}
 #ifdef USE_LID_AS_SEARCH_KEY
-	if (sConfig_UnSaved.u8maxid != 0xFF) {
-		sFlash.sData.u8maxid = sConfig_UnSaved.u8maxid;
+	if (sConfig_UnSaved.u32idmask != 0xFFFFFFFF) {
+		sFlash.sData.u32idmask = sConfig_UnSaved.u32idmask;
 	}
 #endif
 #endif
@@ -995,10 +994,10 @@ static void vSerUpdateScreen() {
 					FL_IS_MODIFIED_u8(parity) ? '*' : ' ');
 	}
 #ifdef USE_LID_AS_SEARCH_KEY
-	// 子機の台数をEEPROMに記憶。
-	V_PRINTF(" I: set max id (%d)%c" LB,
-			FL_IS_MODIFIED_u8(maxid) ? FL_UNSAVE_u8(maxid) : FL_MASTER_u8(maxid),
-			FL_IS_MODIFIED_u8(maxid) ? '*' : ' ');
+	// 子機論理IDの使用マスクをEEPROMに記憶
+	V_PRINTF(" I: set Device ID mask (0x%08X)%c" LB,
+			FL_IS_MODIFIED_u32(idmask) ? FL_UNSAVE_u32(idmask) : FL_MASTER_u32(idmask),
+			FL_IS_MODIFIED_u32(idmask) ? '*' : ' ');
 #endif
 
 #endif

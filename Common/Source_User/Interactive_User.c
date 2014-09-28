@@ -36,7 +36,7 @@ static void Config_vSetDefaults(tsFlashApp *p) {
 	p->u32baud_safe = UART_BAUD;
 	p->u8parity = 0;
 #ifdef USE_LID_AS_SEARCH_KEY
-	p->u8maxid = 1;
+	p->u32idmask = 0x00000001;
 #endif
 #endif
 
