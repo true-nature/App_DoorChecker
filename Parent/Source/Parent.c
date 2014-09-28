@@ -1509,28 +1509,35 @@ static void vInitLcdBuffer() {
 	sLcdBuffer[1][LCD_COLUMNS] = '\0';
 }
 
-static void vUpdateLcdStr(uint8 idx)
-{
+static void vUpdateLcdById(uint8 id, uint8 chr) {
+	if (id < ADDRKEYA_MAX_HISTORY)
+	{
+		uint8 row = (id > LCD_COLUMNS ? 1 : 0);
+		uint8 column = ((id - 1) % LCD_COLUMNS);
+		sLcdBuffer[row][column] = chr;
+	}
+}
+
+static void vUpdateLcdByListIndex(uint8 idx) {
 	if (sEndDevList.au32ScanListKey[idx] != 0) {
 		uint32 key = sEndDevList.au32ScanListKey[idx];
 		uint8 id = AddrKey2Id(key);
 		uint8 status = AddrKey2Status(key);
 		uint16 volt = DECODE_VOLT(AddrKey2Batt(key));
-		uint8 row = (id > LCD_COLUMNS ? 1 : 0);
-		uint8 column = ((id - 1) % LCD_COLUMNS);
 		uint8 chr = '-';
 		if (status != 0) {
+			// 窓開放は大文字表示
 			chr = id + '@';
 		} else if (volt < VOLT_LOW) {
+			// 低電圧は小文字表示
 			chr = id + '`';
 		}
-		sLcdBuffer[row][column] = chr;
+		vUpdateLcdById(id, chr);
 	}
 
 }
 
-static bool_t vRescanDoorStatus()
-{
+static bool_t vRescanDoorStatus() {
 	bool_t ret = TRUE;
 	uint32 bit = 1;
 	uint8 u8id = 1;
@@ -1545,7 +1552,7 @@ static bool_t vRescanDoorStatus()
 				if (AddrKey2Id(sEndDevList.au32ScanListKey[i]) == u8id) {
 					if (sAddrKeyIndex[u8id - 1] == ADDRKEY_NO_DATA) {
 						sAddrKeyIndex[u8id - 1] = i;
-						vUpdateLcdStr(i);
+						vUpdateLcdByListIndex(i);
 					} else {
 						ret = FALSE;
 						if (sAddrKeyIndex[u8id - 1] < ADDRKEYA_MAX_HISTORY) {
@@ -1553,13 +1560,16 @@ static bool_t vRescanDoorStatus()
 						} else {
 							A_PRINTF("*** DUPLICATED: ID=%d ADDR1=INVALID ADDR2=%08x ***"LB, u8id, sEndDevList.au32ScanListAddr[i]);
 							sAddrKeyIndex[u8id - 1] = i;
-							vUpdateLcdStr(i);
+							vUpdateLcdByListIndex(i);
 						}
 					}
 					break;
 				}
 			}
-			V_FLUSH();
+			if (i == ADDRKEYA_MAX_HISTORY) {
+				// 非検出は小文字表示
+				vUpdateLcdById(u8id, u8id + '`');
+			}
 		}
 		bit <<= 1;
 		u8id++;

@@ -42,6 +42,7 @@ bool_t ADDRKEYA_bFind(tsAdrKeyA_Context *p, uint32 u32Addr, uint32 *pu32Key) {
 		if (u32TickCount_ms - p->au32ScanListTick[i] > ADDRKEYA_TIMEOUT) {
 			p->au32ScanListTick[i] = 0;
 			p->au32ScanListAddr[i] = 0;
+			p->au32ScanListKey[i] = 0;
 		} else {
 			if (pu32Key && (u32Addr == p->au32ScanListAddr[i])) {
 				*pu32Key = p->au32ScanListKey[i];
