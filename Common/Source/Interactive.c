@@ -750,8 +750,12 @@ static void vProcessInputString(tsInpStr_Context *pContext) {
 			uint32 u32val = u32string2hex(pu8str, u8idx);
 
 			V_PRINTF(LB"-> ");
+			if (u32val == 0x0) {
+				V_PRINTF("(ignored)");
+			} else {
+				sConfig_UnSaved.u32idmask = u32val;
+			}
 
-			sConfig_UnSaved.u32idmask = u32val;
 			V_PRINTF("0x%08X"LB, u32val);
 		}
 		break;
@@ -994,10 +998,12 @@ static void vSerUpdateScreen() {
 					FL_IS_MODIFIED_u8(parity) ? '*' : ' ');
 	}
 #ifdef USE_LID_AS_SEARCH_KEY
-	// 子機論理IDの使用マスクをEEPROMに記憶
-	V_PRINTF(" I: set Device ID mask (0x%08X)%c" LB,
-			FL_IS_MODIFIED_u32(idmask) ? FL_UNSAVE_u32(idmask) : FL_MASTER_u32(idmask),
-			FL_IS_MODIFIED_u32(idmask) ? '*' : ' ');
+	{
+		// 子機論理IDの使用マスクをEEPROMに記憶
+		V_PRINTF(" I: set Device ID mask (0x%08X)%c" LB,
+				FL_IS_MODIFIED_u32(idmask) ? FL_UNSAVE_u32(idmask) : FL_MASTER_u32(idmask),
+				FL_IS_MODIFIED_u32(idmask) ? '*' : ' ');
+	}
 #endif
 
 #endif
