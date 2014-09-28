@@ -66,10 +66,12 @@ void ADDRKEYA_vAdd(tsAdrKeyA_Context *p, uint32 u32Addr, uint32 u32Key) {
 		if (p->au32ScanListAddr[i] == u32Addr) {
 			// 同じアドレスが見つかったら、こちらに登録する（アルゴリズム上無いはずだが）
 			idxPrimary = i;
+			break;
 		}
 		if (p->au32ScanListAddr[i] == 0) {
 			// 空のエントリ
 			idxSecondary = i;
+			break;
 		}
 
 		if (p->au32ScanListAddr[i]) {
