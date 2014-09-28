@@ -242,6 +242,11 @@ void cbAppColdStart(bool_t bAfterAhiInit) {
 			// Other Hardware
 			vInitHardware(FALSE);
 
+#ifdef DISABLE_DOOR_ALARM
+			// ADC の初期化 (電源が心配なので計測してみる)
+			vInitADC();
+#endif
+
 			// イベント処理の初期化
 			vInitAppDoorTimer();
 		} else
@@ -379,6 +384,10 @@ void cbAppWarmStart(bool_t bAfterAhiInit) {
 		} else
 		//	磁気スイッチなど
 		if ( sAppData.sFlash.sData.u8mode == PKT_ID_IO_TIMER ) {
+#ifdef DISABLE_DOOR_ALARM
+			// ADC の初期化 (電源が心配なので計測してみる)
+			vInitADC();
+#endif
 		} else
 		// SHT21
 		if ( sAppData.sFlash.sData.u8mode == PKT_ID_SHT21 ) {
@@ -495,6 +504,9 @@ static void vInitADC() {
 #ifdef USE_TEMP_INSTDOF_ADC2
 	sAppData.sObjADC.u8SourceMask =
 			TEH_ADC_SRC_VOLT | TEH_ADC_SRC_ADC_1 | TEH_ADC_SRC_TEMP;
+#elif defined(DISABLE_DOOR_ALARM)
+	sAppData.sObjADC.u8SourceMask =
+			TEH_ADC_SRC_VOLT | TEH_ADC_SRC_ADC_1;
 #else
 	sAppData.sObjADC.u8SourceMask =
 			TEH_ADC_SRC_VOLT | TEH_ADC_SRC_ADC_1 | TEH_ADC_SRC_ADC_2;
@@ -556,6 +568,7 @@ static void vInitHardware(int f_warm_start) {
 	// Serial Port の初期化
 	vSerialInit();
 
+#ifndef DISABLE_DOOR_ALARM
 	// PWM の初期化
 	if ( sAppData.sFlash.sData.u8mode == PKT_ID_IO_TIMER ) {
 # ifndef JN516x
@@ -586,6 +599,7 @@ static void vInitHardware(int f_warm_start) {
 		}
 # endif
 	}
+#endif
 
 	// SMBUS の初期化
 

@@ -94,6 +94,11 @@ PRSEV_HANDLER_DEF(E_STATE_APP_WAIT_TX, tsEvent *pEv, teEvent eEvent, uint32 u32e
 		S_OCTET(sAppData.bDI1_Now_Opened); // 開閉状態
 		S_BE_DWORD(sAppData.u32DI1_Dur_Opened_ms); // 連続開時間
 
+#ifdef DISABLE_DOOR_ALARM
+		S_OCTET(sAppData.sSns.u8Batt);
+		S_BE_WORD(sAppData.sSns.u16Adc1);
+#endif
+
 		sTx.u8Len = q - sTx.auData; // パケットのサイズ
 		sTx.u8CbId = sAppData.u16frame_count & 0xFF; // TxEvent で通知される番号、送信先には通知されない
 		sTx.u8Seq = sAppData.u16frame_count & 0xFF; // シーケンス番号(送信先に通知される)

@@ -788,8 +788,13 @@ void vSerOutput_Standard(tsRxPktInfo sRxPktInfo, uint8 *p) {
 		_C {
 			uint8 u8stat = G_OCTET();
 			uint32 u32dur = G_BE_DWORD();
-
+#ifdef DISABLE_DOOR_ALARM
+			uint8 u8batt = G_OCTET();
+			uint16	u16adc1 = G_BE_WORD();
+			A_PRINTF(":btn=%d:dur=%d:ba=%04d:a1=%04d" LB, u8stat, u32dur / 1000, DECODE_VOLT(u8batt), u16adc1);
+#else
 			A_PRINTF(":btn=%d:dur=%d" LB, u8stat, u32dur / 1000);
+#endif
 
 #ifdef USE_LCD
 			// LCD への出力
@@ -1207,6 +1212,41 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 		uint8 u8stat = G_OCTET();
 		uint32 u32dur = G_BE_DWORD();
 
+#ifdef DISABLE_DOOR_ALARM
+		uint8 u8batt = G_OCTET();
+		uint16 u16adc1 = G_BE_WORD();
+
+		// センサー情報
+		A_PRINTF( ";"
+				"%d;"			// TIME STAMP
+				"%08X;"			// 受信機のアドレス
+				"%03d;"			// LQI  (0-255)
+				"%03d;"			// 連番
+				"%07x;"			// シリアル番号
+				"%04d;"			// 電源電圧 (0-3600, mV)
+				"%s;"			//
+				"%04d;"			// SuperCAP 電圧(mV)
+				"%04d;"			// ADC1
+				"%s;"			//
+				"%c;"			// ドアフラグ
+				"%04d;"			// OPEN=1, CLOSE=0
+				"%04d;"			// 開いている時間(開いていた時間)
+				LB,
+				u32TickCount_ms / 1000,
+				sRxPktInfo.u32addr_rcvr & 0x0FFFFFFF,
+				sRxPktInfo.u8lqi_1st,
+				sRxPktInfo.u16fct,
+				sRxPktInfo.u32addr_1st & 0x0FFFFFFF,
+				DECODE_VOLT(u8batt),
+				"",
+				u16adc1 * 2 * 3, // 3300mV で 99% 相当
+				u16adc1,
+				"",
+				'B',
+				u8stat,
+				u32dur / 1000
+		);
+#else
 		// センサー情報
 		A_PRINTF( ";"
 				"%d;"			// TIME STAMP
@@ -1237,6 +1277,7 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 				u8stat,
 				u32dur / 1000
 		);
+#endif
 
 #ifdef USE_LCD
 		// LCD への出力
@@ -1334,6 +1375,10 @@ void vSerOutput_Uart(tsRxPktInfo sRxPktInfo, uint8 *p) {
 			S_OCTET(G_OCTET()); // batt
 			S_OCTET(G_OCTET()); // stat
 			S_BE_DWORD(G_BE_DWORD()); // dur
+#ifdef DISABLE_DOOR_ALARM
+			S_OCTET(G_OCTET()); // batt
+			S_BE_WORD(G_BE_WORD());		//	ADC1
+#endif
 		}
 		break;
 
