@@ -51,7 +51,7 @@ extern uint32 u32TickCount_ms; //!< TOCONETのタイムスタンプ @ingroup DUP
 /** @ingroup DUPCHK
  * ノードリストの要素数
  */
-#define ADDRKEYA_MAX_HISTORY 30
+#define ADDRKEYA_MAX_HISTORY 16		//  AQM0802Aの文字数
 
 /** @ingroup DUPCHK
  * データベース
