@@ -30,9 +30,7 @@ typedef struct _tsFlashApp {
 	uint32 u32Opt;			//!< 色々オプション
 	int16 i16param;
 
-#ifdef USE_LID_AS_SEARCH_KEY
 	uint32 u32idmask;			//!< 子機論理IDの使用マスク
-#endif
 } tsFlashApp;
 
 
