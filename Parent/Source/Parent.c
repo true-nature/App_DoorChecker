@@ -287,12 +287,8 @@ void cbToCoNet_vRxEvent(tsRxDataApp *pRx) {
 
 		// データベースへ登録（線形配列に格納している）
 		if (sRxPktInfo.u8pkt == PKT_ID_BOTTON) {
-			sRxPktInfo.u8input =  G_OCTET();
-			p += 4;	// skip u32dur
-			sRxPktInfo.u8batt = G_OCTET();
-			sRxPktInfo.u16adc1 = G_BE_WORD();
 			// ID,状態,電源電圧を登録
-			uint32 u32key = (sRxPktInfo.u8id|sRxPktInfo.u8input<<8|sRxPktInfo.u8batt<<16);
+			uint32 u32key = (sRxPktInfo.u8id|sRxPktInfo.u8btn<<8|sRxPktInfo.u8batt<<16);
 			ADDRKEYA_vAdd(&sEndDevList, sRxPktInfo.u32addr_1st, u32key);
 		} else {
 			ADDRKEYA_vAdd(&sEndDevList, sRxPktInfo.u32addr_1st, 0); // アドレスだけ登録。
@@ -616,16 +612,17 @@ void vSerOutput_Standard(tsRxPktInfo *pRxPktInfo, uint8 *p) {
 	switch(pRxPktInfo->u8pkt) {
 	case PKT_ID_BOTTON:
 		_C {
-			uint8 u8batt = G_OCTET();
+			pRxPktInfo->u8batt = G_OCTET();
 
-			uint16 u16adc1 = G_BE_WORD();(void)u16adc1;
-			uint16 u16adc2 = G_BE_WORD();(void)u16adc2;
+			pRxPktInfo->u16adc1 = G_BE_WORD();
+			pRxPktInfo->u16adc2 = G_BE_WORD();
 
 			uint8 u8mode = G_OCTET();(void)u8mode;
+			pRxPktInfo->u8btn = G_OCTET();
 
 			// センサー情報
 			A_PRINTF(":ba=%04d:bt=%04d" LB,
-					DECODE_VOLT(u8batt), sAppData.u8DO_State );
+					DECODE_VOLT(pRxPktInfo->u8batt), pRxPktInfo->u8btn );
 
 #ifdef USE_LCD
 			// LCD への出力
@@ -862,9 +859,9 @@ void vSerOutput_Standard(tsRxPktInfo *pRxPktInfo, uint8 *p) {
 void vSerOutput_SmplTag3( tsRxPktInfo *pRxPktInfo, uint8 *p) {
 	//	押しボタン
 	if ( pRxPktInfo->u8pkt == PKT_ID_BOTTON ) {
-		uint8 u8batt = G_OCTET();
-		uint16 u16adc1 = G_BE_WORD();
-		uint16 u16adc2 = G_BE_WORD();
+		pRxPktInfo->u8batt = G_OCTET();
+		pRxPktInfo->u16adc1 = G_BE_WORD();
+		pRxPktInfo->u16adc2 = G_BE_WORD();
 		uint8 u8mode = G_OCTET();
 		uint8 u8DI_Bitmap = G_OCTET();
 
@@ -886,6 +883,7 @@ void vSerOutput_SmplTag3( tsRxPktInfo *pRxPktInfo, uint8 *p) {
 		if( u8DI_Bitmap & 1 ){
 			u16bitmap += 1;
 		}
+		pRxPktInfo->u8btn = u8DI_Bitmap;
 
 		A_PRINTF( ";"
 				"%d;"			// TIME STAMP
@@ -906,9 +904,9 @@ void vSerOutput_SmplTag3( tsRxPktInfo *pRxPktInfo, uint8 *p) {
 				pRxPktInfo->u8lqi_1st,
 				pRxPktInfo->u16fct,
 				pRxPktInfo->u32addr_1st & 0x0FFFFFFF,
-				DECODE_VOLT(u8batt),
-				u16adc1,
-				u16adc2,
+				DECODE_VOLT(pRxPktInfo->u8batt),
+				pRxPktInfo->u16adc1,
+				pRxPktInfo->u16adc2,
 				u8mode,
 				u16bitmap,
 				'P',
@@ -1476,7 +1474,7 @@ static void vUpdateLcdByListIndex(uint8 idx) {
 		uint8 status = AddrKey2Status(key);
 		uint16 volt = DECODE_VOLT(AddrKey2Batt(key));
 		uint8 chr = '-';
-		if (status != 0) {
+		if ((status & 1) == 0) {
 			// 窓開放は大文字表示
 			chr = id + '@';
 		} else if (volt < VOLT_LOW) {

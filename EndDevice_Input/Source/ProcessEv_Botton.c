@@ -210,7 +210,7 @@ PRSEV_HANDLER_DEF(E_STATE_APP_SLEEP, tsEvent *pEv, teEvent eEvent, uint32 u32eva
 		}
 
 		// wake up using wakeup timer as well.
-		ToCoNet_vSleep(E_AHI_WAKE_TIMER_0, 0, FALSE, FALSE ); // PERIODIC RAM OFF SLEEP USING WK0
+		ToCoNet_vSleep(E_AHI_WAKE_TIMER_0, sAppData.sFlash.sData.u32Slp, FALSE, FALSE ); // PERIODIC RAM OFF SLEEP USING WK0
 
 	}
 }

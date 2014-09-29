@@ -39,10 +39,10 @@ typedef struct _tsRxPktInfo{
 	uint8 u8id;				//	ID
 	uint16 u16fct;			//	FCT
 	uint8 u8pkt;			//	子機のセンサモード
-	uint8 u8batt;
-	uint16 u16adc1;
-	uint16 u16adc2;
-	uint8 u8input;
+	uint8 u8batt;			// Battery
+	uint16 u16adc1;			// ADC 1
+	uint16 u16adc2;			// ADC 2
+	uint8 u8btn;			// DI input status
 } tsRxPktInfo;
 
 /****************************************************************************/
