@@ -283,7 +283,7 @@ void cbToCoNet_vRxEvent(tsRxDataApp *pRx) {
 		}
 
 		// データベースへ登録（線形配列に格納している）
-#ifdef DISABLE_DOOR_ALARM
+#ifdef USE_LID_AS_SEARCH_KEY
 		sRxPktInfo.u8stat =  G_OCTET();
 		p += 4;	// skip u32dur
 		sRxPktInfo.u8batt = G_OCTET();

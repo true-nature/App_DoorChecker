@@ -26,8 +26,6 @@
 #include <jendefs.h>
 #include <AppHardwareApi.h>
 
-#include "config.h"
-
 #include "appdata.h"
 
 #include "utils.h"
@@ -41,6 +39,8 @@
 #include <sprintf.h>
 
 #include "Interactive.h"
+
+#include "config.h"
 
 #include "sercmd_gen.h"
 #include "sercmd_plus3.h"

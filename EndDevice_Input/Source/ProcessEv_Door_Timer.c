@@ -25,7 +25,7 @@
 #include "EndDevice_Input.h"
 
 static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg);
-static void vStoreSensorValue();
+
 static void vSleep_IO_Timer(uint32 u32SleepDur_ms, bool_t bPeriodic, bool_t bDeep, bool_t bInt);
 extern tsTimerContext sTimerPWM[1]; //!< タイマー管理構造体  @ingroup MASTER
 
@@ -181,7 +181,6 @@ PRSEV_HANDLER_DEF(E_STATE_APP_SLEEP, tsEvent *pEv, teEvent eEvent, uint32 u32eva
 		// 念のため状態を再チェック
 		bool_t bOpen = (bPortRead(PORT_INPUT1) == FALSE);
 
-		// ToDo: ドア開閉状態に関わらず一定間隔で送信させる。
 		// 周期スリープに入る
 		//  - 初回は一定時間秒あけて、次回以降はスリープ復帰を基点に５秒
 		if (sAppData.bDI1_Now_Opened || bOpen) {
