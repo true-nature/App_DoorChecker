@@ -128,9 +128,7 @@ enum {
 	E_APPCONF_ENC_KEY,    //!< 暗号化鍵の設定
 	E_APPCONF_SER_MODE,    //!< センサの設定
 	E_APPCONF_SER_PARAM,    //!< センサの固有のパラメータの設定
-#ifdef USE_LID_AS_SEARCH_KEY
-	E_APPCONF_ID_MASK,	//!< 子機論理IDの使用マスク
-#endif
+	E_APPCONF_ID_MASK,   //!< 子機論理IDの使用マスク
 	E_APPCONF_TEST
 };
 

@@ -269,9 +269,12 @@ void cbToCoNet_vRxEvent(tsRxDataApp *pRx) {
 		// パケットの種別により処理を変更
 		sRxPktInfo.u8pkt = G_OCTET();
 
+#if 0
+		// 戸締りチェッカーとしては不要な動作
 		if( sRxPktInfo.u8pkt == PKT_ID_BOTTON ){
 			vLED_Toggle();
 		}
+#endif
 
 		// 出力用の関数を呼び出す
 		if (IS_APPCONF_OPT_SHT21()) {
@@ -283,17 +286,17 @@ void cbToCoNet_vRxEvent(tsRxDataApp *pRx) {
 		}
 
 		// データベースへ登録（線形配列に格納している）
-#ifdef USE_LID_AS_SEARCH_KEY
-		sRxPktInfo.u8stat =  G_OCTET();
-		p += 4;	// skip u32dur
-		sRxPktInfo.u8batt = G_OCTET();
-		sRxPktInfo.u16adc1 = G_BE_WORD();
-		// ID,状態,電源電圧を登録
-		uint32 u32key = (sRxPktInfo.u8id|sRxPktInfo.u8stat<<8|sRxPktInfo.u8batt<<16);
-		ADDRKEYA_vAdd(&sEndDevList, sRxPktInfo.u32addr_1st, u32key);
-#else
-		ADDRKEYA_vAdd(&sEndDevList, sRxPktInfo.u32addr_1st, 0); // アドレスだけ登録。
-#endif
+		if (sRxPktInfo.u8pkt == PKT_ID_BOTTON) {
+			sRxPktInfo.u8input =  G_OCTET();
+			p += 4;	// skip u32dur
+			sRxPktInfo.u8batt = G_OCTET();
+			sRxPktInfo.u16adc1 = G_BE_WORD();
+			// ID,状態,電源電圧を登録
+			uint32 u32key = (sRxPktInfo.u8id|sRxPktInfo.u8input<<8|sRxPktInfo.u8batt<<16);
+			ADDRKEYA_vAdd(&sEndDevList, sRxPktInfo.u32addr_1st, u32key);
+		} else {
+			ADDRKEYA_vAdd(&sEndDevList, sRxPktInfo.u32addr_1st, 0); // アドレスだけ登録。
+		}
 	}
 }
 
