@@ -79,9 +79,9 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg);
 static void vInitHardware(int f_warm_start);
 static void vSerialInit(uint32 u32Baud, tsUartOpt *pUartOpt);
 
-void vSerOutput_Standard(tsRxPktInfo sRxPktInfo, uint8 *p);
-void vSerOutput_SmplTag3(tsRxPktInfo sRxPktInfo, uint8 *p);
-void vSerOutput_Uart(tsRxPktInfo sRxPktInfo, uint8 *p);
+void vSerOutput_Standard(tsRxPktInfo *pRxPktInfo, uint8 *p);
+void vSerOutput_SmplTag3(tsRxPktInfo *pRxPktInfo, uint8 *p);
+void vSerOutput_Uart(tsRxPktInfo *pRxPktInfo, uint8 *p);
 
 void vSerOutput_Secondary();
 
@@ -278,11 +278,11 @@ void cbToCoNet_vRxEvent(tsRxDataApp *pRx) {
 
 		// 出力用の関数を呼び出す
 		if (IS_APPCONF_OPT_SHT21()) {
-			vSerOutput_SmplTag3(sRxPktInfo, p);
+			vSerOutput_SmplTag3(&sRxPktInfo, p);
 		} else if (IS_APPCONF_OPT_UART()) {
-			vSerOutput_Uart(sRxPktInfo, p);
+			vSerOutput_Uart(&sRxPktInfo, p);
 		} else {
-			vSerOutput_Standard(sRxPktInfo, p);
+			vSerOutput_Standard(&sRxPktInfo, p);
 		}
 
 		// データベースへ登録（線形配列に格納している）
@@ -600,20 +600,20 @@ void vSerInitMessage() {
 /**
  * 標準の出力
  */
-void vSerOutput_Standard(tsRxPktInfo sRxPktInfo, uint8 *p) {
+void vSerOutput_Standard(tsRxPktInfo *pRxPktInfo, uint8 *p) {
 	// 受信機のアドレス
-	A_PRINTF("::rc=%08X", sRxPktInfo.u32addr_rcvr);
+	A_PRINTF("::rc=%08X", pRxPktInfo->u32addr_rcvr);
 
 	// LQI
-	A_PRINTF(":lq=%d", sRxPktInfo.u8lqi_1st);
+	A_PRINTF(":lq=%d", pRxPktInfo->u8lqi_1st);
 
 	// フレーム
-	A_PRINTF(":ct=%04X", sRxPktInfo.u16fct);
+	A_PRINTF(":ct=%04X", pRxPktInfo->u16fct);
 
 	// 送信元子機アドレス
-	A_PRINTF(":ed=%08X:id=%X", sRxPktInfo.u32addr_1st, sRxPktInfo.u8id);
+	A_PRINTF(":ed=%08X:id=%X", pRxPktInfo->u32addr_1st, pRxPktInfo->u8id);
 
-	switch(sRxPktInfo.u8pkt) {
+	switch(pRxPktInfo->u8pkt) {
 	case PKT_ID_BOTTON:
 		_C {
 			uint8 u8batt = G_OCTET();
@@ -631,9 +631,9 @@ void vSerOutput_Standard(tsRxPktInfo sRxPktInfo, uint8 *p) {
 			// LCD への出力
 			V_PRINTF_LCD("%03d:%08X:%03d:%02X:P:%04d:%04d:\n",
 					u32sec % 1000,
-					sRxPktInfo.u32addr_1st,
-					sRxPktInfo.u8lqi_1st,
-					sRxPktInfo.u16fct & 0xFF,
+					pRxPktInfo->u32addr_1st,
+					pRxPktInfo->u8lqi_1st,
+					pRxPktInfo->u16fct & 0xFF,
 					sAppData.u8DO_State
 					);
 			vLcdRefresh();
@@ -658,9 +658,9 @@ void vSerOutput_Standard(tsRxPktInfo sRxPktInfo, uint8 *p) {
 			// LCD への出力:
 			V_PRINTF_LCD("%03d:%08X:%03d:%02X:A:%04d:%04d:%04d\n",
 					u32sec % 1000,
-					sRxPktInfo.u32addr_1st,
-					sRxPktInfo.u8lqi_1st,
-					sRxPktInfo.u16fct & 0xFF,
+					pRxPktInfo->u32addr_1st,
+					pRxPktInfo->u8lqi_1st,
+					pRxPktInfo->u16fct & 0xFF,
 					u16adc1,
 					u16adc2
 					);
@@ -693,9 +693,9 @@ void vSerOutput_Standard(tsRxPktInfo sRxPktInfo, uint8 *p) {
 			// LCD への出力
 			V_PRINTF_LCD("%03d:%08X:%03d:%02X:L:%04d:%04d:%04d\n",
 					u32sec % 1000,
-					sRxPktInfo.u32addr_1st,
-					sRxPktInfo.u8lqi_1st,
-					sRxPktInfo.u16fct & 0xFF,
+					pRxPktInfo->u32addr_1st,
+					pRxPktInfo->u8lqi_1st,
+					pRxPktInfo->u16fct & 0xFF,
 					u16adc1,
 					u16adc2
 					);
@@ -720,9 +720,9 @@ void vSerOutput_Standard(tsRxPktInfo sRxPktInfo, uint8 *p) {
 			// LCD への出力
 			V_PRINTF_LCD("%03d:%08X:%03d:%02X:S:%04d:%04d\n",
 					u32sec % 1000,
-					sRxPktInfo.u32addr_1st,
-					sRxPktInfo.u8lqi_1st,
-					sRxPktInfo.u16fct & 0xFF,
+					pRxPktInfo->u32addr_1st,
+					pRxPktInfo->u8lqi_1st,
+					pRxPktInfo->u16fct & 0xFF,
 					i16temp,
 					i16humd
 					);
@@ -749,9 +749,9 @@ void vSerOutput_Standard(tsRxPktInfo sRxPktInfo, uint8 *p) {
 			// LCD への出力
 			V_PRINTF_LCD("%03d:%08X:%03d:%02X:I:%04d:%04d:%04d\n",
 					u32sec % 1000,
-					sRxPktInfo.u32addr_1st,
-					sRxPktInfo.u8lqi_1st,
-					sRxPktInfo.u16fct & 0xFF,
+					pRxPktInfo->u32addr_1st,
+					pRxPktInfo->u8lqi_1st,
+					pRxPktInfo->u16fct & 0xFF,
 					i16x,
 					i16y,
 					i16z
@@ -777,9 +777,9 @@ void vSerOutput_Standard(tsRxPktInfo sRxPktInfo, uint8 *p) {
 			// LCD への出力
 			V_PRINTF_LCD("%03d:%08X:%03d:%02X:D:%04d:%04d:%04d\n",
 					u32sec % 1000,
-					sRxPktInfo.u32addr_1st,
-					sRxPktInfo.u8lqi_1st,
-					sRxPktInfo.u16fct & 0xFF,
+					pRxPktInfo->u32addr_1st,
+					pRxPktInfo->u8lqi_1st,
+					pRxPktInfo->u16fct & 0xFF,
 					u16adc1,
 					u16adc2
 					);
@@ -804,9 +804,9 @@ void vSerOutput_Standard(tsRxPktInfo sRxPktInfo, uint8 *p) {
 			// LCD への出力
 			V_PRINTF_LCD("%03d:%08X:%03d:%02X:M:%04d:%04d:%04d\n",
 					u32sec % 1000,
-					sRxPktInfo.u32addr_1st,
-					sRxPktInfo.u8lqi_1st,
-					sRxPktInfo.u16fct & 0xFF,
+					pRxPktInfo->u32addr_1st,
+					pRxPktInfo->u8lqi_1st,
+					pRxPktInfo->u16fct & 0xFF,
 					u16atmo,
 					u16adc1
 					);
@@ -827,9 +827,9 @@ void vSerOutput_Standard(tsRxPktInfo sRxPktInfo, uint8 *p) {
 			// LCD への出力
 			V_PRINTF_LCD("%03d:%08X:%03d:%02X:B:%04d:%04d\n",
 					u32sec % 1000,
-					sRxPktInfo.u32addr_1st,
-					sRxPktInfo.u8lqi_1st,
-					sRxPktInfo.u16fct & 0xFF,
+					pRxPktInfo->u32addr_1st,
+					pRxPktInfo->u8lqi_1st,
+					pRxPktInfo->u16fct & 0xFF,
 					u8stat,
 					u32dur / 1000
 					);
@@ -859,9 +859,9 @@ void vSerOutput_Standard(tsRxPktInfo sRxPktInfo, uint8 *p) {
 /**
  * SimpleTag v3 互換 (SHT21 用) の出力
  */
-void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
+void vSerOutput_SmplTag3( tsRxPktInfo *pRxPktInfo, uint8 *p) {
 	//	押しボタン
-	if ( sRxPktInfo.u8pkt == PKT_ID_BOTTON ) {
+	if ( pRxPktInfo->u8pkt == PKT_ID_BOTTON ) {
 		uint8 u8batt = G_OCTET();
 		uint16 u16adc1 = G_BE_WORD();
 		uint16 u16adc2 = G_BE_WORD();
@@ -902,10 +902,10 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 				"%04d;"			// ボタンの状態(LEDが光れば1、消えれば0)
 				LB,
 				u32TickCount_ms / 1000,
-				sRxPktInfo.u32addr_rcvr & 0x0FFFFFFF,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct,
-				sRxPktInfo.u32addr_1st & 0x0FFFFFFF,
+				pRxPktInfo->u32addr_rcvr & 0x0FFFFFFF,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct,
+				pRxPktInfo->u32addr_1st & 0x0FFFFFFF,
 				DECODE_VOLT(u8batt),
 				u16adc1,
 				u16adc2,
@@ -919,9 +919,9 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 		// LCD への出力
 		V_PRINTF_LCD("%03d:%08X:%03d:%02X:P:%04d:%04d:\n",
 				u32sec % 1000,
-				sRxPktInfo.u32addr_1st,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct & 0xFF,
+				pRxPktInfo->u32addr_1st,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct & 0xFF,
 //				u8btn
 				sAppData.u8DO_State
 				);
@@ -929,7 +929,7 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 #endif
 	}
 
-	if (sRxPktInfo.u8pkt == PKT_ID_SHT21) {
+	if (pRxPktInfo->u8pkt == PKT_ID_SHT21) {
 		uint8 u8batt = G_OCTET();
 		uint16 u16adc1 = G_BE_WORD();
 		uint16 u16adc2 = G_BE_WORD(); (void)u16adc2;
@@ -950,10 +950,10 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 				"%c;"			// パケット識別子
 				LB,
 				u32TickCount_ms / 1000,
-				sRxPktInfo.u32addr_rcvr & 0x0FFFFFFF,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct,
-				sRxPktInfo.u32addr_1st & 0x0FFFFFFF,
+				pRxPktInfo->u32addr_rcvr & 0x0FFFFFFF,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct,
+				pRxPktInfo->u32addr_1st & 0x0FFFFFFF,
 				DECODE_VOLT(u8batt),
 				i16temp,
 				i16humd,
@@ -966,9 +966,9 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 		// LCD への出力
 		V_PRINTF_LCD("%03d:%08X:%03d:%02X:S:%04d:%04d\n",
 				u32sec % 1000,
-				sRxPktInfo.u32addr_1st,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct & 0xFF,
+				pRxPktInfo->u32addr_1st,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct & 0xFF,
 				i16temp,
 				i16humd
 				);
@@ -976,7 +976,7 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 #endif
 	}
 
-	if (sRxPktInfo.u8pkt == PKT_ID_LIS3DH) {
+	if (pRxPktInfo->u8pkt == PKT_ID_LIS3DH) {
 		uint8 u8batt = G_OCTET();
 		uint16 u16adc1 = G_BE_WORD();
 		uint16 u16adc2 = G_BE_WORD(); (void)u16adc2;
@@ -1002,10 +1002,10 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 				"%04d;"			// z
 				LB,
 				u32TickCount_ms / 1000,
-				sRxPktInfo.u32addr_rcvr & 0x0FFFFFFF,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct,
-				sRxPktInfo.u32addr_1st & 0x0FFFFFFF,
+				pRxPktInfo->u32addr_rcvr & 0x0FFFFFFF,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct,
+				pRxPktInfo->u32addr_1st & 0x0FFFFFFF,
 				DECODE_VOLT(u8batt),
 				u8bitmap,
 				0,
@@ -1021,9 +1021,9 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 		// LCD への出力
 		V_PRINTF_LCD("%03d:%08X:%03d:%02X:I:%04d:%04d:%04d\n",
 				u32sec % 1000,
-				sRxPktInfo.u32addr_1st,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct & 0xFF,
+				pRxPktInfo->u32addr_1st,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct & 0xFF,
 				i16x,
 				i16y,
 				i16z
@@ -1032,7 +1032,7 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 #endif
 	}
 
-	if (sRxPktInfo.u8pkt == PKT_ID_ADT7410) {
+	if (pRxPktInfo->u8pkt == PKT_ID_ADT7410) {
 		uint8 u8batt = G_OCTET();
 		uint16 u16adc1 = G_BE_WORD();
 		uint16 u16adc2 = G_BE_WORD(); (void)u16adc2;
@@ -1052,10 +1052,10 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 				"%c;"			// パケット識別子
 				LB,
 				u32TickCount_ms / 1000,
-				sRxPktInfo.u32addr_rcvr & 0x0FFFFFFF,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct,
-				sRxPktInfo.u32addr_1st & 0x0FFFFFFF,
+				pRxPktInfo->u32addr_rcvr & 0x0FFFFFFF,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct,
+				pRxPktInfo->u32addr_1st & 0x0FFFFFFF,
 				DECODE_VOLT(u8batt),
 				i16temp,
 				0,
@@ -1068,9 +1068,9 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 		// LCD への出力
 		V_PRINTF_LCD("%03d:%08X:%03d:%02X:S:%04d:%04d\n",
 				u32sec % 1000,
-				sRxPktInfo.u32addr_1st,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct & 0xFF,
+				pRxPktInfo->u32addr_1st,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct & 0xFF,
 				i16temp,
 				i16humd
 				);
@@ -1078,7 +1078,7 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 #endif
 	}
 
-	if (sRxPktInfo.u8pkt == PKT_ID_MPL115A2) {
+	if (pRxPktInfo->u8pkt == PKT_ID_MPL115A2) {
 		uint8 u8batt = G_OCTET();
 		uint16 u16adc1 = G_BE_WORD();
 		uint16 u16adc2 = G_BE_WORD();;
@@ -1098,10 +1098,10 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 				"%c;"			// パケット識別子
 				LB,
 				u32TickCount_ms / 1000,
-				sRxPktInfo.u32addr_rcvr & 0x0FFFFFFF,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct,
-				sRxPktInfo.u32addr_1st & 0x0FFFFFFF,
+				pRxPktInfo->u32addr_rcvr & 0x0FFFFFFF,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct,
+				pRxPktInfo->u32addr_1st & 0x0FFFFFFF,
 				DECODE_VOLT(u8batt),
 				i16atmo,
 				0,
@@ -1114,16 +1114,16 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 		// LCD への出力
 		V_PRINTF_LCD("%03d:%08X:%03d:%02X:M:%04d\n",
 				u32sec % 1000,
-				sRxPktInfo.u32addr_1st,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct & 0xFF,
+				pRxPktInfo->u32addr_1st,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct & 0xFF,
 				i16atmo
 				);
 		vLcdRefresh();
 #endif
 	}
 
-	if (sRxPktInfo.u8pkt == PKT_ID_STANDARD) {
+	if (pRxPktInfo->u8pkt == PKT_ID_STANDARD) {
 		uint8 u8batt = G_OCTET();
 
 		uint16 u16adc1 = G_BE_WORD();
@@ -1146,10 +1146,10 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 				"%c;"			// 識別子
 				LB,
 				u32TickCount_ms / 1000,
-				sRxPktInfo.u32addr_rcvr & 0x0FFFFFFF,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct,
-				sRxPktInfo.u32addr_1st & 0x0FFFFFFF,
+				pRxPktInfo->u32addr_rcvr & 0x0FFFFFFF,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct,
+				pRxPktInfo->u32addr_1st & 0x0FFFFFFF,
 				DECODE_VOLT(u8batt),
 //				iTemp,
 				u16adc2,
@@ -1163,9 +1163,9 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 		// LCD への出力
 		V_PRINTF_LCD("%03d:%08X:%03d:%02X:S:%04d:%04d\n",
 				u32sec % 1000,
-				sRxPktInfo.u32addr_1st,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct & 0xFF,
+				pRxPktInfo->u32addr_1st,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct & 0xFF,
 				u16adc2,
 				u16adc1 * 2
 				);
@@ -1173,7 +1173,7 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 #endif
 	}
 
-	if (sRxPktInfo.u8pkt == PKT_ID_LM61) {
+	if (pRxPktInfo->u8pkt == PKT_ID_LM61) {
 		uint8 u8batt = G_OCTET();
 
 		uint16	u16adc1 = G_BE_WORD();
@@ -1209,10 +1209,10 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 				"%c;"			// 識別子
 				LB,
 				u32TickCount_ms / 1000,
-				sRxPktInfo.u32addr_rcvr & 0x0FFFFFFF,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct,
-				sRxPktInfo.u32addr_1st & 0x0FFFFFFF,
+				pRxPktInfo->u32addr_rcvr & 0x0FFFFFFF,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct,
+				pRxPktInfo->u32addr_1st & 0x0FFFFFFF,
 				DECODE_VOLT(u8batt),
 				iTemp,
 				u16adc1 * 2 * 3, // 3300mV で 99% 相当
@@ -1225,9 +1225,9 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 		// LCD への出力
 		V_PRINTF_LCD("%03d:%08X:%03d:%02X:L:%04d:%04d\n",
 				u32sec % 1000,
-				sRxPktInfo.u32addr_1st,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct & 0xFF,
+				pRxPktInfo->u32addr_1st,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct & 0xFF,
 				iTemp,
 				u16adc1 * 2
 				);
@@ -1235,7 +1235,7 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 #endif
 	}
 
-	if (sRxPktInfo.u8pkt == PKT_ID_IO_TIMER) {
+	if (pRxPktInfo->u8pkt == PKT_ID_IO_TIMER) {
 		uint8 u8stat = G_OCTET();
 		uint32 u32dur = G_BE_DWORD();
 
@@ -1256,10 +1256,10 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 				"%04d;"			// 開いている時間(開いていた時間)
 				LB,
 				u32TickCount_ms / 1000,
-				sRxPktInfo.u32addr_rcvr & 0x0FFFFFFF,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct,
-				sRxPktInfo.u32addr_1st & 0x0FFFFFFF,
+				pRxPktInfo->u32addr_rcvr & 0x0FFFFFFF,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct,
+				pRxPktInfo->u32addr_1st & 0x0FFFFFFF,
 				"",
 				"",
 				"",
@@ -1274,9 +1274,9 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
 		// LCD への出力
 		V_PRINTF_LCD("%03d:%08X:%03d:%02X:B:%04d:%04d\n",
 				u32sec % 1000,
-				sRxPktInfo.u32addr_1st,
-				sRxPktInfo.u8lqi_1st,
-				sRxPktInfo.u16fct & 0xFF,
+				pRxPktInfo->u32addr_1st,
+				pRxPktInfo->u8lqi_1st,
+				pRxPktInfo->u16fct & 0xFF,
 				u8stat,
 				u32dur / 1000
 				);
@@ -1303,26 +1303,26 @@ void vSerOutput_SmplTag3( tsRxPktInfo sRxPktInfo, uint8 *p) {
  * 15          <= XOR チェックサム
  * 04          <= 終端
  */
-void vSerOutput_Uart(tsRxPktInfo sRxPktInfo, uint8 *p) {
+void vSerOutput_Uart(tsRxPktInfo *pRxPktInfo, uint8 *p) {
 	uint8 u8buff[256], *q = u8buff; // 出力バッファ
 
 	// 受信機のアドレス
-	S_BE_DWORD(sRxPktInfo.u32addr_rcvr);
+	S_BE_DWORD(pRxPktInfo->u32addr_rcvr);
 
 	// LQI
-	S_OCTET(sRxPktInfo.u8lqi_1st);
+	S_OCTET(pRxPktInfo->u8lqi_1st);
 
 	// フレーム
-	S_BE_WORD(sRxPktInfo.u16fct);
+	S_BE_WORD(pRxPktInfo->u16fct);
 
 	// 送信元子機アドレス
-	S_BE_DWORD(sRxPktInfo.u32addr_1st);
-	S_OCTET(sRxPktInfo.u8id);
+	S_BE_DWORD(pRxPktInfo->u32addr_1st);
+	S_OCTET(pRxPktInfo->u8id);
 
 	// パケットの種別により処理を変更
-	S_OCTET(sRxPktInfo.u8pkt);
+	S_OCTET(pRxPktInfo->u8pkt);
 
-	switch(sRxPktInfo.u8pkt) {
+	switch(pRxPktInfo->u8pkt) {
 	//	温度センサなど
 	case PKT_ID_STANDARD:
 	case PKT_ID_LM61:
