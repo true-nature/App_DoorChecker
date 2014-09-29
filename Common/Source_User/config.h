@@ -63,7 +63,7 @@ extern "C" {
 /**
  * ブザーを鳴らす処理を無効化し定時送信する
  */
-#define DISABLE_DOOR_ALARM
+#undef DISABLE_DOOR_ALARM
 /**
  * 子機論理IDを検索キーとして使用
  */
@@ -72,11 +72,7 @@ extern "C" {
 /**
  * 子機のデフォルトスリープ周期
  */
-#ifdef DISABLE_DOOR_ALARM
-#define DEFAULT_SLEEP_DUR_ms (30000UL)
-#else
 #define DEFAULT_SLEEP_DUR_ms (5000UL)
-#endif
 
 /**
  * 温度センサーの利用

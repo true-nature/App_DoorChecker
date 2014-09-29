@@ -76,10 +76,7 @@ PRSEV_HANDLER_DEF(E_STATE_IDLE, tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 		V_PRINTF(LB "* IO=%d, t=%d, ct=%d", sAppData.bDI1_Now_Opened, sAppData.u32DI1_Dur_Opened_ms, sAppData.u16DI1_Ct_PktFired);
 	}
 
-	// E_IO_TIMER_NWK_NWK_STARTを経てFIREできる状態になる
-	if (eEvent == E_EVENT_TICK_TIMER) {
-		ToCoNet_Event_SetState(pEv, E_STATE_RUNNING);
-	}
+	ToCoNet_Event_SetState(pEv, E_STATE_RUNNING);
 }
 
 /**
@@ -97,25 +94,6 @@ PRSEV_HANDLER_DEF(E_STATE_RUNNING, tsEvent *pEv, teEvent eEvent, uint32 u32evarg
 	static bool_t bBuzz;
 	static bool_t bTxCmp;
 
-#ifdef DISABLE_DOOR_ALARM
-	// ブザーを鳴らさないIO状態を送信するだけのモードが必要。
-	static bool_t bTxFire;
-	if (eEvent == E_EVENT_NEW_STATE) {
-		bTxFire = FALSE;
-		bTxCmp = FALSE;
-		bBuzz = FALSE;
-
-		// ADC の開始
-		vADC_WaitInit();
-		vSnsObj_Process(&sAppData.sADC, E_ORDER_KICK);
-	}
-	if (!bTxFire && bSnsObj_isComplete(&sAppData.sADC)) {
-		// 送信要求
-		sAppData.u8NwkStat = E_IO_TIMER_NWK_FIRE_REQUEST;
-		sAppData.u16DI1_Ct_PktFired++;
-		bTxFire = TRUE;
-	}
-#else
 	/*
 	 * ブザーを鳴らす処理
 	 */
@@ -151,7 +129,6 @@ PRSEV_HANDLER_DEF(E_STATE_RUNNING, tsEvent *pEv, teEvent eEvent, uint32 u32evarg
 
 		return;
 	}
-#endif
 
 	if (bBuzz && ToCoNet_Event_u32TickFrNewState(pEv) > u16_IO_Timer_buzz_dur) {
 		// u16_IO_Timer_buzz_dur [ms] を超えたら終了
@@ -166,8 +143,16 @@ PRSEV_HANDLER_DEF(E_STATE_RUNNING, tsEvent *pEv, teEvent eEvent, uint32 u32evarg
 	}
 
 	if (sAppData.u8NwkStat) { // 送信が実施された時
-		bTxCmp |= (sAppData.u8NwkStat & E_IO_TIMER_NWK_COMPLETE_MASK) != 0;
-		bTxCmp |= (ToCoNet_Event_u32TickFrNewState(pEv) > u16_IO_Timer_buzz_dur + 50); // 50ms 余分にタイムアウトを設定
+		bool_t bCond = FALSE;
+
+		bCond |= (sAppData.u8NwkStat & E_IO_TIMER_NWK_COMPLETE_MASK) != 0;
+		bCond |= (ToCoNet_Event_u32TickFrNewState(pEv) > u16_IO_Timer_buzz_dur + 50); // 50ms 余分にタイムアウトを設定
+
+		if (bCond) {
+			// 送信完了を待ってスリープ
+			bTxCmp = TRUE;
+			V_PRINTF(LB"* TxCmp %d", eEvent);
+		}
 	}
 
 	if (!bBuzz && bTxCmp) { // ブザーが鳴り終わった&&送信し終わった
@@ -191,17 +176,12 @@ PRSEV_HANDLER_DEF(E_STATE_APP_SLEEP, tsEvent *pEv, teEvent eEvent, uint32 u32eva
 		vPortSetSns(FALSE);
 
 		// Sleep は必ず E_EVENT_NEW_STATE 内など１回のみ呼び出される場所で呼び出す。
-		V_PRINTF(LB"* Sleeping... @%dms", u32TickCount_ms);
-		V_FLUSH();
+		V_PRINTF(LB"Sleeping...");
 
-		// ドア開閉状態に関わらず一定間隔で送信させる。
-#ifdef DISABLE_DOOR_ALARM
-		// 現在を起点にsleep開始, RAM OFF, DI1立ち上がり割り込み有効
-		vSleep_IO_Timer(sAppData.sFlash.sData.u32Slp, FALSE, FALSE, TRUE);
-#else
 		// 念のため状態を再チェック
 		bool_t bOpen = (bPortRead(PORT_INPUT1) == FALSE);
 
+		// ToDo: ドア開閉状態に関わらず一定間隔で送信させる。
 		// 周期スリープに入る
 		//  - 初回は一定時間秒あけて、次回以降はスリープ復帰を基点に５秒
 		if (sAppData.bDI1_Now_Opened || bOpen) {
@@ -220,7 +200,6 @@ PRSEV_HANDLER_DEF(E_STATE_APP_SLEEP, tsEvent *pEv, teEvent eEvent, uint32 u32eva
 			sAppData.u32DI1_Dur_Opened_ms = 0;
 			vSleep_IO_Timer(60*1000UL, FALSE, FALSE, TRUE); // １分に１回は起きて送信する&割り込み有効
 		}
-#endif
 	}
 }
 
@@ -300,42 +279,7 @@ static uint8 cbAppToCoNet_u8HwInt(uint32 u32DeviceId, uint32 u32ItemBitmap) {
 }
 #endif
 
-#ifdef DISABLE_DOOR_ALARM
-
-/**
- * ハードウェアイベント（遅延実行）
- * @param u32DeviceId
- * @param u32ItemBitmap
- */
-static void cbAppToCoNet_vHwEvent(uint32 u32DeviceId, uint32 u32ItemBitmap) {
-	switch (u32DeviceId) {
-	case E_AHI_DEVICE_TICK_TIMER:
-		break;
-
-	case E_AHI_DEVICE_ANALOGUE:
-		/*
-		 * ADC完了割り込み
-		 */
-		V_PUTCHAR('@');
-		vSnsObj_Process(&sAppData.sADC, E_ORDER_KICK);
-		if (bSnsObj_isComplete(&sAppData.sADC)) {
-			// 全チャネルの処理が終わったら、次の処理を呼び起こす
-			vStoreSensorValue();
-			ToCoNet_Event_Process(E_ORDER_KICK, 0, vProcessEvCore);
-		}
-		break;
-
-	case E_AHI_DEVICE_SYSCTRL:
-		break;
-
-	case E_AHI_DEVICE_TIMER0:
-		break;
-
-	default:
-		break;
-	}
-}
-#else
+#if 0
 /**
  * ハードイベント（遅延割り込み処理）
  * @param u32DeviceId
@@ -412,11 +356,7 @@ static void cbAppToCoNet_vTxEvent(uint8 u8CbId, uint8 bStatus) {
  */
 static tsCbHandler sCbHandler = {
 	NULL, // cbAppToCoNet_u8HwInt,
-#ifdef DISABLE_DOOR_ALARM
-	cbAppToCoNet_vHwEvent,
-#else
 	NULL, // cbAppToCoNet_vHwEvent,
-#endif
 	NULL, // cbAppToCoNet_vMain,
 	NULL, //cbAppToCoNet_vNwkEvent,
 	NULL, // cbAppToCoNet_vRxEvent,
@@ -433,27 +373,3 @@ void vInitAppDoorTimer() {
 	extern void vInitAppDoorTimerSub();
 	vInitAppDoorTimerSub();
 }
-
-#ifdef DISABLE_DOOR_ALARM
-/**
- * センサー値を格納する
- */
-static void vStoreSensorValue() {
-	// センサー値の保管
-	sAppData.sSns.u16Adc1 = sAppData.sObjADC.ai16Result[TEH_ADC_IDX_ADC_1];
-#ifdef USE_TEMP_INSTDOF_ADC2
-	sAppData.sSns.u16Adc2 = sAppData.sObjADC.ai16Result[TEH_ADC_IDX_TEMP];
-#else
-	sAppData.sSns.u16Adc2 = sAppData.sObjADC.ai16Result[TEH_ADC_IDX_ADC_2];
-#endif
-	sAppData.sSns.u8Batt = ENCODE_VOLT(sAppData.sObjADC.ai16Result[TEH_ADC_IDX_VOLT]);
-
-	// ADC1 が 1300mV 以上(SuperCAP が 2600mV 以上)である場合は SUPER CAP の直結を有効にする
-	if (sAppData.sSns.u16Adc1 >= VOLT_SUPERCAP_CONTROL) {
-		vPortSetLo(DIO_SUPERCAP_CONTROL);
-	}
-
-	// センサー用の電源制御回路を Hi に戻す
-	vPortSetSns(FALSE);
-}
-#endif
