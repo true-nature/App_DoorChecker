@@ -697,6 +697,7 @@ static void vInitHardware(int f_warm_start) {
 
 	// SMBUS
 	vSMBusInit();
+	bDraw2LinesLcd_AQM0802A(NULL, NULL);
 }
 
 /****************************************************************************
