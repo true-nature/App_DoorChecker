@@ -23,7 +23,7 @@
 #include <string.h>
 #include <AppHardwareApi.h>
 
-#include "Parent.h"
+//#include "Parent.h"
 
 #include "common.h"
 #include "config.h"
@@ -71,8 +71,6 @@
 /****************************************************************************/
 /***        Exported Variables                                            ***/
 /****************************************************************************/
-extern tsAppData_Pa sAppData; //!< アプリケーションデータ  @ingroup MASTER
-extern tsFILE sSerStream;
 
 /****************************************************************************/
 /***        Local Variables                                               ***/

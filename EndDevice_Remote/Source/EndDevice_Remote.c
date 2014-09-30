@@ -30,6 +30,10 @@
 #include "flash.h"
 
 #include "common.h"
+#include "AddrKeyAry.h"
+
+#include "SMBus.h"
+#include "I2C_impl.h"
 
 // Serial options
 #include "serial.h"
@@ -96,6 +100,7 @@ static void vInitHardware(int f_warm_start);
 static void vSerialInit();
 void vSerInitMessage();
 void vProcessSerialCmd(tsSerCmd_Context *pCmd);
+static bool_t vUpdateLcdByMessageData(uint8 *pMessageData);
 
 #ifdef USE_LCD
 static void vLcdInit(void);
@@ -117,6 +122,12 @@ tsSerialPortSetup sSerPort;
 
 // Timer object
 tsTimerContext sTimerApp;
+/**
+ * MessagePool送信用
+ * 3bytes/子機 [id][DI bitmap][volt] vold==0なら子機音信不通
+ * id==0または配列末尾で終端
+ */
+uint8 su8MessagePoolData[TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE + 1];
 
 #ifdef USE_LCD
 static tsFILE sLcdStream, sLcdStreamBtm;
@@ -529,9 +540,10 @@ void cbToCoNet_vNwkEvent(teEvent eEvent, uint32 u32arg) {
 			int i;
 			//static uint8 u8seq = 0;
 
-			uint8 u8buff[TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE+1];
+			uint8 *u8buff = su8MessagePoolData;
 			memcpy(u8buff, pInfo->au8Message, pInfo->u8MessageLen); // u8Message にデータ u8MessageLen にデータ長
 			u8buff[pInfo->u8MessageLen] = 0;
+			vUpdateLcdByMessageData(u8buff);
 
 			// UART にメッセージ出力
 			if (pInfo->bGotData) { // empty なら FALSE になる
@@ -683,6 +695,9 @@ static void vInitHardware(int f_warm_start) {
 	sTimerApp.u8PreScale = 10;
 	vTimerConfig(&sTimerApp);
 	vTimerStart(&sTimerApp);
+
+	// SMBUS
+	vSMBusInit();
 }
 
 /****************************************************************************
@@ -740,6 +755,56 @@ void vProcessSerialCmd(tsSerCmd_Context *pCmd) {
 	}
 
 	return;
+}
+
+#define LCD_COLUMNS 8
+#define VOLT_LOW 2300
+uint8 sLcdBuffer[2][LCD_COLUMNS + 1];
+
+static void vInitLcdBuffer() {
+	memset(&sLcdBuffer[0][0], ' ', LCD_COLUMNS);
+	memset(&sLcdBuffer[1][0], ' ', LCD_COLUMNS);
+	sLcdBuffer[0][LCD_COLUMNS] = '\0';
+	sLcdBuffer[1][LCD_COLUMNS] = '\0';
+}
+
+static void vUpdateLcdById(uint8 id, uint8 chr) {
+	if (id < ADDRKEYA_MAX_HISTORY)
+	{
+		uint8 row = (id > LCD_COLUMNS ? 1 : 0);
+		uint8 column = ((id - 1) % LCD_COLUMNS);
+		sLcdBuffer[row][column] = chr;
+	}
+}
+
+static bool_t vUpdateLcdByMessageData(uint8 *pMessageData) {
+	bool_t ret = TRUE;
+	uint8 u8id;
+	uint8 *p;
+	uint8 *tail;
+
+	vInitLcdBuffer();
+	p = pMessageData;
+	tail = pMessageData + TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE;
+	u8id = G_OCTET();
+	while (u8id != 0 && p < tail) {
+		uint8 u8btn = G_OCTET();
+		uint16 volt = DECODE_VOLT(G_OCTET());
+		uint8 chr = '-';
+		if ((u8btn & 1) == 0) {
+			// 窓開放は大文字表示
+			chr = u8id + '@';
+		} else if (volt < VOLT_LOW) {
+			// 低電圧は小文字表示
+			chr = u8id + '`';
+		}
+		vUpdateLcdById(u8id, chr);
+	}
+	ret &= bDraw2LinesLcd_AQM0802A((const char *)&sLcdBuffer[0][0], (const char *)&sLcdBuffer[1][0]);
+#if 0
+	V_PRINTF(LB"[%s][%s] ret=%d", &sLcdBuffer[0][0], &sLcdBuffer[1][0], ret);
+#endif
+	return ret;
 }
 
 #ifdef USE_LCD

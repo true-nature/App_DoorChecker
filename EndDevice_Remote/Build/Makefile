@@ -47,6 +47,8 @@ include ../Version.mk
 APPSRC += $(TARGET_DIR).c
 APPSRC += common.c
 APPSRC += flash.c
+APPSRC += SMBus.c
+APPSRC += I2C_impl.c
 
 APPSRC += input_string.c
 APPSRC += Interactive.c

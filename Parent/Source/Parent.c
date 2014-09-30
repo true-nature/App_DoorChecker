@@ -89,8 +89,8 @@ void vSerInitMessage();
 void vProcessSerialCmd(tsSerCmd_Context *pCmd);
 
 void vLED_Toggle(void);
-static bool_t vRescanDoorStatus();
-
+static uint8 vRescanDoorStatus();
+static bool_t vUpdateLcdByMessageData(uint8 *pMessageData);
 
 #ifdef USE_LCD
 static void vLcdInit(void);
@@ -114,6 +114,13 @@ tsAdrKeyA_Context sEndDevList; // 子機の発報情報を保存するデータ�
  * 戸締り情報集計
  */
 uint8 sAddrKeyIndex[ADDRKEYA_MAX_HISTORY]; // 論理IDからデータベースへの索引
+/**
+ * MessagePool送信用
+ * 3bytes/子機 [id][DI bitmap][volt] vold==0なら子機音信不通
+ * id==0または配列末尾で終端
+ */
+uint8 su8MessagePoolData[TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE + 1];
+
 #define ADDRKEY_NO_DATA 0xFF
 #define AddrKey2Id(k) ((k)&0xFF)
 #define AddrKey2Status(k) (((k)>>8)&0xFF)
@@ -505,44 +512,20 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			V_PRINTF(LB"[E_STATE_RUNNING]");
 		} else if (eEvent == E_EVENT_TICK_SECOND) {
 			static uint8 u8Ct_s = 0;
-			int i;
 
 			// 毎秒ごとのシリアル出力
 			vSerOutput_Secondary();
-			// 戸締り状態の表示
-			vRescanDoorStatus();
 
 			// 定期クリーン（タイムアウトしたノードを削除する）
 			ADDRKEYA_bFind(&sEndDevList, 0, 0);
 
-			// 共有情報（メッセージプール）の送信
-			//   - OCTET: 経過秒 (0xFF は終端)
-			//   - BE_DWORD: 発報アドレス
+			// 戸締り状態の表示
+			uint8 idcount = vRescanDoorStatus();
+			vUpdateLcdByMessageData(su8MessagePoolData);
+
+			// vRescanDoorStatus()で構築した共有情報（メッセージプール）の送信
 			if (++u8Ct_s > PARENT_MSGPOOL_TX_DUR_s) {
-				uint8 au8pl[TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE];
-					// メッセージプールの最大バイト数は 64 なので、これに収まる数とする。
-				uint8 *q = au8pl;
-
-				for (i = 0; i < ADDRKEYA_MAX_HISTORY; i++) {
-					if (sEndDevList.au32ScanListAddr[i]) {
-
-						uint16 u16Sec = (u32TickCount_ms
-								- sEndDevList.au32ScanListTick[i]) / 1000;
-						if (u16Sec >= 0xF0)
-							continue; // 古すぎるので飛ばす
-
-						S_OCTET(u16Sec & 0xFF);
-						S_BE_DWORD(sEndDevList.au32ScanListAddr[i]);
-					}
-				}
-				S_OCTET(0xFF);
-
-				S_OCTET('A'); // ダミーデータ(不要：テスト目的)
-				S_OCTET('B');
-				S_OCTET('C');
-				S_OCTET('D');
-
-				ToCoNet_MsgPl_bSetMessage(0, 0, q - au8pl, au8pl);
+				ToCoNet_MsgPl_bSetMessage(0, 0, idcount, su8MessagePoolData);
 				u8Ct_s = 0;
 			}
 		} else {
@@ -1466,29 +1449,47 @@ static void vUpdateLcdById(uint8 id, uint8 chr) {
 	}
 }
 
-static void vUpdateLcdByListIndex(uint8 idx) {
-	if (sEndDevList.au32ScanListKey[idx] != 0) {
-		uint32 key = sEndDevList.au32ScanListKey[idx];
-		uint8 id = AddrKey2Id(key);
-		uint8 status = AddrKey2Status(key);
-		uint16 volt = DECODE_VOLT(AddrKey2Batt(key));
+static bool_t vUpdateLcdByMessageData(uint8 *pMessageData) {
+	bool_t ret = TRUE;
+	uint8 u8id;
+	uint8 *p;
+	uint8 *tail;
+
+	vInitLcdBuffer();
+	p = pMessageData;
+	tail = pMessageData + TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE;
+	u8id = G_OCTET();
+	while (u8id != 0 && p < tail) {
+		uint8 u8btn = G_OCTET();
+		uint16 volt = DECODE_VOLT(G_OCTET());
 		uint8 chr = '-';
-		if ((status & 1) == 0) {
+		if ((u8btn & 1) == 0) {
 			// 窓開放は大文字表示
-			chr = id + '@';
+			chr = u8id + '@';
 		} else if (volt < VOLT_LOW) {
 			// 低電圧は小文字表示
-			chr = id + '`';
+			chr = u8id + '`';
 		}
-		vUpdateLcdById(id, chr);
+		vUpdateLcdById(u8id, chr);
 	}
-
+	ret &= bDraw2LinesLcd_AQM0802A((const char *)&sLcdBuffer[0][0], (const char *)&sLcdBuffer[1][0]);
+#if 0
+	V_PRINTF(LB"[%s][%s] ret=%d", &sLcdBuffer[0][0], &sLcdBuffer[1][0], ret);
+#endif
+	return ret;
 }
 
-static bool_t vRescanDoorStatus() {
-	bool_t ret = TRUE;
+
+/**
+ * 子機の発報情報データベース(sEndDevList)をスキャンしてMessagePool用データを再構築する
+ * @return
+ */
+static uint8 vRescanDoorStatus() {
+	uint8 idcount = 0;
+	uint8 ret = TRUE;
 	uint32 bit = 1;
 	uint8 u8id = 1;
+	uint8 *q = &su8MessagePoolData[0];	// message pool index
 	int i;
 
 	memset(sAddrKeyIndex, ADDRKEY_NO_DATA, ADDRKEYA_MAX_HISTORY);
@@ -1497,10 +1498,13 @@ static bool_t vRescanDoorStatus() {
 	{
 		if (sAppData.sFlash.sData.u32idmask & bit) {
 			for (i = 0; i < ADDRKEYA_MAX_HISTORY; i++) {
-				if (AddrKey2Id(sEndDevList.au32ScanListKey[i]) == u8id) {
+				uint32 u32key = sEndDevList.au32ScanListKey[i];
+				if (AddrKey2Id(u32key) == u8id) {
 					if (sAddrKeyIndex[u8id - 1] == ADDRKEY_NO_DATA) {
 						sAddrKeyIndex[u8id - 1] = i;
-						vUpdateLcdByListIndex(i);
+						S_OCTET(u8id);
+						S_OCTET(AddrKey2Status(u32key));
+						S_OCTET(AddrKey2Batt(u32key));
 					} else {
 						ret = FALSE;
 						if (sAddrKeyIndex[u8id - 1] < ADDRKEYA_MAX_HISTORY) {
@@ -1508,7 +1512,6 @@ static bool_t vRescanDoorStatus() {
 						} else {
 							A_PRINTF("*** DUPLICATED: ID=%d ADDR1=INVALID ADDR2=%08x ***"LB, u8id, sEndDevList.au32ScanListAddr[i]);
 							sAddrKeyIndex[u8id - 1] = i;
-							vUpdateLcdByListIndex(i);
 						}
 					}
 					break;
@@ -1516,20 +1519,21 @@ static bool_t vRescanDoorStatus() {
 			}
 			if (i == ADDRKEYA_MAX_HISTORY) {
 				// 非検出は小文字表示
-				vUpdateLcdById(u8id, u8id + '`');
+				S_OCTET(u8id);
+				S_OCTET(0);
+				S_OCTET(0);
 			}
+			idcount++;
 		}
 		bit <<= 1;
 		u8id++;
 	}
-	if (ret) {
-		ret &= bDraw2LinesLcd_AQM0802A((const char *)&sLcdBuffer[0][0], (const char *)&sLcdBuffer[1][0]);
-#if 0
-		V_PRINTF(LB"[%s][%s] ret=%d", &sLcdBuffer[0][0], &sLcdBuffer[1][0], ret);
-#endif
+	S_OCTET(0);	// sentinel
+	if (!ret) {
+		idcount = 0;
 	}
 
-	return ret;
+	return idcount;
 }
 
 #ifdef USE_LCD
