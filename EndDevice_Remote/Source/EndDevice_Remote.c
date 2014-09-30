@@ -271,6 +271,8 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			V_PRINTF(LB"[E_STATE_APP_IO_WAIT_RX:%d]", u32TickCount_ms & 0xFFFF);
 		} if (eEvent == E_EVENT_APP_GET_IC_INFO) {
 			// メッセージが届いた
+			// ToDo: LCD, LEDの表示変更。音声合成で状態通知。
+			// ToDo: 音声アナウンスが終わるまでスリープを保留。
 			if (u32evarg) {
 				V_PRINTF(LB"[E_STATE_APP_IO_WAIT_RX:GOTDATA:%d]", u32TickCount_ms & 0xFFFF);
 				ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
@@ -309,6 +311,7 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			ToCoNet_Nwk_bPause(sAppData.pContextNwk);
 
 			SERIAL_vFlush(UART_PORT);
+			// ToDo: ATP3012スリープ、I2C停止、LCD電源供給停止。
 			vSleep(0, FALSE, FALSE);
 #endif
 		}
@@ -777,6 +780,11 @@ static void vUpdateLcdById(uint8 id, uint8 chr) {
 	}
 }
 
+/**
+ * LCDに戸締り状態、電源または通信の問題を表示。
+ * @param pMessageData
+ * @return
+ */
 static bool_t vUpdateLcdByMessageData(uint8 *pMessageData) {
 	bool_t ret = TRUE;
 	uint8 u8id;
