@@ -450,9 +450,8 @@ static void vSerialInit(uint32 u32Baud, tsUartOpt *pUartOpt) {
 	sSerStream.u8Device = UART_PORT;
 }
 
-// ToDo: ボタンに応答するレポート処理を追加する。
-// ToDo: 定期ヘルスチェックレポート(電源,通信)。
-// ToDo: 窓状態の変化を検出した時に音声アナウンス。
+// ToDo: 定期ヘルスチェック集計(窓状態,電源,通信)。
+// ToDo: メッセージプールによるヘルスチェック送信。
 /**
  * アプリケーション主要処理
  * - E_STATE_IDLE\n
