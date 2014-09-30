@@ -769,7 +769,7 @@ static void vInitLcdBuffer() {
 }
 
 static void vUpdateLcdById(uint8 id, uint8 chr) {
-	if (id < ADDRKEYA_MAX_HISTORY)
+	if (id <= ADDRKEYA_MAX_HISTORY)
 	{
 		uint8 row = (id > LCD_COLUMNS ? 1 : 0);
 		uint8 column = ((id - 1) % LCD_COLUMNS);
