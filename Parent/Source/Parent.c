@@ -123,7 +123,7 @@ uint8 su8MessagePoolData[TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE + 1];
 
 #define ADDRKEY_NO_DATA 0xFF
 #define AddrKey2Id(k) ((k)&0xFF)
-#define AddrKey2Status(k) (((k)>>8)&0xFF)
+#define AddrKey2Button(k) (((k)>>8)&0xFF)
 #define AddrKey2Batt(k) (((k)>>16)&0xFF)
 
 #ifdef USE_LCD
@@ -212,10 +212,16 @@ void cbToCoNet_vMain(void) {
  * @param u32arg
  */
 void cbToCoNet_vNwkEvent(teEvent eEvent, uint32 u32arg) {
+	uint8 idcount;
 	switch (eEvent) {
 	case E_EVENT_TOCONET_NWK_START:
 		// send this event to the local event machine.
 		ToCoNet_Event_Process(eEvent, u32arg, vProcessEvCore);
+		break;
+	case E_EVENT_TOCONET_NWK_MESSAGE_POOL_REQUEST:
+		// vRescanDoorStatus()で構築した共有情報（メッセージプール）の送信
+		idcount = vRescanDoorStatus();
+		ToCoNet_MsgPl_bSetMessage(0, 0, idcount * 3 +1, su8MessagePoolData);
 		break;
 	default:
 		break;
@@ -525,7 +531,8 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 
 			// vRescanDoorStatus()で構築した共有情報（メッセージプール）の送信
 			if (++u8Ct_s > PARENT_MSGPOOL_TX_DUR_s) {
-				ToCoNet_MsgPl_bSetMessage(0, 0, idcount, su8MessagePoolData);
+				// 最大3byte×16台+1(sentinel)=49bytes
+				ToCoNet_MsgPl_bSetMessage(0, 0, idcount * 3 +1, su8MessagePoolData);
 				u8Ct_s = 0;
 			}
 		} else {
@@ -1503,7 +1510,7 @@ static uint8 vRescanDoorStatus() {
 					if (sAddrKeyIndex[u8id - 1] == ADDRKEY_NO_DATA) {
 						sAddrKeyIndex[u8id - 1] = i;
 						S_OCTET(u8id);
-						S_OCTET(AddrKey2Status(u32key));
+						S_OCTET(AddrKey2Button(u32key));
 						S_OCTET(AddrKey2Batt(u32key));
 					} else {
 						ret = FALSE;
@@ -1528,7 +1535,7 @@ static uint8 vRescanDoorStatus() {
 		bit <<= 1;
 		u8id++;
 	}
-	S_OCTET(0);	// sentinel
+	S_OCTET(DOORCHECKER_MSGPOOL_SENTINEL);
 	if (!ret) {
 		idcount = 0;
 	}

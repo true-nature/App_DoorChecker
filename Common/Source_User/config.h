@@ -46,9 +46,8 @@ extern "C" {
 /* Specify which serial port to use when outputting debug information */
 #define UART_PORT			E_AHI_UART_0
 
-// ToDO: 親機シリアル番号に基づいたAPP_IDに変更する
 /* Specify the PAN ID and CHANNEL to be used by tags, readers and gateway */
-#define APP_ID              0x67726305
+#define APP_ID              0x8100B352
 #define APP_NAME            "App_DoorChecker"
 #define CHANNEL             15
 //#define CHMASK              ((1UL << CHANNEL) | (1UL << (CHANNEL+5)) | (1UL << (CHANNEL+10)))
@@ -59,6 +58,10 @@ extern "C" {
  * メッセージプールの送信周期
  */
 #define PARENT_MSGPOOL_TX_DUR_s 10
+/**
+ * メッセージプールで送る戸締り情報のsentinel
+ */
+#define DOORCHECKER_MSGPOOL_SENTINEL 0xFF
 
 /**
  * ブザーを鳴らす処理を無効化し定時送信する

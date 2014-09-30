@@ -540,10 +540,9 @@ void cbToCoNet_vNwkEvent(teEvent eEvent, uint32 u32arg) {
 			int i;
 			//static uint8 u8seq = 0;
 
-			uint8 *u8buff = su8MessagePoolData;
-			memcpy(u8buff, pInfo->au8Message, pInfo->u8MessageLen); // u8Message にデータ u8MessageLen にデータ長
-			u8buff[pInfo->u8MessageLen] = 0;
-			vUpdateLcdByMessageData(u8buff);
+			memcpy(su8MessagePoolData, pInfo->au8Message, pInfo->u8MessageLen); // u8Message にデータ u8MessageLen にデータ長
+			su8MessagePoolData[pInfo->u8MessageLen] = 0;
+			vUpdateLcdByMessageData(su8MessagePoolData);
 
 			// UART にメッセージ出力
 			if (pInfo->bGotData) { // empty なら FALSE になる
@@ -554,7 +553,7 @@ void cbToCoNet_vNwkEvent(teEvent eEvent, uint32 u32arg) {
 
 				SPRINTF_vRewind();
 				for (i = 0; i < pInfo->u8MessageLen; i++) {
-					vfPrintf(SPRINTF_Stream, "%02X", u8buff[i]);
+					vfPrintf(SPRINTF_Stream, "%02X", su8MessagePoolData[i]);
 				}
 				V_PRINTF("%s", SPRINTF_pu8GetBuff());
 
@@ -787,9 +786,10 @@ static bool_t vUpdateLcdByMessageData(uint8 *pMessageData) {
 	p = pMessageData;
 	tail = pMessageData + TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE;
 	u8id = G_OCTET();
-	while (u8id != 0 && p < tail) {
+	while (u8id != DOORCHECKER_MSGPOOL_SENTINEL && p < tail) {
 		uint8 u8btn = G_OCTET();
-		uint16 volt = DECODE_VOLT(G_OCTET());
+		uint8 u8batt = G_OCTET();
+		uint16 volt = DECODE_VOLT(u8batt);
 		uint8 chr = '-';
 		if ((u8btn & 1) == 0) {
 			// 窓開放は大文字表示
@@ -799,6 +799,7 @@ static bool_t vUpdateLcdByMessageData(uint8 *pMessageData) {
 			chr = u8id + '`';
 		}
 		vUpdateLcdById(u8id, chr);
+		u8id = G_OCTET();
 	}
 	ret &= bDraw2LinesLcd_AQM0802A((const char *)&sLcdBuffer[0][0], (const char *)&sLcdBuffer[1][0]);
 #if 0
