@@ -77,7 +77,7 @@
 #define PWM_IDX_COMM_ALERT 3
 
 #define LCD_COLUMNS 8	// AQM0802A
-#define VOLT_LOW 2300
+#define VOLT_LOW 2400
 
 #ifdef USE_LCD
 #define V_PRINTF_LCD(...) vfPrintf(&sLcdStream, __VA_ARGS__)
@@ -159,25 +159,25 @@ static void vBlinkLeds(teEvent eEvent)
 		u16dutyWarn = 0;
 		bBlinkPositive = TRUE;
 	}
-	// 電源警告(PWM1)
-	sTimerPWM[PWM_IDX_POWER_ALERT].u16duty = (sAppData.sDoorState.u32LowBattMap ? u16dutyWarn : 1024);
+	// 電源警告(PWM1) 正常時は常時点灯
+	sTimerPWM[PWM_IDX_POWER_ALERT].u16duty = (sAppData.sDoorState.u32LowBattMap ? 1024 - u16dutyWarn : 0);
 	vTimerConfig(&sTimerPWM[PWM_IDX_POWER_ALERT]);
 	vTimerStart(&sTimerPWM[PWM_IDX_POWER_ALERT]);
-	// 窓空き警告(PWM2)
-	sTimerPWM[PWM_IDX_DOOR_ALERT].u16duty = (sAppData.sDoorState.u32OpenedMap ? u16dutyWarn : 0);
+	// 窓空き警告(PWM2) 正常時は消灯
+	sTimerPWM[PWM_IDX_DOOR_ALERT].u16duty = (sAppData.sDoorState.u32OpenedMap ? u16dutyWarn : 1024);
 	vTimerConfig(&sTimerPWM[PWM_IDX_DOOR_ALERT]);
 	vTimerStart(&sTimerPWM[PWM_IDX_DOOR_ALERT]);
-	// 通信警告(PWM4)
-	sTimerPWM[PWM_IDX_COMM_ALERT].u16duty = (sAppData.sDoorState.u32CommErrMap ? u16dutyWarn : 0);
+	// 通信警告(PWM4) 正常時は消灯
+	sTimerPWM[PWM_IDX_COMM_ALERT].u16duty = (sAppData.sDoorState.u32CommErrMap ? u16dutyWarn : 1024);
 	vTimerConfig(&sTimerPWM[PWM_IDX_COMM_ALERT]);
 	vTimerStart(&sTimerPWM[PWM_IDX_COMM_ALERT]);
 
 	if (bBlinkPositive) {
-		u16dutyWarn++;
+		u16dutyWarn += 16;
 		bBlinkPositive = (u16dutyWarn < 1024);
 	} else {
-		u16dutyWarn--;
-		bBlinkPositive = !(u16dutyWarn > 0);
+		u16dutyWarn -= 16;
+		bBlinkPositive = !(u16dutyWarn >= 16);
 	}
 }
 
@@ -320,7 +320,7 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			if (u32evarg) {
 				V_PRINTF(LB"[E_STATE_APP_IO_WAIT_RX:GOTDATA:%d]", u32TickCount_ms & 0xFFFF);
 				vDisplayMessageData(su8MessagePoolData);
-				ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
+				ToCoNet_Event_SetState(pEv, E_STATE_APP_WAIT_DISPLAY);
 			} else {
 				ToCoNet_Event_SetState(pEv, E_STATE_APP_IO_RECV_ERROR);
 			}
@@ -346,6 +346,7 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			}
 		}
 		vBlinkLeds(eEvent);
+		// ToDo: DI2がHighである事もSleep条件に加える。
 		if (ToCoNet_Event_u32TickFrNewState(pEv) > DISPLAY_HOLD_TIME_ms) {
 			ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
 		}
@@ -365,7 +366,13 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			ToCoNet_Nwk_bPause(sAppData.pContextNwk);
 
 			SERIAL_vFlush(UART_PORT);
-			// ToDo: ATP3012スリープ、I2C停止、LCD電源供給停止。
+			// PWM切り離し
+			vAHI_TimerFineGrainDIOControl(0x7F);
+			vPortSetHi(sTimerPWM[PWM_IDX_POWER_ALERT].u8Device);
+			vPortSetHi(sTimerPWM[PWM_IDX_DOOR_ALERT].u8Device);
+			vPortSetHi(sTimerPWM[PWM_IDX_COMM_ALERT].u8Device);
+			// ToDo: ATP3012スリープ、I2C停止、DO3でLCD電源供給停止。
+
 			vSleep(0, FALSE, FALSE);
 #endif
 		}
@@ -884,17 +891,19 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 		uint8 u8batt = G_OCTET();
 		uint16 volt = DECODE_VOLT(u8batt);
 		uint8 chr = '-';
-		if ((u8btn & 1) == 0) {
-			// 窓開放は大文字表示
-			chr = u8id + '@';
-			sDoorState.u32OpenedMap |= (1<<u8id);
-		} else if (volt < VOLT_LOW) {
-			// 低電圧は小文字表示
+		if (u8batt == 0) {
+			// 0V(電圧確認できない)は子機通信エラーで小文字
+			sDoorState.u32CommErrMap |= (1<<u8id);
 			chr = u8id + '`';
-			if (u8batt == 0) {
-				// 0V(電圧確認できない)は子機通信エラー
-				sDoorState.u32CommErrMap |= (1<<u8id);
-			}else{
+		} else {
+			if ((u8btn & 1) == 0) {
+				// 窓開放は大文字表示
+				chr = u8id + '@';
+				sDoorState.u32OpenedMap |= (1<<u8id);
+			}
+			if (volt < VOLT_LOW) {
+				// 低電圧は小文字表示
+				chr = u8id + '`';
 				sDoorState.u32LowBattMap |= (1<<u8id);
 			}
 		}
@@ -904,7 +913,7 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 	// 結果をsAppDataへコピー。LED点滅はｖProcessEvCoreで行う。
 	memcpy(&sAppData.sDoorState, &sDoorState, sizeof(tsDoorStateData));
 #ifdef USE_I2C_LCD
-	ret &= bDraw2LinesLcd_AQM0802A((const char *)&sLcdBuffer[0][0], (const char *)&sLcdBuffer[1][0]);
+	ret &= bDraw2LinesLcd_AQM0802A((const char *)sLcdBuffer[0], (const char *)sLcdBuffer[1]);
 #endif
 	return ret;
 }
