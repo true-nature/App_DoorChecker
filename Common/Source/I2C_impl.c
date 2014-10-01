@@ -159,7 +159,7 @@ bool_t bInit2LinesLcd_AQM0802A() {
 	const uint8 u8addr = 0x3E;
 
 	// ディスプレーのクリア
-	const uint8 au8data[] = { 0x38, 0x39, 0x14, 0x70, 0x56, 0x6c, 0x00 };
+	const uint8 au8data[] = { 0x38, 0x39, 0x14, 0x77, 0x56, 0x6c, 0x00 };
 	pu8data = au8data;
 	while (*pu8data && bOk) {
 		bOk &= bSMBusWrite(u8addr, 0x00, 1, (uint8*) pu8data);
