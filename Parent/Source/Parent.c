@@ -35,9 +35,6 @@
 #include "common.h"
 #include "AddrKeyAry.h"
 
-#include "SMBus.h"
-#include "I2C_impl.h"
-
 /****************************************************************************/
 /***        ToCoNet Definitions                                           ***/
 /****************************************************************************/
@@ -90,7 +87,6 @@ void vProcessSerialCmd(tsSerCmd_Context *pCmd);
 
 void vLED_Toggle(void);
 static uint8 vRescanDoorStatus();
-static bool_t vUpdateLcdByMessageData(uint8 *pMessageData);
 
 #ifdef USE_LCD
 static void vLcdInit(void);
@@ -212,16 +208,17 @@ void cbToCoNet_vMain(void) {
  * @param u32arg
  */
 void cbToCoNet_vNwkEvent(teEvent eEvent, uint32 u32arg) {
-	uint8 idcount;
 	switch (eEvent) {
 	case E_EVENT_TOCONET_NWK_START:
 		// send this event to the local event machine.
 		ToCoNet_Event_Process(eEvent, u32arg, vProcessEvCore);
 		break;
 	case E_EVENT_TOCONET_NWK_MESSAGE_POOL_REQUEST:
-		// vRescanDoorStatus()で構築した共有情報（メッセージプール）の送信
-		idcount = vRescanDoorStatus();
-		ToCoNet_MsgPl_bSetMessage(0, 0, idcount * 3 +1, su8MessagePoolData);
+		{
+			// vRescanDoorStatus()で構築した共有情報（メッセージプール）の送信
+			uint8 msglen = vRescanDoorStatus();
+			ToCoNet_MsgPl_bSetMessage(0, 0, msglen, su8MessagePoolData);
+		}
 		break;
 	default:
 		break;
@@ -365,9 +362,6 @@ uint8 cbToCoNet_u8HwInt(uint32 u32DeviceId, uint32 u32ItemBitmap) {
 /***        Local Functions                                               ***/
 /****************************************************************************/
 
-// ToDo: 状態レポートのトリガーとなるボタンの割り込みを有効にする。
-// ToDo: LCDキャラクタモジュール ACM1602NI,AQM0802A を初期化する。
-// ToDo: 音声合成LSI ATP3011を初期化する。
 /**
  * ハードウェアの初期化
  * @param f_warm_start
@@ -417,8 +411,6 @@ static void vInitHardware(int f_warm_start) {
 	} else {
 		vSerialInit(u32baud, NULL);
 	}
-	// SMBUS
-	vSMBusInit();
 
 	ToCoNet_vDebugInit(&sSerStream);
 	ToCoNet_vDebugLevel(TOCONET_DEBUG_LEVEL);
@@ -429,9 +421,6 @@ static void vInitHardware(int f_warm_start) {
 
 	vPortSetHi( PORT_OUT2 );
 	vPortAsOutput( PORT_OUT2 );
-
-	// 状態表示トリガー
-	vPortAsInput(PORT_INPUT1);
 
 	// LCD の設定
 #ifdef USE_LCD
@@ -525,14 +514,13 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			// 定期クリーン（タイムアウトしたノードを削除する）
 			ADDRKEYA_bFind(&sEndDevList, 0, 0);
 
-			// 戸締り状態の表示
-			uint8 idcount = vRescanDoorStatus();
-			vUpdateLcdByMessageData(su8MessagePoolData);
+			// 戸締り状態をMessagePoolのペイロードとして用意
+			uint8 msglen = vRescanDoorStatus();
 
 			// vRescanDoorStatus()で構築した共有情報（メッセージプール）の送信
 			if (++u8Ct_s > PARENT_MSGPOOL_TX_DUR_s) {
 				// 最大3byte×16台+1(sentinel)=49bytes
-				ToCoNet_MsgPl_bSetMessage(0, 0, idcount * 3 +1, su8MessagePoolData);
+				ToCoNet_MsgPl_bSetMessage(0, 0, msglen, su8MessagePoolData);
 				u8Ct_s = 0;
 			}
 		} else {
@@ -1436,63 +1424,14 @@ void vLED_Toggle( void )
 	}
 }
 
-#define LCD_COLUMNS 8
-#define VOLT_LOW 2300
-uint8 sLcdBuffer[2][LCD_COLUMNS + 1];
-
-static void vInitLcdBuffer() {
-	memset(&sLcdBuffer[0][0], ' ', LCD_COLUMNS);
-	memset(&sLcdBuffer[1][0], ' ', LCD_COLUMNS);
-	sLcdBuffer[0][LCD_COLUMNS] = '\0';
-	sLcdBuffer[1][LCD_COLUMNS] = '\0';
-}
-
-static void vUpdateLcdById(uint8 id, uint8 chr) {
-	if (id < ADDRKEYA_MAX_HISTORY)
-	{
-		uint8 row = (id > LCD_COLUMNS ? 1 : 0);
-		uint8 column = ((id - 1) % LCD_COLUMNS);
-		sLcdBuffer[row][column] = chr;
-	}
-}
-
-static bool_t vUpdateLcdByMessageData(uint8 *pMessageData) {
-	bool_t ret = TRUE;
-	uint8 u8id;
-	uint8 *p;
-	uint8 *tail;
-
-	vInitLcdBuffer();
-	p = pMessageData;
-	tail = pMessageData + TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE;
-	u8id = G_OCTET();
-	while (u8id != 0 && p < tail) {
-		uint8 u8btn = G_OCTET();
-		uint16 volt = DECODE_VOLT(G_OCTET());
-		uint8 chr = '-';
-		if ((u8btn & 1) == 0) {
-			// 窓開放は大文字表示
-			chr = u8id + '@';
-		} else if (volt < VOLT_LOW) {
-			// 低電圧は小文字表示
-			chr = u8id + '`';
-		}
-		vUpdateLcdById(u8id, chr);
-	}
-	ret &= bDraw2LinesLcd_AQM0802A((const char *)&sLcdBuffer[0][0], (const char *)&sLcdBuffer[1][0]);
-#if 0
-	V_PRINTF(LB"[%s][%s] ret=%d", &sLcdBuffer[0][0], &sLcdBuffer[1][0], ret);
-#endif
-	return ret;
-}
 
 
 /**
- * 子機の発報情報データベース(sEndDevList)をスキャンしてMessagePool用データを再構築する
- * @return
+ * 子機の発報情報データベース(sEndDevList)をスキャンしてMessagePool用データを再構築する。
+ * @return Accumulated data length.
  */
 static uint8 vRescanDoorStatus() {
-	uint8 idcount = 0;
+	uint8 length = 0;
 	uint8 ret = TRUE;
 	uint32 bit = 1;
 	uint8 u8id = 1;
@@ -1500,7 +1439,6 @@ static uint8 vRescanDoorStatus() {
 	int i;
 
 	memset(sAddrKeyIndex, ADDRKEY_NO_DATA, ADDRKEYA_MAX_HISTORY);
-	vInitLcdBuffer();
 	while (bit != 0 && u8id <= ADDRKEYA_MAX_HISTORY)
 	{
 		if (sAppData.sFlash.sData.u32idmask & bit) {
@@ -1530,17 +1468,16 @@ static uint8 vRescanDoorStatus() {
 				S_OCTET(0);
 				S_OCTET(0);
 			}
-			idcount++;
 		}
 		bit <<= 1;
 		u8id++;
 	}
 	S_OCTET(DOORCHECKER_MSGPOOL_SENTINEL);
-	if (!ret) {
-		idcount = 0;
+	if (ret) {
+		length = q - su8MessagePoolData;
 	}
 
-	return idcount;
+	return length;
 }
 
 #ifdef USE_LCD
