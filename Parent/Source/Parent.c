@@ -107,10 +107,6 @@ tsSerCmd_Context sSerCmdOut; //!< シリアル出力用
 
 tsAdrKeyA_Context sEndDevList; // 子機の発報情報を保存するデータベース
 /**
- * 戸締り情報集計
- */
-uint8 sAddrKeyIndex[ADDRKEYA_MAX_HISTORY]; // 論理IDからデータベースへの索引
-/**
  * MessagePool送信用
  * 3bytes/子機 [id][DI bitmap][volt] vold==0なら子機音信不通
  * id==0または配列末尾で終端
@@ -452,8 +448,6 @@ static void vSerialInit(uint32 u32Baud, tsUartOpt *pUartOpt) {
 	sSerStream.u8Device = UART_PORT;
 }
 
-// ToDo: 定期ヘルスチェック集計(窓状態,電源,通信)。
-// ToDo: メッセージプールによるヘルスチェック送信。
 /**
  * アプリケーション主要処理
  * - E_STATE_IDLE\n
@@ -1436,34 +1430,35 @@ static uint8 vRescanDoorStatus() {
 	uint32 bit = 1;
 	uint8 u8id = 1;
 	uint8 *q = &su8MessagePoolData[0];	// message pool index
+	uint8 u8AddrKeyIndex[ADDRKEYA_MAX_HISTORY]; // 論理IDからデータベースへの索引
 	int i;
 
-	memset(sAddrKeyIndex, ADDRKEY_NO_DATA, ADDRKEYA_MAX_HISTORY);
+	memset(u8AddrKeyIndex, ADDRKEY_NO_DATA, ADDRKEYA_MAX_HISTORY);
 	while (bit != 0 && u8id <= ADDRKEYA_MAX_HISTORY)
 	{
 		if (sAppData.sFlash.sData.u32idmask & bit) {
 			for (i = 0; i < ADDRKEYA_MAX_HISTORY; i++) {
 				uint32 u32key = sEndDevList.au32ScanListKey[i];
 				if (AddrKey2Id(u32key) == u8id) {
-					if (sAddrKeyIndex[u8id - 1] == ADDRKEY_NO_DATA) {
-						sAddrKeyIndex[u8id - 1] = i;
+					if (u8AddrKeyIndex[u8id - 1] == ADDRKEY_NO_DATA) {
+						u8AddrKeyIndex[u8id - 1] = i;
 						S_OCTET(u8id);
 						S_OCTET(AddrKey2Button(u32key));
 						S_OCTET(AddrKey2Batt(u32key));
 					} else {
 						ret = FALSE;
-						if (sAddrKeyIndex[u8id - 1] < ADDRKEYA_MAX_HISTORY) {
-							A_PRINTF("*** DUPLICATED: ID=%d ADDR1=%08x ADDR2=%08x ***"LB, u8id, sEndDevList.au32ScanListAddr[sAddrKeyIndex[u8id - 1]], sEndDevList.au32ScanListAddr[i]);
+						if (u8AddrKeyIndex[u8id - 1] < ADDRKEYA_MAX_HISTORY) {
+							A_PRINTF("*** DUPLICATED: ID=%d ADDR1=%08x ADDR2=%08x ***"LB, u8id, sEndDevList.au32ScanListAddr[u8AddrKeyIndex[u8id - 1]], sEndDevList.au32ScanListAddr[i]);
 						} else {
 							A_PRINTF("*** DUPLICATED: ID=%d ADDR1=INVALID ADDR2=%08x ***"LB, u8id, sEndDevList.au32ScanListAddr[i]);
-							sAddrKeyIndex[u8id - 1] = i;
+							u8AddrKeyIndex[u8id - 1] = i;
 						}
 					}
 					break;
 				}
 			}
 			if (i == ADDRKEYA_MAX_HISTORY) {
-				// 非検出は小文字表示
+				// 非検出は電圧0
 				S_OCTET(u8id);
 				S_OCTET(0);
 				S_OCTET(0);

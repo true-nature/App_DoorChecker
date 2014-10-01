@@ -150,7 +150,9 @@ bool_t bDraw2LinesLcd_ACM1602(const char *puUpperRow,
 #endif
 
 #ifdef USE_I2C_AQM0802A
-static bool_t bInit2LinesLcd_AQM0802A() {
+static bool_t bInit_AQM0802A = FALSE;
+
+bool_t bInit2LinesLcd_AQM0802A() {
 	bool_t bOk = TRUE;
 	const uint8 *pu8data;
 	const uint32 u32delay = 2000;
@@ -165,8 +167,14 @@ static bool_t bInit2LinesLcd_AQM0802A() {
 
 		pu8data++;
 	}
+	vWait(400000);
 
+	bInit_AQM0802A = TRUE;
 	return bOk;
+}
+
+void bDeinit2LinesLcd_AQM0802A() {
+	bInit_AQM0802A = FALSE;
 }
 
 /** @ingroup MASTER
@@ -185,13 +193,10 @@ bool_t bDraw2LinesLcd_AQM0802A(const char *puUpperRow,
 	const uint32 u32delay = 2000;
 	const uint8 u8addr = 0x3E;
 
-	static bool_t bInit;
 
 	// ディスプレーのクリア
-	if (!bInit) {
+	if (!bInit_AQM0802A) {
 		bOk &= bInit2LinesLcd_AQM0802A();
-		vWait(400000);
-		bInit = TRUE;
 	}
 
 	const uint8 au8data2[] = { 0x38, 0x0c, 0x01, 0x06, 0x00 };

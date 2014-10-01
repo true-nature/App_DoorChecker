@@ -33,7 +33,11 @@
 #include "AddrKeyAry.h"
 
 #include "SMBus.h"
+
+#define USE_I2C_LCD
+#ifdef USE_I2C_LCD
 #include "I2C_impl.h"
+#endif
 
 // Serial options
 #include "serial.h"
@@ -67,6 +71,13 @@
 /****************************************************************************/
 /***        Macro Definitions                                             ***/
 /****************************************************************************/
+#define DISPLAY_HOLD_TIME_ms	5000	// 表示継続時間
+#define PWM_IDX_POWER_ALERT 0
+#define PWM_IDX_DOOR_ALERT 1
+#define PWM_IDX_COMM_ALERT 3
+
+#define LCD_COLUMNS 8	// AQM0802A
+#define VOLT_LOW 2300
 
 #ifdef USE_LCD
 #define V_PRINTF_LCD(...) vfPrintf(&sLcdStream, __VA_ARGS__)
@@ -100,7 +111,7 @@ static void vInitHardware(int f_warm_start);
 static void vSerialInit();
 void vSerInitMessage();
 void vProcessSerialCmd(tsSerCmd_Context *pCmd);
-static bool_t vUpdateLcdByMessageData(uint8 *pMessageData);
+static bool_t vDisplayMessageData(uint8 *pMessageData);
 
 #ifdef USE_LCD
 static void vLcdInit(void);
@@ -122,12 +133,15 @@ tsSerialPortSetup sSerPort;
 
 // Timer object
 tsTimerContext sTimerApp;
+tsTimerContext sTimerPWM[4]; //!< タイマー管理構造体(PWM)
 /**
  * MessagePool送信用
  * 3bytes/子機 [id][DI bitmap][volt] vold==0なら子機音信不通
  * id==0または配列末尾で終端
  */
 uint8 su8MessagePoolData[TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE + 1];
+
+uint8 sLcdBuffer[2][LCD_COLUMNS + 1];
 
 #ifdef USE_LCD
 static tsFILE sLcdStream, sLcdStreamBtm;
@@ -137,7 +151,37 @@ static tsFILE sLcdStream, sLcdStreamBtm;
 /***        FUNCTIONS                                                     ***/
 /****************************************************************************/
 
-// ToDo: ボタンに応答するレポート処理を追加する。
+static void vBlinkLeds(teEvent eEvent)
+{
+	static uint16 u16dutyWarn;
+	static bool_t bBlinkPositive;
+	if (eEvent == E_EVENT_NEW_STATE) {
+		u16dutyWarn = 0;
+		bBlinkPositive = TRUE;
+	}
+	// 電源警告(PWM1)
+	sTimerPWM[PWM_IDX_POWER_ALERT].u16duty = (sAppData.sDoorState.u32LowBattMap ? u16dutyWarn : 1024);
+	vTimerConfig(&sTimerPWM[PWM_IDX_POWER_ALERT]);
+	vTimerStart(&sTimerPWM[PWM_IDX_POWER_ALERT]);
+	// 窓空き警告(PWM2)
+	sTimerPWM[PWM_IDX_DOOR_ALERT].u16duty = (sAppData.sDoorState.u32OpenedMap ? u16dutyWarn : 0);
+	vTimerConfig(&sTimerPWM[PWM_IDX_DOOR_ALERT]);
+	vTimerStart(&sTimerPWM[PWM_IDX_DOOR_ALERT]);
+	// 通信警告(PWM4)
+	sTimerPWM[PWM_IDX_COMM_ALERT].u16duty = (sAppData.sDoorState.u32CommErrMap ? u16dutyWarn : 0);
+	vTimerConfig(&sTimerPWM[PWM_IDX_COMM_ALERT]);
+	vTimerStart(&sTimerPWM[PWM_IDX_COMM_ALERT]);
+
+	if (bBlinkPositive) {
+		u16dutyWarn++;
+		bBlinkPositive = (u16dutyWarn < 1024);
+	} else {
+		u16dutyWarn--;
+		bBlinkPositive = !(u16dutyWarn > 0);
+	}
+}
+
+// ToDo: MessagePool受信に応答するレポート処理を追加する。
 /****************************************************************************
  *
  * NAME: vProcessEvent
@@ -275,12 +319,14 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			// ToDo: 音声アナウンスが終わるまでスリープを保留。
 			if (u32evarg) {
 				V_PRINTF(LB"[E_STATE_APP_IO_WAIT_RX:GOTDATA:%d]", u32TickCount_ms & 0xFFFF);
+				vDisplayMessageData(su8MessagePoolData);
 				ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
 			} else {
 				ToCoNet_Event_SetState(pEv, E_STATE_APP_IO_RECV_ERROR);
 			}
 		} else {
 			// タイムアウト
+			// ToDo: LCD, LEDの表示変更。音声合成で状態通知。
 			if (ToCoNet_Event_u32TickFrNewState(pEv) > ENDD_TIMEOUT_WAIT_MSG_ms) {
 				V_PRINTF(LB"[E_STATE_APP_IO_WAIT_RX:TIMEOUT:%d]", u32TickCount_ms & 0xFFFF);
 				ToCoNet_Event_SetState(pEv, E_STATE_APP_IO_RECV_ERROR);
@@ -288,21 +334,29 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 		}
 		break;
 
-	/*
-	 * 送信完了の処理
-	 * - スリープ実行
-	 */
 	case E_STATE_APP_IO_RECV_ERROR:
-	case E_STATE_APP_SLEEP:
+	case E_STATE_APP_WAIT_DISPLAY:
 		if (eEvent == E_EVENT_NEW_STATE) {
-			if (pEv->eState == E_STATE_APP_SLEEP) {
-				V_PRINTF(LB"[E_STATE_APP_SLEEP_LED:%d]", u32TickCount_ms & 0xFFFF);
+			if (pEv->eState == E_STATE_APP_WAIT_DISPLAY) {
+				V_PRINTF(LB"[E_STATE_APP_WAIT_DISPLAY:%d]", u32TickCount_ms & 0xFFFF);
 				sAppData.eLedState = E_LED_RESULT;
 			} else {
 				V_PRINTF(LB"[E_STATE_APP_IO_RECV_ERROR:%d]", u32TickCount_ms & 0xFFFF);
 				sAppData.eLedState = E_LED_ERROR;
 			}
-
+		}
+		vBlinkLeds(eEvent);
+		if (ToCoNet_Event_u32TickFrNewState(pEv) > DISPLAY_HOLD_TIME_ms) {
+			ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
+		}
+		break;
+	/*
+	 * 送信完了の処理
+	 * - スリープ実行
+	 */
+	case E_STATE_APP_SLEEP:
+		if (eEvent == E_EVENT_NEW_STATE) {
+			V_PRINTF(LB"[E_STATE_APP_SLEEP:%d]", u32TickCount_ms & 0xFFFF);
 			vPortSetHi(PORT_KIT_LED1);
 			vPortSetHi(PORT_KIT_LED2);
 #ifdef NO_SLEEP
@@ -328,6 +382,7 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 		break;
 	}
 }
+
 
 /**
  * 設定処理用の状態マシン（未使用）
@@ -545,7 +600,6 @@ void cbToCoNet_vNwkEvent(teEvent eEvent, uint32 u32arg) {
 
 			memcpy(su8MessagePoolData, pInfo->au8Message, pInfo->u8MessageLen); // u8Message にデータ u8MessageLen にデータ長
 			su8MessagePoolData[pInfo->u8MessageLen] = 0;
-			vUpdateLcdByMessageData(su8MessagePoolData);
 
 			// UART にメッセージ出力
 			if (pInfo->bGotData) { // empty なら FALSE になる
@@ -690,6 +744,7 @@ static void vInitHardware(int f_warm_start) {
 		sAppData.bConfigMode = TRUE;
 	}
 
+	// ToDo: Tick Timerが猛烈に遅いようだけど問題無いか？
 	// activate tick timers
 	memset(&sTimerApp, 0, sizeof(sTimerApp));
 	sTimerApp.u8Device = E_AHI_DEVICE_TIMER0;
@@ -698,9 +753,40 @@ static void vInitHardware(int f_warm_start) {
 	vTimerConfig(&sTimerApp);
 	vTimerStart(&sTimerApp);
 
+# ifdef JN516x
+	{
+		vAHI_TimerFineGrainDIOControl(0x7); // bit 0,1,2 をセット (TIMER0 の各ピンを解放する, PWM1..4 は使用する)
+
+		// PWM
+		const uint8 au8TimTbl[] = {
+			E_AHI_DEVICE_TIMER1,
+			E_AHI_DEVICE_TIMER2,
+			E_AHI_DEVICE_TIMER3,
+			E_AHI_DEVICE_TIMER4
+		};
+		int i;
+		for (i = 0; i < 4; i++) {
+			memset(&sTimerPWM[i], 0, sizeof(tsTimerContext));
+			sTimerPWM[i].u16Hz = 1000;
+			sTimerPWM[i].u8PreScale = 0;
+			sTimerPWM[i].u16duty = 1024; // 1024=Hi, 0:Lo
+			sTimerPWM[i].bPWMout = TRUE;
+			sTimerPWM[i].bDisableInt = TRUE; // 割り込みを禁止する指定
+			sTimerPWM[i].u8Device = au8TimTbl[i];
+		}
+		vAHI_TimerSetLocation(E_AHI_TIMER_1, TRUE, TRUE); // IOの割り当てを設定
+		for (i = 0; i < 4; i++) {
+			vTimerConfig(&sTimerPWM[i]);
+			vTimerStart(&sTimerPWM[i]);
+		}
+	}
+# endif
+
 	// SMBUS
 	vSMBusInit();
-	bDraw2LinesLcd_AQM0802A(NULL, NULL);
+#ifdef USE_I2C_LCD
+	bInit2LinesLcd_AQM0802A();
+#endif
 }
 
 /****************************************************************************
@@ -760,10 +846,6 @@ void vProcessSerialCmd(tsSerCmd_Context *pCmd) {
 	return;
 }
 
-#define LCD_COLUMNS 8
-#define VOLT_LOW 2300
-uint8 sLcdBuffer[2][LCD_COLUMNS + 1];
-
 static void vInitLcdBuffer() {
 	memset(&sLcdBuffer[0][0], ' ', LCD_COLUMNS);
 	memset(&sLcdBuffer[1][0], ' ', LCD_COLUMNS);
@@ -771,7 +853,7 @@ static void vInitLcdBuffer() {
 	sLcdBuffer[1][LCD_COLUMNS] = '\0';
 }
 
-static void vUpdateLcdById(uint8 id, uint8 chr) {
+static void vUpdateLcdBufferById(uint8 id, uint8 chr) {
 	if (id <= ADDRKEYA_MAX_HISTORY)
 	{
 		uint8 row = (id > LCD_COLUMNS ? 1 : 0);
@@ -781,16 +863,18 @@ static void vUpdateLcdById(uint8 id, uint8 chr) {
 }
 
 /**
- * LCDに戸締り状態、電源または通信の問題を表示。
+ * LCD,LEDに戸締り状態、電源または通信の問題を表示。
  * @param pMessageData
  * @return
  */
-static bool_t vUpdateLcdByMessageData(uint8 *pMessageData) {
+static bool_t vDisplayMessageData(uint8 *pMessageData) {
 	bool_t ret = TRUE;
 	uint8 u8id;
 	uint8 *p;
 	uint8 *tail;
+	tsDoorStateData sDoorState;
 
+	memset(&sDoorState, 0, sizeof(tsDoorStateData));
 	vInitLcdBuffer();
 	p = pMessageData;
 	tail = pMessageData + TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE;
@@ -803,16 +887,24 @@ static bool_t vUpdateLcdByMessageData(uint8 *pMessageData) {
 		if ((u8btn & 1) == 0) {
 			// 窓開放は大文字表示
 			chr = u8id + '@';
+			sDoorState.u32OpenedMap |= (1<<u8id);
 		} else if (volt < VOLT_LOW) {
 			// 低電圧は小文字表示
 			chr = u8id + '`';
+			if (u8batt == 0) {
+				// 0V(電圧確認できない)は子機通信エラー
+				sDoorState.u32CommErrMap |= (1<<u8id);
+			}else{
+				sDoorState.u32LowBattMap |= (1<<u8id);
+			}
 		}
-		vUpdateLcdById(u8id, chr);
+		vUpdateLcdBufferById(u8id, chr);
 		u8id = G_OCTET();
 	}
+	// 結果をsAppDataへコピー。LED点滅はｖProcessEvCoreで行う。
+	memcpy(&sAppData.sDoorState, &sDoorState, sizeof(tsDoorStateData));
+#ifdef USE_I2C_LCD
 	ret &= bDraw2LinesLcd_AQM0802A((const char *)&sLcdBuffer[0][0], (const char *)&sLcdBuffer[1][0]);
-#if 0
-	V_PRINTF(LB"[%s][%s] ret=%d", &sLcdBuffer[0][0], &sLcdBuffer[1][0], ret);
 #endif
 	return ret;
 }

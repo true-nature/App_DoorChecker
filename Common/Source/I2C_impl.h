@@ -38,6 +38,8 @@ bool_t bDraw2LinesLcd_ACM1602(const char *puUpperRow,
 		const char *puLowerRow);
 #endif
 #ifdef USE_I2C_AQM0802A
+bool_t bInit2LinesLcd_AQM0802A();
+void bDeinit2LinesLcd_AQM0802A();
 bool_t bDraw2LinesLcd_AQM0802A(const char *puUpperRow,
 		const char *puLowerRow);
 #endif

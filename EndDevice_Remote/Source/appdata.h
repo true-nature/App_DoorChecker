@@ -23,6 +23,12 @@ typedef enum {
 	E_LED_RESULT//!< E_LED_RESULT
 } teLedState;
 
+typedef struct {
+	uint32 u32OpenedMap;  //!< 解放窓ビットマップ
+	uint32 u32LowBattMap; //!< 低電圧ビットマップ
+	uint32 u32CommErrMap; //!< 通信エラービットマップ
+} tsDoorStateData;
+
 /**
  * アプリケーション基本データ構造体
  */
@@ -44,6 +50,7 @@ typedef struct {
 
 	// state
 	teLedState eLedState; //!< LED表示状態
+	tsDoorStateData sDoorState;
 } tsAppData_Re;
 extern tsAppData_Re sAppData_Re;
 
