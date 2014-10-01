@@ -162,6 +162,7 @@ void cbAppColdStart(bool_t bAfterAhiInit) {
 		sToCoNet_AppContext.bRxOnIdle = TRUE;
 		sToCoNet_AppContext.u8TxMacRetry = 1;
 
+		// ToDo: M2を押しながら起動したら子機再登録モード。
 		// Register
 		ToCoNet_Event_Register_State_Machine(vProcessEvCore);
 
