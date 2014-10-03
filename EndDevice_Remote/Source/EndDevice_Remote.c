@@ -71,10 +71,11 @@
 /****************************************************************************/
 /***        Macro Definitions                                             ***/
 /****************************************************************************/
-#define DISPLAY_HOLD_TIME_ms	5000	// 表示継続時間
 #define PWM_IDX_POWER_ALERT 0
 #define PWM_IDX_DOOR_ALERT 1
 #define PWM_IDX_COMM_ALERT 3
+
+
 
 #define LCD_COLUMNS 8	// AQM0802A
 #define VOLT_LOW 2400
@@ -181,7 +182,6 @@ static void vBlinkLeds(teEvent eEvent)
 	}
 }
 
-// ToDo: MessagePool受信に応答するレポート処理を追加する。
 /****************************************************************************
  *
  * NAME: vProcessEvent
@@ -316,7 +316,6 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 		} if (eEvent == E_EVENT_APP_GET_IC_INFO) {
 			// メッセージが届いた
 			// ToDo: LCD, LEDの表示変更。音声合成で状態通知。
-			// ToDo: 音声アナウンスが終わるまでスリープを保留。
 			if (u32evarg) {
 				V_PRINTF(LB"[E_STATE_APP_IO_WAIT_RX:GOTDATA:%d]", u32TickCount_ms & 0xFFFF);
 				vDisplayMessageData(su8MessagePoolData);
@@ -346,8 +345,8 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			}
 		}
 		vBlinkLeds(eEvent);
-		// ToDo: DI2がHighである事もSleep条件に加える。
-		if (ToCoNet_Event_u32TickFrNewState(pEv) > DISPLAY_HOLD_TIME_ms) {
+		// 一定時間が過ぎて音声再生中でなければスリープ
+		if (ToCoNet_Event_u32TickFrNewState(pEv) > ENDD_LED_DISP_DUR_ms && !bPortRead(DIO_ATP_PLAY)) {
 			ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
 		}
 		break;
@@ -371,7 +370,10 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			vPortSetHi(sTimerPWM[PWM_IDX_POWER_ALERT].u8Device);
 			vPortSetHi(sTimerPWM[PWM_IDX_DOOR_ALERT].u8Device);
 			vPortSetHi(sTimerPWM[PWM_IDX_COMM_ALERT].u8Device);
-			// ToDo: ATP3012スリープ、I2C停止、DO3でLCD電源供給停止。
+
+			// 表示デバイス用電源を停止
+			vPortDisablePullup(DIO_DISP_POWER);
+			vPortSetLo(DIO_DISP_POWER);
 
 			vSleep(0, FALSE, FALSE);
 #endif
@@ -746,6 +748,11 @@ static void vInitHardware(int f_warm_start) {
 	vPortSetHi(PORT_KIT_LED2);
 	vPortSetHi(PORT_KIT_LED3);
 	vPortSetHi(PORT_KIT_LED4);
+
+	// 表示デバイス用電源を投入
+	vPortAsOutput(DIO_DISP_POWER);
+	vPortSetHi(DIO_DISP_POWER);
+	vPortDisablePullup(DIO_DISP_POWER);
 
 	if (!f_warm_start && bPortRead(PORT_CONF2)) {
 		sAppData.bConfigMode = TRUE;

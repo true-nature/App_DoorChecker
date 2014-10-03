@@ -64,10 +64,6 @@ extern "C" {
 #define DOORCHECKER_MSGPOOL_SENTINEL 0xFF
 
 /**
- * ブザーを鳴らす処理を無効化し定時送信する
- */
-#undef DISABLE_DOOR_ALARM
-/**
  * 子機論理IDを検索キーとして使用
  */
 #define USE_LID_AS_SEARCH_KEY
