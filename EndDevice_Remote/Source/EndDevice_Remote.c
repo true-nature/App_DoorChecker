@@ -113,6 +113,7 @@ static void vSerialInit();
 void vSerInitMessage();
 void vProcessSerialCmd(tsSerCmd_Context *pCmd);
 static bool_t vDisplayMessageData(uint8 *pMessageData);
+static bool_t bSpeakStatusData();
 
 #ifdef USE_LCD
 static void vLcdInit(void);
@@ -141,6 +142,10 @@ tsTimerContext sTimerPWM[4]; //!< タイマー管理構造体(PWM)
  * id==0または配列末尾で終端
  */
 uint8 su8MessagePoolData[TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE + 1];
+/**
+ * MessagePool受信に失敗した場合に使用するダミーデータ
+ */
+const uint8 su8MessageIfReceiveFailed[] = {0x00, 0x00, 0x00, 0xFF, 0xFF};
 
 uint8 sLcdBuffer[2][LCD_COLUMNS + 1];
 
@@ -315,17 +320,14 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			V_PRINTF(LB"[E_STATE_APP_IO_WAIT_RX:%d]", u32TickCount_ms & 0xFFFF);
 		} if (eEvent == E_EVENT_APP_GET_IC_INFO) {
 			// メッセージが届いた
-			// ToDo: LCD, LEDの表示変更。音声合成で状態通知。
 			if (u32evarg) {
 				V_PRINTF(LB"[E_STATE_APP_IO_WAIT_RX:GOTDATA:%d]", u32TickCount_ms & 0xFFFF);
-				vDisplayMessageData(su8MessagePoolData);
 				ToCoNet_Event_SetState(pEv, E_STATE_APP_WAIT_DISPLAY);
 			} else {
 				ToCoNet_Event_SetState(pEv, E_STATE_APP_IO_RECV_ERROR);
 			}
 		} else {
 			// タイムアウト
-			// ToDo: LCD, LEDの表示変更。音声合成で状態通知。
 			if (ToCoNet_Event_u32TickFrNewState(pEv) > ENDD_TIMEOUT_WAIT_MSG_ms) {
 				V_PRINTF(LB"[E_STATE_APP_IO_WAIT_RX:TIMEOUT:%d]", u32TickCount_ms & 0xFFFF);
 				ToCoNet_Event_SetState(pEv, E_STATE_APP_IO_RECV_ERROR);
@@ -342,8 +344,14 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			} else {
 				V_PRINTF(LB"[E_STATE_APP_IO_RECV_ERROR:%d]", u32TickCount_ms & 0xFFFF);
 				sAppData.eLedState = E_LED_ERROR;
+				memccpy(su8MessagePoolData, su8MessageIfReceiveFailed, 0, sizeof(su8MessageIfReceiveFailed));
 			}
+			// LCDの表示変更。
+			vDisplayMessageData(su8MessagePoolData);
+			// 音声合成で状態通知。
+			bSpeakStatusData();
 		}
+		// 状態に応じてLED点滅
 		vBlinkLeds(eEvent);
 		// 一定時間が過ぎて音声再生中でなければスリープ
 		if (ToCoNet_Event_u32TickFrNewState(pEv) > ENDD_LED_DISP_DUR_ms && !bPortRead(DIO_ATP_PLAY)) {
@@ -750,6 +758,7 @@ static void vInitHardware(int f_warm_start) {
 	vPortSetHi(PORT_KIT_LED4);
 
 	// 表示デバイス用電源を投入
+	// 状態報告はMessagePool受信後なので起動待ちは不要
 	vPortAsOutput(DIO_DISP_POWER);
 	vPortSetHi(DIO_DISP_POWER);
 	vPortDisablePullup(DIO_DISP_POWER);
@@ -877,7 +886,8 @@ static void vUpdateLcdBufferById(uint8 id, uint8 chr) {
 }
 
 /**
- * LCD,LEDに戸締り状態、電源または通信の問題を表示。
+ * MessagePoolを戸締り状態の構造体にコピー。
+ * LCDに戸締り状態、電源または通信の問題を表示。
  * @param pMessageData
  * @return
  */
@@ -922,6 +932,16 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 #ifdef USE_I2C_LCD
 	ret &= bDraw2LinesLcd_AQM0802A((const char *)sLcdBuffer[0], (const char *)sLcdBuffer[1]);
 #endif
+	return ret;
+}
+
+/**
+ * ToDo: 状態を音声で報告
+ * @return
+ */
+static bool_t bSpeakStatusData()
+{
+	bool_t ret = TRUE;
 	return ret;
 }
 
