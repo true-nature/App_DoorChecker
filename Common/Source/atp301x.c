@@ -102,7 +102,6 @@ bool_t bAtpPrepareMessage(tsDoorStateData *pDoorState, uint8 *msg1, uint8 *msg2)
 	}
 	uint8 au8LidList[33];
 
-	V_PRINTF(LB"[bAtpPrepareMessage] COMM %08X DOOR %08X BATT %08X", pDoorState->u32CommErrMap, pDoorState->u32OpenedMap, pDoorState->u32LowBattMap);
 	// 親機不通では話にならない
 	if (pDoorState->u32CommErrMap & 1) {
 		strcpy((char*)msg1, su8AtpMsg_Pre_Comm);

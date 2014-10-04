@@ -932,12 +932,6 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 	uint8 *tail;
 	tsDoorStateData sDoorState;
 
-	V_PRINTF(LB"[vDisplayMessageData] ");
-	int i;
-	for (i = 0; i < 64; i++) {
-		V_PRINTF("%02X", pMessageData[i]);
-		if (pMessageData[i] == DOORCHECKER_MSGPOOL_SENTINEL) break;
-	}
 	memset(&sDoorState, 0, sizeof(tsDoorStateData));
 	vInitLcdBuffer();
 	p = pMessageData;
