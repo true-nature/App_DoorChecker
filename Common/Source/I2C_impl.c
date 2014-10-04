@@ -39,7 +39,7 @@
 #include <fprintf.h>
 #include <sprintf.h>
 
-#include "sercmd_gen.h"
+//#include "sercmd_gen.h"
 
 /****************************************************************************/
 /***        実験的な実装定義                                              ***/

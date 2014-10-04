@@ -39,6 +39,11 @@
 #include "I2C_impl.h"
 #endif
 
+#define USE_ATP301x
+#ifdef USE_ATP301x
+#include "atp301x.h"
+#endif
+
 // Serial options
 #include "serial.h"
 #include "fprintf.h"
@@ -113,7 +118,6 @@ static void vSerialInit();
 void vSerInitMessage();
 void vProcessSerialCmd(tsSerCmd_Context *pCmd);
 static bool_t vDisplayMessageData(uint8 *pMessageData);
-static bool_t bSpeakStatusData();
 
 #ifdef USE_LCD
 static void vLcdInit(void);
@@ -148,6 +152,9 @@ uint8 su8MessagePoolData[TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE + 1];
 const uint8 su8MessageIfReceiveFailed[] = {0x00, 0x00, 0x00, 0xFF, 0xFF};
 
 uint8 sLcdBuffer[2][LCD_COLUMNS + 1];
+
+// ATP3011に送るメッセージ
+static uint8 su8AtpMessage[2][128];
 
 #ifdef USE_LCD
 static tsFILE sLcdStream, sLcdStreamBtm;
@@ -199,6 +206,7 @@ static void vBlinkLeds(teEvent eEvent)
  ****************************************************************************/
 //
 static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
+	static uint32 u32LastBusyInq;
 	switch (pEv->eState) {
 
 	/*
@@ -219,6 +227,8 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 				bool_t bRes = bRegAesKey(sAppData.sFlash.sData.u32EncKey);
 				V_PRINTF(LB "*** Register AES key (%d) ***", bRes);
 			}
+			// MessagePoolを通信前状態に初期化
+			memccpy(su8MessagePoolData, su8MessageIfReceiveFailed, 0, sizeof(su8MessageIfReceiveFailed));
 #ifdef USE_LCD
 			vLcdInit(); // register sLcd
 
@@ -272,7 +282,8 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			ToCoNet_Event_SetState(pEv, E_STATE_RUNNING);
 		}
 		if (ToCoNet_Event_u32TickFrNewState(pEv) > 500) {
-			ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
+			// 開始タイムアウト
+			ToCoNet_Event_SetState(pEv, E_STATE_APP_IO_RECV_ERROR);
 		}
 		break;
 
@@ -337,25 +348,49 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 
 	case E_STATE_APP_IO_RECV_ERROR:
 	case E_STATE_APP_WAIT_DISPLAY:
-		if (eEvent == E_EVENT_NEW_STATE) {
+		if (eEvent == E_EVENT_NEW_STATE || eEvent == E_EVENT_TOCONET_NWK_DISCONNECT) {
 			if (pEv->eState == E_STATE_APP_WAIT_DISPLAY) {
 				V_PRINTF(LB"[E_STATE_APP_WAIT_DISPLAY:%d]", u32TickCount_ms & 0xFFFF);
 				sAppData.eLedState = E_LED_RESULT;
 			} else {
 				V_PRINTF(LB"[E_STATE_APP_IO_RECV_ERROR:%d]", u32TickCount_ms & 0xFFFF);
 				sAppData.eLedState = E_LED_ERROR;
-				memccpy(su8MessagePoolData, su8MessageIfReceiveFailed, 0, sizeof(su8MessageIfReceiveFailed));
 			}
 			// LCDの表示変更。
 			vDisplayMessageData(su8MessagePoolData);
 			// 音声合成で状態通知。
-			bSpeakStatusData();
+			bAtpPrepareMessage(&sAppData.sDoorState, su8AtpMessage[0], su8AtpMessage[1]);
+			// ToDo: 電源ONから80ms以上経過している必要がある。
+			bAtpSpeak(su8AtpMessage[0]);
 		}
 		// 状態に応じてLED点滅
 		vBlinkLeds(eEvent);
 		// 一定時間が過ぎて音声再生中でなければスリープ
-		if (ToCoNet_Event_u32TickFrNewState(pEv) > ENDD_LED_DISP_DUR_ms && !bPortRead(DIO_ATP_PLAY)) {
-			ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
+		if (ToCoNet_Event_u32TickFrNewState(pEv) > ENDD_LED_ERROR_DUR_ms && (u32TickCount_ms - u32LastBusyInq) >= 128) {
+			u32LastBusyInq = u32TickCount_ms;
+			if (!bIsAtpBusy()) {
+				ToCoNet_Event_SetState(pEv, E_STATE_APP_WAIT_SPEAK);
+			}
+		}
+		break;
+	case E_STATE_APP_WAIT_SPEAK:
+		if (eEvent == E_EVENT_NEW_STATE) {
+			V_PRINTF(LB"[E_STATE_APP_WAIT_SPEAK:%d]", u32TickCount_ms & 0xFFFF);
+			if (su8AtpMessage[1][0] == 0) {
+				ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
+			} else {
+				bAtpSpeak(su8AtpMessage[1]);
+			}
+		}
+		if (eEvent == E_EVENT_TICK_TIMER) {
+			// 状態に応じてLED点滅
+			vBlinkLeds(eEvent);
+			if (ToCoNet_Event_u32TickFrNewState(pEv) > ENDD_LED_ERROR_DUR_ms && (u32TickCount_ms - u32LastBusyInq) >= 128) {
+				u32LastBusyInq = u32TickCount_ms;
+				if (!bIsAtpBusy()) {
+					ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
+				}
+			}
 		}
 		break;
 	/*
@@ -750,15 +785,14 @@ static void vInitHardware(int f_warm_start) {
 	// LED's
 	vPortAsOutput(PORT_KIT_LED1);
 	vPortAsOutput(PORT_KIT_LED2);
-	vPortAsOutput(PORT_KIT_LED3);
-	vPortAsOutput(PORT_KIT_LED4);
+//	vPortAsOutput(PORT_KIT_LED3);
+//	vPortAsOutput(PORT_KIT_LED4);
 	vPortSetHi(PORT_KIT_LED1);
 	vPortSetHi(PORT_KIT_LED2);
-	vPortSetHi(PORT_KIT_LED3);
-	vPortSetHi(PORT_KIT_LED4);
+//	vPortSetHi(PORT_KIT_LED3);
+//	vPortSetHi(PORT_KIT_LED4);
 
 	// 表示デバイス用電源を投入
-	// 状態報告はMessagePool受信後なので起動待ちは不要
 	vPortAsOutput(DIO_DISP_POWER);
 	vPortSetHi(DIO_DISP_POWER);
 	vPortDisablePullup(DIO_DISP_POWER);
@@ -918,7 +952,7 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 				chr = u8id + '@';
 				sDoorState.u32OpenedMap |= (1<<u8id);
 			}
-			if (volt < VOLT_LOW) {
+			else if (volt < VOLT_LOW) {
 				// 低電圧は小文字表示
 				chr = u8id + '`';
 				sDoorState.u32LowBattMap |= (1<<u8id);
@@ -935,15 +969,6 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 	return ret;
 }
 
-/**
- * ToDo: 状態を音声で報告
- * @return
- */
-static bool_t bSpeakStatusData()
-{
-	bool_t ret = TRUE;
-	return ret;
-}
 
 #ifdef USE_LCD
 /**

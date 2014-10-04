@@ -24,9 +24,9 @@ typedef enum {
 } teLedState;
 
 typedef struct {
-	uint32 u32OpenedMap;  //!< 解放窓ビットマップ
-	uint32 u32LowBattMap; //!< 低電圧ビットマップ
-	uint32 u32CommErrMap; //!< 通信エラービットマップ
+	uint32 u32OpenedMap;  //!< 解放窓ビットマップ b0:不使用, b1...b16:センサー子機 1ならば窓開放
+	uint32 u32LowBattMap; //!< 低電圧ビットマップ b0:リモート子機, b1...b16:センサー子機 1ならば低電圧
+	uint32 u32CommErrMap; //!< 通信エラービットマップ b0:親機, b1...b16:センサー子機 1ならば無応答
 } tsDoorStateData;
 
 /**
