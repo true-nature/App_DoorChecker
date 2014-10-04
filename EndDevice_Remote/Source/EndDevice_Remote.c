@@ -228,7 +228,7 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 				V_PRINTF(LB "*** Register AES key (%d) ***", bRes);
 			}
 			// MessagePoolを通信前状態に初期化
-			memccpy(su8MessagePoolData, su8MessageIfReceiveFailed, 0, sizeof(su8MessageIfReceiveFailed));
+			memcpy(su8MessagePoolData, su8MessageIfReceiveFailed, sizeof(su8MessageIfReceiveFailed));
 #ifdef USE_LCD
 			vLcdInit(); // register sLcd
 
@@ -932,6 +932,12 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 	uint8 *tail;
 	tsDoorStateData sDoorState;
 
+	V_PRINTF(LB"[vDisplayMessageData] ");
+	int i;
+	for (i = 0; i < 64; i++) {
+		V_PRINTF("%02X", pMessageData[i]);
+		if (pMessageData[i] == DOORCHECKER_MSGPOOL_SENTINEL) break;
+	}
 	memset(&sDoorState, 0, sizeof(tsDoorStateData));
 	vInitLcdBuffer();
 	p = pMessageData;

@@ -40,7 +40,7 @@ const char su8AtpMsg_Pre_Comm[] = "tsu-shinne'ra-de_su.\r";
 const char su8AtpMsg_Post_Comm[] = "/no/o-to-ga/arimase'nn.\r";
 
 // アクセスポイント
-const char su8AtpMsg_Name_Accesspoint[] = "a_kuse_supo'innto.";
+const char su8AtpMsg_Name_Accesspoint[] = "a_kuse_supo'innto";
 // この端末
 const char su8AtpMsg_Name_Remote[] = "kono/tannmatsu";
 
@@ -102,6 +102,7 @@ bool_t bAtpPrepareMessage(tsDoorStateData *pDoorState, uint8 *msg1, uint8 *msg2)
 	}
 	uint8 au8LidList[33];
 
+	V_PRINTF(LB"[bAtpPrepareMessage] COMM %08X DOOR %08X BATT %08X", pDoorState->u32CommErrMap, pDoorState->u32OpenedMap, pDoorState->u32LowBattMap);
 	// 親機不通では話にならない
 	if (pDoorState->u32CommErrMap & 1) {
 		strcpy((char*)msg1, su8AtpMsg_Pre_Comm);
