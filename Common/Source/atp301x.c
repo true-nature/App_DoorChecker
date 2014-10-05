@@ -25,7 +25,7 @@ extern tsFILE sSerStream;
 static const uint8 u8addr = 0x2E;
 
 // 戸締りオーケーです。
-const char su8AtpMsg_Ok[] = "toji'mari o'-ke-de_su.\r";
+const char su8AtpMsg_Ok[] = "toji'mari;o'-ke-de_su.\r";
 // 戸締りを確認してください。
 const char su8AtpMsg_Pre_Door[] = "toji'mario/kakuninn_shitekudasa'i.\r";
 // の窓があいています。
@@ -35,12 +35,12 @@ const char su8AtpMsg_Pre_Batt[] = "dennatsu/ga/teika_shiteima'_su.\r";
 // の電池を交換してください。
 const char su8AtpMsg_Post_Batt[] = "/no/de'nnchio/ko-kann_shitekudasa'i.\r";
 // 通信エラーです。
-const char su8AtpMsg_Pre_Comm[] = "tsu-shinne'ra-de_su.\r";
-// の応答がありません。
-const char su8AtpMsg_Post_Comm[] = "/no/o-to-ga/arimase'nn.\r";
+const char su8AtpMsg_Pre_Comm[] = "tsu-shinn;e'ra-de_su.\r";
+// の窓からの応答がありません。
+const char su8AtpMsg_Post_Comm[] = "/no/ma'dokarano/o-to-ga/arimase'nn.\r";
 
-// アクセスポイント
-const char su8AtpMsg_Name_Accesspoint[] = "a_kuse_supo'innto";
+// アクセスポイントの応答がありません。
+const char su8AtpMsg_Accesspoint[] = "a_kuse_supo'inntono/o-to-ga/arimase'nn.\r";
 // この端末
 const char su8AtpMsg_Name_Remote[] = "kono/tannmatsu";
 
@@ -49,7 +49,6 @@ bool_t bAtpSpeak(uint8 *command)
 	if (command == NULL) {
 		return FALSE;
 	}
-	V_PRINTF(LB"bSpeakAtp(%s)", command);
 	bool_t bOk = TRUE;
 	uint16 len = strlen((const char*)command);
 	bOk &= bSMBusWrite(u8addr, command[0], len - 1, command + 1);
@@ -105,7 +104,7 @@ bool_t bAtpPrepareMessage(tsDoorStateData *pDoorState, uint8 *msg1, uint8 *msg2)
 	// 親機不通では話にならない
 	if (pDoorState->u32CommErrMap & 1) {
 		strcpy((char*)msg1, su8AtpMsg_Pre_Comm);
-		sprintf((char*)msg2, "%s%s", su8AtpMsg_Name_Accesspoint, su8AtpMsg_Post_Comm);
+		strcpy((char*)msg2, su8AtpMsg_Accesspoint);
 	} else {
 		// 以降、即時解決できる問題を優先して報告
 		// 開放された窓は閉めなくてはならない
