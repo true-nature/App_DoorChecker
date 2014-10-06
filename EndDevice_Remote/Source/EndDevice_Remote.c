@@ -154,7 +154,8 @@ const uint8 su8MessageIfReceiveFailed[] = {0x00, 0x00, 0x00, 0xFF, 0xFF};
 uint8 sLcdBuffer[2][LCD_COLUMNS + 1];
 
 // ATP3011に送るメッセージ
-static uint8 su8AtpMessage[2][128];
+static uint8 *pAtpMessages[3];
+static uint8 su8AtpMsg[2][128];
 
 #ifdef USE_LCD
 static tsFILE sLcdStream, sLcdStreamBtm;
@@ -206,6 +207,7 @@ static void vBlinkLeds(teEvent eEvent)
  ****************************************************************************/
 //
 static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
+	static uint8 u8SpeakPtr;
 	static uint32 u32LastBusyInq;
 	switch (pEv->eState) {
 
@@ -348,47 +350,40 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 
 	case E_STATE_APP_IO_RECV_ERROR:
 	case E_STATE_APP_WAIT_DISPLAY:
-		if (eEvent == E_EVENT_NEW_STATE || eEvent == E_EVENT_TOCONET_NWK_DISCONNECT) {
-			if (pEv->eState == E_STATE_APP_WAIT_DISPLAY) {
-				V_PRINTF(LB"[E_STATE_APP_WAIT_DISPLAY:%d]", u32TickCount_ms & 0xFFFF);
-				sAppData.eLedState = E_LED_RESULT;
-			} else {
-				V_PRINTF(LB"[E_STATE_APP_IO_RECV_ERROR:%d]", u32TickCount_ms & 0xFFFF);
-				sAppData.eLedState = E_LED_ERROR;
-			}
-			// LCDの表示変更。
-			vDisplayMessageData(su8MessagePoolData);
-			// 音声合成で状態通知。
-			bAtpPrepareMessage(&sAppData.sDoorState, su8AtpMessage[0], su8AtpMessage[1]);
-			// ToDo: 電源ONから80ms以上経過している必要がある。
-			bAtpSpeak(su8AtpMessage[0]);
+		if (pEv->eState == E_STATE_APP_WAIT_DISPLAY) {
+			V_PRINTF(LB"[E_STATE_APP_WAIT_DISPLAY:%d]", u32TickCount_ms & 0xFFFF);
+			sAppData.eLedState = E_LED_RESULT;
+		} else {
+			V_PRINTF(LB"[E_STATE_APP_IO_RECV_ERROR:%d]", u32TickCount_ms & 0xFFFF);
+			sAppData.eLedState = E_LED_ERROR;
 		}
+		// LCDの表示変更。
+		vDisplayMessageData(su8MessagePoolData);
 		// 状態に応じてLED点滅
 		vBlinkLeds(eEvent);
-		// 一定時間が過ぎて音声再生中でなければスリープ
-		if (ToCoNet_Event_u32TickFrNewState(pEv) > ENDD_LED_ERROR_DUR_ms && (u32TickCount_ms - u32LastBusyInq) >= 128) {
-			u32LastBusyInq = u32TickCount_ms;
-			if (!bIsAtpBusy()) {
-				ToCoNet_Event_SetState(pEv, E_STATE_APP_WAIT_SPEAK);
-			}
-		}
+		// 音声合成で状態通知。
+		bAtpPrepareMessage(&sAppData.sDoorState, pAtpMessages[0], pAtpMessages[1]);
+		u8SpeakPtr = 0;
+		ToCoNet_Event_SetState(pEv, E_STATE_APP_WAIT_SPEAK);
 		break;
 	case E_STATE_APP_WAIT_SPEAK:
 		if (eEvent == E_EVENT_NEW_STATE) {
 			V_PRINTF(LB"[E_STATE_APP_WAIT_SPEAK:%d]", u32TickCount_ms & 0xFFFF);
-			if (su8AtpMessage[1][0] == 0) {
-				ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
-			} else {
-				bAtpSpeak(su8AtpMessage[1]);
-			}
 		}
-		if (eEvent == E_EVENT_TICK_TIMER) {
+		else if (eEvent == E_EVENT_TICK_TIMER) {
 			// 状態に応じてLED点滅
 			vBlinkLeds(eEvent);
-			if (ToCoNet_Event_u32TickFrNewState(pEv) > ENDD_LED_ERROR_DUR_ms && (u32TickCount_ms - u32LastBusyInq) >= 128) {
+			if ((u32TickCount_ms - u32LastBusyInq) >= 128) {
+				// ATP301xへのポーリング間隔は10ms以上
 				u32LastBusyInq = u32TickCount_ms;
 				if (!bIsAtpBusy()) {
-					ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
+					if (pAtpMessages[u8SpeakPtr] != NULL && pAtpMessages[u8SpeakPtr][0] != '\0') {
+						// ToDo: 電源ONから80ms以上経過している必要がある。
+						bAtpSpeak(pAtpMessages[u8SpeakPtr]);
+						u8SpeakPtr++;
+					} else if (ToCoNet_Event_u32TickFrNewState(pEv) > ENDD_LED_DISP_DUR_ms) {
+						ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
+					}
 				}
 			}
 		}
@@ -486,6 +481,10 @@ PUBLIC void cbAppColdStart(bool_t bAfterAhiInit) {
 	} else {
 		// clear application context
 		memset(&sAppData, 0x00, sizeof(sAppData));
+		pAtpMessages[0] = su8AtpMsg[0];
+		pAtpMessages[1] = su8AtpMsg[1];
+		pAtpMessages[2] = NULL;;
+
 
 		// SPRINTF
 		SPRINTF_vInit128();
@@ -834,7 +833,7 @@ static void vInitHardware(int f_warm_start) {
 		vAHI_TimerSetLocation(E_AHI_TIMER_1, TRUE, TRUE); // IOの割り当てを設定
 		for (i = 0; i < 4; i++) {
 			vTimerConfig(&sTimerPWM[i]);
-			vTimerStart(&sTimerPWM[i]);
+			//vTimerStart(&sTimerPWM[i]);
 		}
 	}
 # endif
