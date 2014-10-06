@@ -29,6 +29,7 @@ extern "C" {
 #define USE_I2C_ACM1620
 
 #define DIO_DISP_POWER (PORT_OUT3)
+#define DIO_SPEAK_RESET (PORT_OUT4)
 #define DIO_ATP_PLAY (PORT_INPUT3)
 /**
  * 定義された場合、親機への問い合わせ待ちの替わりに MessagePool の問い合わせを使う

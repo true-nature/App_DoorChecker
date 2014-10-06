@@ -225,6 +225,13 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 		SERIAL_vFlush(UART_PORT);
 
 		if (eEvent == E_EVENT_START_UP) {
+			// リセット解除
+			vPortSetHi(DIO_SPEAK_RESET);
+			// I2Cバス初期化
+			vSMBusInit();
+#ifdef USE_I2C_LCD
+			bInit2LinesLcd_AQM0802A();
+#endif
 			if (IS_APPCONF_OPT_SECURE()) {
 				bool_t bRes = bRegAesKey(sAppData.sFlash.sData.u32EncKey);
 				V_PRINTF(LB "*** Register AES key (%d) ***", bRes);
@@ -795,6 +802,10 @@ static void vInitHardware(int f_warm_start) {
 	vPortAsOutput(DIO_DISP_POWER);
 	vPortSetHi(DIO_DISP_POWER);
 	vPortDisablePullup(DIO_DISP_POWER);
+	// ATP301xリセット開始
+	vPortAsOutput(DIO_SPEAK_RESET);
+	vPortSetLo(DIO_SPEAK_RESET);
+	vPortDisablePullup(DIO_SPEAK_RESET);
 
 	if (!f_warm_start && bPortRead(PORT_CONF2)) {
 		sAppData.bConfigMode = TRUE;
@@ -838,11 +849,6 @@ static void vInitHardware(int f_warm_start) {
 	}
 # endif
 
-	// SMBUS
-	vSMBusInit();
-#ifdef USE_I2C_LCD
-	bInit2LinesLcd_AQM0802A();
-#endif
 }
 
 /****************************************************************************
