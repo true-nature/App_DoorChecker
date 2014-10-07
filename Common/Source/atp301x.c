@@ -60,8 +60,7 @@ bool_t bAtpSpeak(uint8 *command)
 
 bool_t bAtpAbort() {
 	bool_t bOk = TRUE;
-	uint8 au8ReadBuf[5];
-	// ATP301x should return 'E255>'
+	// ATP301x should return 'E255>', but don't wait it.
 	bOk &= bSMBusWrite(u8addr, '$', 0, NULL);
 	if (!bOk) {
 		V_PRINTF(LB"[bAtpAbort()] not OK");
