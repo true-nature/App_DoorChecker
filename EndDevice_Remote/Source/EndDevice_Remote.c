@@ -274,11 +274,9 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 		if (eEvent == E_EVENT_START_UP) {
 			// リセット解除
 			vPortSetHi(DIO_SPEAK_RESET);
-#if 0
 			// ADC の開始
 			vADC_WaitInit();
 			vSnsObj_Process(&sAppData.sADC, E_ORDER_KICK);
-#endif
 			// I2Cバス初期化
 			// リセットに近すぎて不都合があれば、ネットワーク開始後へ移動する
 			vSMBusInit();
@@ -479,6 +477,7 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			V_PRINTF(LB"[E_STATE_APP_SLEEP:%d]", u32TickCount_ms & 0xFFFF);
 			vPortSetHi(PORT_KIT_LED1);
 			vPortSetHi(PORT_KIT_LED2);
+			vADC_Final(&sAppData.sObjADC, &sAppData.sADC, TRUE);
 #ifdef NO_SLEEP
 			ToCoNet_Event_SetState(pEv, E_STATE_APP_PREUDO_SLEEP);
 #else
@@ -594,8 +593,6 @@ PUBLIC void cbAppColdStart(bool_t bAfterAhiInit) {
 		if (sAppData.bConfigMode) {
 			ToCoNet_Event_Register_State_Machine(vProcessEvCoreConfig); // デバッグ用の動作マシン
 		} else {
-			// ADC
-			vADC_Init(&sAppData.sObjADC, &sAppData.sADC, TRUE);
 			ToCoNet_Event_Register_State_Machine(vProcessEvCore); // main state machine
 		}
 	}
@@ -897,6 +894,8 @@ static void vInitHardware(int f_warm_start) {
 		sAppData.bConfigMode = TRUE;
 	}
 	// ToDo: Remote機でも自機バッテリー残量をADCでチェックする。appdataにフィールドを追加する必要あり。
+	// ADC
+	vADC_Init(&sAppData.sObjADC, &sAppData.sADC, TRUE);
 
 	// activate tick timers
 	memset(&sTimerApp, 0, sizeof(sTimerApp));
