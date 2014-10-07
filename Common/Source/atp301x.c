@@ -53,7 +53,18 @@ bool_t bAtpSpeak(uint8 *command)
 	uint16 len = strlen((const char*)command);
 	bOk &= bSMBusWrite(u8addr, command[0], len - 1, command + 1);
 	if (!bOk) {
-		V_PRINTF(LB"[bSpeakAtp(%s)] not OK");
+		V_PRINTF(LB"[bSpeakAtp(%s)] not OK", command);
+	}
+	return bOk;
+}
+
+bool_t bAtpAbort() {
+	bool_t bOk = TRUE;
+	uint8 au8ReadBuf[5];
+	// ATP301x should return 'E255>'
+	bOk &= bSMBusRandomRead(u8addr, '$', 5, au8ReadBuf);
+	if (!bOk) {
+		V_PRINTF(LB"[bAtpAbort()] not OK");
 	}
 	return bOk;
 }
@@ -67,7 +78,6 @@ bool_t bIsAtpBusy() {
 		}
 	}
 	return bBusy;
-
 }
 
 static void vBuildLidList(uint32 u32bitmap, uint8 *msg)

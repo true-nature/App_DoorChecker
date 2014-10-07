@@ -8,6 +8,7 @@ extern "C" {
 
 /**** Message String ***/
 
+bool_t bAtpAbort();
 bool_t bIsAtpBusy();
 bool_t bAtpSpeak(uint8 *command);
 bool_t bAtpPrepareMessage(tsDoorStateData *pDoorState, uint8 *msg1, uint8 *msg2);

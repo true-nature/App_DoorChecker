@@ -207,8 +207,7 @@ static void vBlinkLeds(teEvent eEvent)
  ****************************************************************************/
 //
 static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
-	static uint8 u8SpeakPtr;
-	static uint32 u32LastBusyInq;
+	static uint8 u8SpeakPtr;  // 処理中の音声メッセージインデックスs
 	switch (pEv->eState) {
 
 	/*
@@ -228,6 +227,7 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			// リセット解除
 			vPortSetHi(DIO_SPEAK_RESET);
 			// I2Cバス初期化
+			// リセットに近すぎて不都合があれば、ネットワーク開始後へ移動する
 			vSMBusInit();
 #ifdef USE_I2C_LCD
 			bInit2LinesLcd_AQM0802A();
@@ -374,21 +374,44 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 		ToCoNet_Event_SetState(pEv, E_STATE_APP_WAIT_SPEAK);
 		break;
 	case E_STATE_APP_WAIT_SPEAK:
-		if (eEvent == E_EVENT_NEW_STATE) {
-			V_PRINTF(LB"[E_STATE_APP_WAIT_SPEAK:%d]", u32TickCount_ms & 0xFFFF);
-		}
-		else if (eEvent == E_EVENT_TICK_TIMER) {
-			// 状態に応じてLED点滅
-			vBlinkLeds(eEvent);
-			if ((u32TickCount_ms - u32LastBusyInq) >= 128) {
-				// ATP301xへのポーリング間隔は10ms以上
-				u32LastBusyInq = u32TickCount_ms;
-				if (!bIsAtpBusy()) {
-					if (pAtpMessages[u8SpeakPtr] != NULL && pAtpMessages[u8SpeakPtr][0] != '\0') {
-						bAtpSpeak(pAtpMessages[u8SpeakPtr]);
-						u8SpeakPtr++;
-					} else if (ToCoNet_Event_u32TickFrNewState(pEv) > ENDD_LED_DISP_DUR_ms) {
-						ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
+		{
+			// ToDo: 表示中の再問合わせを可能にする。
+			static uint32 u32LastBusyInq;
+			static uint32 u32LastButtonPressed_ms;
+			if (eEvent == E_EVENT_NEW_STATE) {
+				V_PRINTF(LB"[E_STATE_APP_WAIT_SPEAK:%d]", u32TickCount_ms & 0xFFFF);
+				u32LastButtonPressed_ms = 0;
+			}
+			else if (eEvent == E_EVENT_TICK_TIMER) {
+				// 状態に応じてLED点滅
+				vBlinkLeds(eEvent);
+				if ((u32TickCount_ms - u32LastBusyInq) >= 128) {
+					// ATP301xへのポーリング間隔は10ms以上
+					u32LastBusyInq = u32TickCount_ms;
+					if (!bIsAtpBusy()) {
+						// 再生終了判定
+						if (pAtpMessages[u8SpeakPtr] != NULL && pAtpMessages[u8SpeakPtr][0] != '\0') {
+							bAtpSpeak(pAtpMessages[u8SpeakPtr]);
+							u8SpeakPtr++;
+						} else if (ToCoNet_Event_u32TickFrNewState(pEv) > ENDD_LED_DISP_DUR_ms) {
+							ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
+						}
+					}
+				} else if (sAppData.sDoorState.u32CommErrMap != 0x1) {
+					// 親機通信エラー以外なら再問合わせ要求をチェック
+					if (bPortRead(PORT_INPUT1)) {
+						if (u32LastButtonPressed_ms) {
+							if ((u32TickCount_ms - u32LastButtonPressed_ms) > 200) {
+								// Speak中断
+								bAtpAbort();
+								// MessagePool requestのやり直し
+								ToCoNet_Event_SetState(pEv, E_STATE_RUNNING);
+							}
+						} else {
+							u32LastButtonPressed_ms = u32TickCount_ms;
+						}
+					} else {
+						u32LastButtonPressed_ms = 0;
 					}
 				}
 			}
@@ -809,6 +832,7 @@ static void vInitHardware(int f_warm_start) {
 	if (!f_warm_start && bPortRead(PORT_CONF2)) {
 		sAppData.bConfigMode = TRUE;
 	}
+	// ToDo: Remote機でも自機バッテリー残量をADCでチェックする。appdataにフィールドを追加する必要あり。
 
 	// activate tick timers
 	memset(&sTimerApp, 0, sizeof(sTimerApp));
@@ -821,6 +845,7 @@ static void vInitHardware(int f_warm_start) {
 # ifdef JN516x
 	{
 		vAHI_TimerFineGrainDIOControl(0x7); // bit 0,1,2 をセット (TIMER0 の各ピンを解放する, PWM1..4 は使用する)
+		vAHI_TimerSetLocation(E_AHI_TIMER_1, TRUE, TRUE); // IOの割り当てを設定
 
 		// PWM
 		const uint8 au8TimTbl[] = {
@@ -839,10 +864,9 @@ static void vInitHardware(int f_warm_start) {
 			sTimerPWM[i].bDisableInt = TRUE; // 割り込みを禁止する指定
 			sTimerPWM[i].u8Device = au8TimTbl[i];
 		}
-		vAHI_TimerSetLocation(E_AHI_TIMER_1, TRUE, TRUE); // IOの割り当てを設定
+		// 基本的な設定だけ行い、状態判定後にduty比を再設定して点灯する
 		for (i = 0; i < 4; i++) {
 			vTimerConfig(&sTimerPWM[i]);
-			//vTimerStart(&sTimerPWM[i]);
 		}
 	}
 # endif
