@@ -31,7 +31,7 @@ const char su8AtpMsg_Pre_Door[] = "toji'mario/kakuninn_shitekudasa'i.\r";
 // の窓があいています。
 const char su8AtpMsg_Post_Door[] = "no/ma'doga/aiteima'_su.\r";
 // 電圧が低下しています。
-const char su8AtpMsg_Pre_Batt[] = "dennatsu/ga/teika_shiteima'_su.\r";
+const char su8AtpMsg_Pre_Batt[] = "dennatsuga/teika_shiteima'_su.\r";
 // の電池を交換してください。
 const char su8AtpMsg_Post_Batt[] = "no/de'nnchio/ko-kann_shitekudasa'i.\r";
 // 通信エラーです。

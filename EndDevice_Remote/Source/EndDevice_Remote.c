@@ -83,8 +83,8 @@
 
 
 
-#define LCD_COLUMNS 8	// AQM0802A
-#define VOLT_LOW 2400
+#define LCD_COLUMNS (8)	// AQM0802A
+#define VOLT_LOW (2400)
 
 #ifdef USE_LCD
 #define V_PRINTF_LCD(...) vfPrintf(&sLcdStream, __VA_ARGS__)
@@ -199,48 +199,10 @@ static void vBlinkLeds(teEvent eEvent)
 }
 
 /**
- * センサーアクティブ時のポートの制御を行う
- *
- * @param bActive ACTIVE時がTRUE
- */
-void vPortSetSns(bool_t bActive) {
-	if (IS_APPCONF_OPT_INVERSE_SNS_ACTIVE()) {
-		bActive = !bActive;
-	}
-
-	vPortSet_TrueAsLo(DIO_SNS_POWER, bActive);
-}
-
-/**
  * センサー値を格納する
  */
 static void vStoreSensorValue() {
-	// パルス数の読み込み
-	bAHI_Read16BitCounter(E_AHI_PC_0, &sAppData.sSns.u16PC1); // 16bitの場合
-	// パルス数のクリア
-	bAHI_Clear16BitPulseCounter(E_AHI_PC_0); // 16bitの場合
-
-	// パルス数の読み込み
-	bAHI_Read16BitCounter(E_AHI_PC_1, &sAppData.sSns.u16PC2); // 16bitの場合
-	// パルス数のクリア
-	bAHI_Clear16BitPulseCounter(E_AHI_PC_1); // 16bitの場合
-
-	// センサー値の保管
-	sAppData.sSns.u16Adc1 = sAppData.sObjADC.ai16Result[TEH_ADC_IDX_ADC_1];
-#ifdef USE_TEMP_INSTDOF_ADC2
-	sAppData.sSns.u16Adc2 = sAppData.sObjADC.ai16Result[TEH_ADC_IDX_TEMP];
-#else
-	sAppData.sSns.u16Adc2 = sAppData.sObjADC.ai16Result[TEH_ADC_IDX_ADC_2];
-#endif
 	sAppData.sSns.u8Batt = ENCODE_VOLT(sAppData.sObjADC.ai16Result[TEH_ADC_IDX_VOLT]);
-
-	// ADC1 が 1300mV 以上(SuperCAP が 2600mV 以上)である場合は SUPER CAP の直結を有効にする
-	if (sAppData.sSns.u16Adc1 >= VOLT_SUPERCAP_CONTROL) {
-		vPortSetLo(DIO_SUPERCAP_CONTROL);
-	}
-
-	// センサー用の電源制御回路を Hi に戻す
-	vPortSetSns(FALSE);
 }
 
 /****************************************************************************
@@ -274,12 +236,12 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 		if (eEvent == E_EVENT_START_UP) {
 			// リセット解除
 			vPortSetHi(DIO_SPEAK_RESET);
-			// ADC の開始
-			vADC_WaitInit();
-			vSnsObj_Process(&sAppData.sADC, E_ORDER_KICK);
 			// I2Cバス初期化
 			// リセットに近すぎて不都合があれば、ネットワーク開始後へ移動する
 			vSMBusInit();
+			// ADC の開始
+			vADC_WaitInit();
+			vSnsObj_Process(&sAppData.sADC, E_ORDER_KICK);
 #ifdef USE_I2C_LCD
 			bInit2LinesLcd_AQM0802A();
 #endif
@@ -794,10 +756,8 @@ void cbToCoNet_vHwEvent(uint32 u32DeviceId, uint32 u32ItemBitmap) {
 		/*
 		 * ADC完了割り込み
 		 */
-		V_PUTCHAR('@');
 		vSnsObj_Process(&sAppData.sADC, E_ORDER_KICK);
 		if (bSnsObj_isComplete(&sAppData.sADC)) {
-			sbSns_cmplt = TRUE;
 			vStoreSensorValue();
 		}
 		break;
@@ -858,6 +818,15 @@ uint8 cbToCoNet_u8HwInt(uint32 u32DeviceId, uint32 u32ItemBitmap) {
 	return u8handled;
 }
 
+/**
+ * ADCの初期化
+ */
+static void vInitADC() {
+	// ADC
+	vADC_Init(&sAppData.sObjADC, &sAppData.sADC, TRUE);
+	// バッテリー電圧だけを計測する
+	sAppData.sObjADC.u8SourceMask = TEH_ADC_SRC_VOLT;
+}
 /****************************************************************************
  *
  * NAME: vInitHardware
@@ -895,7 +864,7 @@ static void vInitHardware(int f_warm_start) {
 	}
 	// ToDo: Remote機でも自機バッテリー残量をADCでチェックする。appdataにフィールドを追加する必要あり。
 	// ADC
-	vADC_Init(&sAppData.sObjADC, &sAppData.sADC, TRUE);
+	vInitADC();
 
 	// activate tick timers
 	memset(&sTimerApp, 0, sizeof(sTimerApp));
@@ -1023,6 +992,13 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 	tsDoorStateData sDoorState;
 
 	memset(&sDoorState, 0, sizeof(tsDoorStateData));
+	if (bSnsObj_isComplete(&sAppData.sADC)) {
+		uint16 volt = DECODE_VOLT(sAppData.sSns.u8Batt);
+		if (volt < VOLT_LOW) {
+			V_PRINTF(LB"[REMOTE V=%dmV]", volt);
+			sDoorState.u32LowBattMap |= 1;
+		}
+	}
 	vInitLcdBuffer();
 	p = pMessageData;
 	tail = pMessageData + TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE;
