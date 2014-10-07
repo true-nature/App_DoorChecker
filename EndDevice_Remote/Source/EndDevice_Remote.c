@@ -983,6 +983,7 @@ static void vUpdateLcdBufferById(uint8 id, uint8 chr) {
  * LCDに戸締り状態、電源または通信の問題を表示。
  * @param pMessageData
  * @return
+ * ToDo: アクセスポイント不通、Remote子機電池減の表示仕様を決定、実装する。
  */
 static bool_t vDisplayMessageData(uint8 *pMessageData) {
 	bool_t ret = TRUE;
