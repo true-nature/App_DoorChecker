@@ -28,6 +28,7 @@
 
 #include "utils.h"
 #include "flash.h"
+#include "sensor_driver.h"
 
 #include "common.h"
 #include "AddrKeyAry.h"
@@ -140,6 +141,8 @@ tsSerialPortSetup sSerPort;
 // Timer object
 tsTimerContext sTimerApp;
 tsTimerContext sTimerPWM[4]; //!< タイマー管理構造体(PWM)
+static bool_t sbSns_cmplt = 0;
+
 /**
  * MessagePool送信用
  * 3bytes/子機 [id][DI bitmap][volt] vold==0なら子機音信不通
@@ -195,6 +198,51 @@ static void vBlinkLeds(teEvent eEvent)
 	}
 }
 
+/**
+ * センサーアクティブ時のポートの制御を行う
+ *
+ * @param bActive ACTIVE時がTRUE
+ */
+void vPortSetSns(bool_t bActive) {
+	if (IS_APPCONF_OPT_INVERSE_SNS_ACTIVE()) {
+		bActive = !bActive;
+	}
+
+	vPortSet_TrueAsLo(DIO_SNS_POWER, bActive);
+}
+
+/**
+ * センサー値を格納する
+ */
+static void vStoreSensorValue() {
+	// パルス数の読み込み
+	bAHI_Read16BitCounter(E_AHI_PC_0, &sAppData.sSns.u16PC1); // 16bitの場合
+	// パルス数のクリア
+	bAHI_Clear16BitPulseCounter(E_AHI_PC_0); // 16bitの場合
+
+	// パルス数の読み込み
+	bAHI_Read16BitCounter(E_AHI_PC_1, &sAppData.sSns.u16PC2); // 16bitの場合
+	// パルス数のクリア
+	bAHI_Clear16BitPulseCounter(E_AHI_PC_1); // 16bitの場合
+
+	// センサー値の保管
+	sAppData.sSns.u16Adc1 = sAppData.sObjADC.ai16Result[TEH_ADC_IDX_ADC_1];
+#ifdef USE_TEMP_INSTDOF_ADC2
+	sAppData.sSns.u16Adc2 = sAppData.sObjADC.ai16Result[TEH_ADC_IDX_TEMP];
+#else
+	sAppData.sSns.u16Adc2 = sAppData.sObjADC.ai16Result[TEH_ADC_IDX_ADC_2];
+#endif
+	sAppData.sSns.u8Batt = ENCODE_VOLT(sAppData.sObjADC.ai16Result[TEH_ADC_IDX_VOLT]);
+
+	// ADC1 が 1300mV 以上(SuperCAP が 2600mV 以上)である場合は SUPER CAP の直結を有効にする
+	if (sAppData.sSns.u16Adc1 >= VOLT_SUPERCAP_CONTROL) {
+		vPortSetLo(DIO_SUPERCAP_CONTROL);
+	}
+
+	// センサー用の電源制御回路を Hi に戻す
+	vPortSetSns(FALSE);
+}
+
 /****************************************************************************
  *
  * NAME: vProcessEvent
@@ -226,6 +274,9 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 		if (eEvent == E_EVENT_START_UP) {
 			// リセット解除
 			vPortSetHi(DIO_SPEAK_RESET);
+			// ADC の開始
+			vADC_WaitInit();
+			vSnsObj_Process(&sAppData.sADC, E_ORDER_KICK);
 			// I2Cバス初期化
 			// リセットに近すぎて不都合があれば、ネットワーク開始後へ移動する
 			vSMBusInit();
@@ -541,6 +592,8 @@ PUBLIC void cbAppColdStart(bool_t bAfterAhiInit) {
 		if (sAppData.bConfigMode) {
 			ToCoNet_Event_Register_State_Machine(vProcessEvCoreConfig); // デバッグ用の動作マシン
 		} else {
+			// ADC
+			vADC_Init(&sAppData.sObjADC, &sAppData.sADC, TRUE);
 			ToCoNet_Event_Register_State_Machine(vProcessEvCore); // main state machine
 		}
 	}
@@ -739,6 +792,15 @@ void cbToCoNet_vNwkEvent(teEvent eEvent, uint32 u32arg) {
 void cbToCoNet_vHwEvent(uint32 u32DeviceId, uint32 u32ItemBitmap) {
 	switch (u32DeviceId) {
 	case E_AHI_DEVICE_ANALOGUE:
+		/*
+		 * ADC完了割り込み
+		 */
+		V_PUTCHAR('@');
+		vSnsObj_Process(&sAppData.sADC, E_ORDER_KICK);
+		if (bSnsObj_isComplete(&sAppData.sADC)) {
+			sbSns_cmplt = TRUE;
+			vStoreSensorValue();
+		}
 		break;
 
 	case E_AHI_DEVICE_SYSCTRL:

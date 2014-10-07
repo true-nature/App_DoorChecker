@@ -49,7 +49,9 @@ APPSRC += common.c
 APPSRC += flash.c
 APPSRC += SMBus.c
 APPSRC += I2C_impl.c
+APPSRC += adc.c
 APPSRC += atp301x.c
+APPSRC += sensor_driver.c
 
 APPSRC += input_string.c
 APPSRC += Interactive.c
@@ -109,7 +111,7 @@ CFLAGS += -DENDDEVICE_REMOTE
 # 下記に指定したディレクトリがソース検索パス、インクルード検索パスに設定
 # されます。Makefile のあるディレクトリからの相対パスを指定します。
 #
-#APP_COMMON_SRC_DIR_ADD1 = ../dummy1  
+APP_COMMON_SRC_DIR_ADD1 = ../../Common/Sensor  
 #APP_COMMON_SRC_DIR_ADD2 = 
 #APP_COMMON_SRC_DIR_ADD3 = 
 #APP_COMMON_SRC_DIR_ADD4 =

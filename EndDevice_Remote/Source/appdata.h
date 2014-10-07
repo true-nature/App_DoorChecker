@@ -12,6 +12,7 @@
 #include "ToCoNet.h"
 #include "flash.h"
 #include "appsave.h"
+#include "adc.h"
 
 /**
  * LED 制御状態
@@ -28,6 +29,14 @@ typedef struct {
 	uint32 u32LowBattMap; //!< 低電圧ビットマップ b0:リモート子機, b1...b16:センサー子機 1ならば低電圧
 	uint32 u32CommErrMap; //!< 通信エラービットマップ b0:親機, b1...b16:センサー子機 1ならば無応答
 } tsDoorStateData;
+
+typedef struct {
+	// sensor data
+	uint8 u8Batt;
+	uint16 u16Adc1, u16Adc2;
+	uint16 u16PC1, u16PC2;
+	uint16 u16Temp, u16Humid;
+} tsSensorData;
 
 /**
  * アプリケーション基本データ構造体
@@ -47,6 +56,12 @@ typedef struct {
 
 	// config mode
 	bool_t bConfigMode; //! CONFIG で起動した場合（インタラクティブモードを使用するため)
+
+	// ADC
+	tsObjData_ADC sObjADC; //!< ADC管理構造体（データ部）
+	tsSnsObj sADC; //!< ADC管理構造体（制御部）
+	// センサ情報
+	tsSensorData sSns;
 
 	// state
 	teLedState eLedState; //!< LED表示状態
