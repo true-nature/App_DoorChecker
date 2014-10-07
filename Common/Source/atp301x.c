@@ -29,15 +29,15 @@ const char su8AtpMsg_Ok[] = "toji'mari;o'-ke-de_su.\r";
 // 戸締りを確認してください。
 const char su8AtpMsg_Pre_Door[] = "toji'mario/kakuninn_shitekudasa'i.\r";
 // の窓があいています。
-const char su8AtpMsg_Post_Door[] = "/no/ma'doga/aiteima'_su.\r";
+const char su8AtpMsg_Post_Door[] = "no/ma'doga/aiteima'_su.\r";
 // 電圧が低下しています。
 const char su8AtpMsg_Pre_Batt[] = "dennatsu/ga/teika_shiteima'_su.\r";
 // の電池を交換してください。
-const char su8AtpMsg_Post_Batt[] = "/no/de'nnchio/ko-kann_shitekudasa'i.\r";
+const char su8AtpMsg_Post_Batt[] = "no/de'nnchio/ko-kann_shitekudasa'i.\r";
 // 通信エラーです。
 const char su8AtpMsg_Pre_Comm[] = "tsu-shinn;e'ra-de_su.\r";
 // の窓からの応答がありません。
-const char su8AtpMsg_Post_Comm[] = "/no/ma'dokarano/o-to-ga/arimase'nn.\r";
+const char su8AtpMsg_Post_Comm[] = "no/ma'dokarano/o-to-ga/arimase'nn.\r";
 
 // アクセスポイントの応答がありません。
 const char su8AtpMsg_Accesspoint[] = "a_kuse_supo'inntono/o-to-ga/arimase'nn.\r";
@@ -62,7 +62,7 @@ bool_t bAtpAbort() {
 	bool_t bOk = TRUE;
 	uint8 au8ReadBuf[5];
 	// ATP301x should return 'E255>'
-	bOk &= bSMBusRandomRead(u8addr, '$', 5, au8ReadBuf);
+	bOk &= bSMBusWrite(u8addr, '$', 0, NULL);
 	if (!bOk) {
 		V_PRINTF(LB"[bAtpAbort()] not OK");
 	}
