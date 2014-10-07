@@ -274,9 +274,11 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 		if (eEvent == E_EVENT_START_UP) {
 			// リセット解除
 			vPortSetHi(DIO_SPEAK_RESET);
+#if 0
 			// ADC の開始
 			vADC_WaitInit();
 			vSnsObj_Process(&sAppData.sADC, E_ORDER_KICK);
+#endif
 			// I2Cバス初期化
 			// リセットに近すぎて不都合があれば、ネットワーク開始後へ移動する
 			vSMBusInit();
@@ -1053,6 +1055,7 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 	// 結果をsAppDataへコピー。LED点滅はｖProcessEvCoreで行う。
 	memcpy(&sAppData.sDoorState, &sDoorState, sizeof(tsDoorStateData));
 #ifdef USE_I2C_LCD
+	ret &= bDraw2LinesLcd_ACM1602((const char *)sLcdBuffer[0], (const char *)sLcdBuffer[1]);
 	ret &= bDraw2LinesLcd_AQM0802A((const char *)sLcdBuffer[0], (const char *)sLcdBuffer[1]);
 #endif
 	return ret;
