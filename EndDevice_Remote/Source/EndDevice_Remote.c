@@ -385,7 +385,6 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 				u32LastBusyInq = u32TickCount_ms;
 				if (!bIsAtpBusy()) {
 					if (pAtpMessages[u8SpeakPtr] != NULL && pAtpMessages[u8SpeakPtr][0] != '\0') {
-						// ToDo: 電源ONから80ms以上経過している必要がある。
 						bAtpSpeak(pAtpMessages[u8SpeakPtr]);
 						u8SpeakPtr++;
 					} else if (ToCoNet_Event_u32TickFrNewState(pEv) > ENDD_LED_DISP_DUR_ms) {
@@ -811,7 +810,6 @@ static void vInitHardware(int f_warm_start) {
 		sAppData.bConfigMode = TRUE;
 	}
 
-	// ToDo: Tick Timerが猛烈に遅いようだけど問題無いか？
 	// activate tick timers
 	memset(&sTimerApp, 0, sizeof(sTimerApp));
 	sTimerApp.u8Device = E_AHI_DEVICE_TIMER0;
