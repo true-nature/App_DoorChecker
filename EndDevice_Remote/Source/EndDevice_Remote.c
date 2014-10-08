@@ -388,7 +388,6 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 		break;
 	case E_STATE_APP_WAIT_SPEAK:
 		{
-			// ToDo: 表示中の再問合わせを可能にする。
 			static uint32 u32LastBusyInq;
 			static uint32 u32LastButtonPressed_ms;
 			if (eEvent == E_EVENT_NEW_STATE) {
@@ -862,7 +861,6 @@ static void vInitHardware(int f_warm_start) {
 	if (!f_warm_start && bPortRead(PORT_CONF2)) {
 		sAppData.bConfigMode = TRUE;
 	}
-	// ToDo: Remote機でも自機バッテリー残量をADCでチェックする。appdataにフィールドを追加する必要あり。
 	// ADC
 	vInitADC();
 
