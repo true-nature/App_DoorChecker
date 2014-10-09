@@ -83,7 +83,7 @@
 
 
 
-#define LCD_COLUMNS (8)	// AQM0802A
+#define LCD_COLUMNS (16)
 #define VOLT_LOW (2400)
 
 #ifdef USE_LCD
@@ -152,8 +152,16 @@ uint8 su8MessagePoolData[TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE + 1];
  * MessagePool受信に失敗した場合に使用するダミーデータ
  */
 const uint8 su8MessageIfReceiveFailed[] = {0x00, 0x00, 0x00, 0xFF, 0xFF};
+////////////////////////////////1234567890123456
+const uint8 cu8MsgDoorWarn[] = "!DOOR OPENED!   ";
+const uint8 cu8MsgBattWarn[] = "!LOW BATTERY!   ";
+const uint8 cu8MsgCommWarn[] = "!NO RESPONSE!   ";
+const uint8 cu8MsgOk[]       = "ﾄｼﾞﾏﾘ OK.       ";
+const uint8 cu8MsgParentErr[]= "ｱｸｾｽﾎﾟｲﾝﾄ ｵｳﾄｳﾅｼ";
+////////////////////////////////1234567890123456
 
-uint8 sLcdBuffer[2][LCD_COLUMNS + 1];
+uint8 sStatusLcdBuffer[LCD_COLUMNS];
+uint8 sMessageLcdBuffer[LCD_COLUMNS];
 
 // ATP3011に送るメッセージ
 static uint8 *pAtpMessages[3];
@@ -960,18 +968,14 @@ void vProcessSerialCmd(tsSerCmd_Context *pCmd) {
 }
 
 static void vInitLcdBuffer() {
-	memset(&sLcdBuffer[0][0], ' ', LCD_COLUMNS);
-	memset(&sLcdBuffer[1][0], ' ', LCD_COLUMNS);
-	sLcdBuffer[0][LCD_COLUMNS] = '\0';
-	sLcdBuffer[1][LCD_COLUMNS] = '\0';
+	memset(sStatusLcdBuffer, ' ', LCD_COLUMNS);
+	memset(sMessageLcdBuffer, ' ', LCD_COLUMNS);
 }
 
 static void vUpdateLcdBufferById(uint8 id, uint8 chr) {
-	if (id <= ADDRKEYA_MAX_HISTORY)
+	if (id > 0 && id <= LCD_COLUMNS)
 	{
-		uint8 row = (id > LCD_COLUMNS ? 1 : 0);
-		uint8 column = ((id - 1) % LCD_COLUMNS);
-		sLcdBuffer[row][column] = chr;
+		sStatusLcdBuffer[id - 1] = chr;
 	}
 }
 
@@ -980,13 +984,13 @@ static void vUpdateLcdBufferById(uint8 id, uint8 chr) {
  * LCDに戸締り状態、電源または通信の問題を表示。
  * @param pMessageData
  * @return
- * ToDo: アクセスポイント不通、Remote子機電池減の表示仕様を決定、実装する。
  */
 static bool_t vDisplayMessageData(uint8 *pMessageData) {
 	bool_t ret = TRUE;
 	uint8 u8id;
 	uint8 *p;
 	uint8 *tail;
+	const uint8 *msg = NULL;
 	tsDoorStateData sDoorState;
 
 	memset(&sDoorState, 0, sizeof(tsDoorStateData));
@@ -1007,7 +1011,7 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 		uint16 volt = DECODE_VOLT(u8batt);
 		uint8 chr = '-';
 		if (u8batt == 0) {
-			// 0V(電圧確認できない)は子機通信エラーで小文字
+			// 0V(電圧確認できない)は通信エラーで小文字
 			sDoorState.u32CommErrMap |= (1<<u8id);
 			chr = u8id + '`';
 		} else {
@@ -1027,9 +1031,21 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 	}
 	// 結果をsAppDataへコピー。LED点滅はｖProcessEvCoreで行う。
 	memcpy(&sAppData.sDoorState, &sDoorState, sizeof(tsDoorStateData));
+	if (sDoorState.u32OpenedMap) {
+		msg = cu8MsgDoorWarn;
+	} else if (sDoorState.u32LowBattMap) {
+		msg = cu8MsgBattWarn;
+	} else if (sDoorState.u32CommErrMap) {
+		if (sDoorState.u32CommErrMap == 1) {
+			memcpy(sStatusLcdBuffer, cu8MsgParentErr, LCD_COLUMNS);
+		}
+		msg = cu8MsgCommWarn;
+	} else {
+		msg = cu8MsgOk;
+	}
 #ifdef USE_I2C_LCD
-	ret &= bDraw2LinesLcd_ACM1602((const char *)sLcdBuffer[0], (const char *)sLcdBuffer[1]);
-	ret &= bDraw2LinesLcd_AQM0802A((const char *)sLcdBuffer[0], (const char *)sLcdBuffer[1]);
+	ret &= bDraw2LinesLcd_ACM1602((const char *)&sStatusLcdBuffer[0], (const char *)msg);
+	ret &= bDraw2LinesLcd_AQM0802A((const char *)&sStatusLcdBuffer[0], (const char *)&sStatusLcdBuffer[8]);
 #endif
 	return ret;
 }
