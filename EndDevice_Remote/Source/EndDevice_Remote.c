@@ -141,7 +141,6 @@ tsSerialPortSetup sSerPort;
 // Timer object
 tsTimerContext sTimerApp;
 tsTimerContext sTimerPWM[4]; //!< タイマー管理構造体(PWM)
-static bool_t sbSns_cmplt = 0;
 
 /**
  * MessagePool送信用
