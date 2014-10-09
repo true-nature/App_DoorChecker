@@ -1,0 +1,52 @@
+Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 2014/10/09 15:57:04
+
+BeginCmp
+TimeStamp = /54360EC8;
+Reference = 0.22F1;
+ValeurCmp = C;
+IdModule  = C2V8;
+EndCmp
+
+BeginCmp
+TimeStamp = /54360F12;
+Reference = 1M1;
+ValeurCmp = R;
+IdModule  = R1;
+EndCmp
+
+BeginCmp
+TimeStamp = /54360838;
+Reference = BT1;
+ValeurCmp = BATTERY;
+IdModule  = PIN_ARRAY_2X1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5436105C;
+Reference = P1;
+ValeurCmp = CONN_2;
+IdModule  = PIN_ARRAY_2X1;
+EndCmp
+
+BeginCmp
+TimeStamp = /54360F7C;
+Reference = P2;
+ValeurCmp = CONN_5;
+IdModule  = PIN_ARRAY_5x1;
+EndCmp
+
+BeginCmp
+TimeStamp = /54360F03;
+Reference = REED1;
+ValeurCmp = SPST;
+IdModule  = PIN_ARRAY_2X1;
+EndCmp
+
+BeginCmp
+TimeStamp = /54360EB9;
+Reference = U1;
+ValeurCmp = LITE_LITE;
+IdModule  = LITE;
+EndCmp
+
+EndListe

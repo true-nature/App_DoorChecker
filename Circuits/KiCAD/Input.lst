@@ -1,0 +1,22 @@
+eeschema (2013-07-07 BZR 4022)-stable  >> Creation date: 2014/10/09 15:45:28
+#コンポーネント ( リファレンス順 )
+| 0.22F1     C           
+| 1M1        R           
+| BT1        BATTERY     
+| P1         CONN_2      
+| P2         CONN_5      
+| REED1      SPST        
+| U1         LITE_LITE   
+#End Cmp
+
+#コンポーネント ( 定数で並び替え )
+| C            0.22F1    
+| R            1M1       
+| BATTERY      BT1       
+| CONN_2       P1        
+| CONN_5       P2        
+| SPST         REED1     
+| LITE_LITE    U1        
+#コンポーネント終了
+
+#リスト終了
