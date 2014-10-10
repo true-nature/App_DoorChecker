@@ -85,6 +85,7 @@
 
 #define LCD_COLUMNS (16)
 #define VOLT_LOW (2400)
+#define VOLT_REMOTE (2400)
 
 #ifdef USE_LCD
 #define V_PRINTF_LCD(...) vfPrintf(&sLcdStream, __VA_ARGS__)
@@ -153,11 +154,11 @@ uint8 su8MessagePoolData[TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE + 1];
  */
 const uint8 su8MessageIfReceiveFailed[] = {0x00, 0x00, 0x00, 0xFF, 0xFF};
 ////////////////////////////////1234567890123456
-const uint8 cu8MsgDoorWarn[] = "!DOOR OPENED!   ";
-const uint8 cu8MsgBattWarn[] = "!LOW BATTERY!   ";
-const uint8 cu8MsgCommWarn[] = "!NO RESPONSE!   ";
-const uint8 cu8MsgOk[]       = "ﾄｼﾞﾏﾘ OK.       ";
-const uint8 cu8MsgParentErr[]= "ｱｸｾｽﾎﾟｲﾝﾄ ｵｳﾄｳﾅｼ";
+const uint8 cu8MsgDoorWarn[] = "!WINDOW OPENED! ";
+const uint8 cu8MsgBattWarn[] = " !LOW BATTERY!  ";
+const uint8 cu8MsgCommWarn[] = " !NO RESPONSE!  ";
+const uint8 cu8MsgOk[]       = "\xC4\xBC\xDE\xCF\xD8 OK.       ";	// ﾄｼﾞﾏﾘ OK.
+const uint8 cu8MsgParentErr[]= "\xB1\xB8\xBE\xBD\xCE\xDF\xB2\xDD\xC4 \xB5\xB3\xC4\xB3\xC5\xBC";	// ｱｸｾｽﾎﾟｲﾝﾄ ｵｳﾄｳﾅｼ
 ////////////////////////////////1234567890123456
 
 uint8 sStatusLcdBuffer[LCD_COLUMNS];
@@ -996,8 +997,8 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 	memset(&sDoorState, 0, sizeof(tsDoorStateData));
 	if (bSnsObj_isComplete(&sAppData.sADC)) {
 		uint16 volt = DECODE_VOLT(sAppData.sSns.u8Batt);
-		if (volt < VOLT_LOW) {
-			V_PRINTF(LB"[REMOTE V=%dmV]", volt);
+		V_PRINTF(LB"[REMOTE V=%dmV]", volt);
+		if (volt < VOLT_REMOTE) {
 			sDoorState.u32LowBattMap |= 1;
 		}
 	}

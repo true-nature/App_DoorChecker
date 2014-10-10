@@ -36,7 +36,7 @@ extern "C" {
 #define ENDD_USE_MESSAGE_POOL
 
 #define ENDD_SLEEP_PERIOD_s (5) //!< DEEPスリープまでの移行時間
-#define ENDD_LED_DISP_DUR_ms (4000) //!< LEDの結果表示時間
+#define ENDD_LED_DISP_DUR_ms (8000) //!< LEDの結果表示時間
 #define ENDD_LED_ERROR_DUR_ms (2000) //!< LEDのエラー表示時間
 #define ENDD_TIMEOUT_CONNECT_ms (600) //!< 接続タイムアウト
 #define ENDD_TIMEOUT_WAIT_MSG_ms (600) //!< 親機からのメッセージの待ち時間
