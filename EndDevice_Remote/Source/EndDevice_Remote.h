@@ -40,6 +40,7 @@ extern "C" {
 #define ENDD_LED_ERROR_DUR_ms (2000) //!< LEDのエラー表示時間
 #define ENDD_TIMEOUT_CONNECT_ms (600) //!< 接続タイムアウト
 #define ENDD_TIMEOUT_WAIT_MSG_ms (600) //!< 親機からのメッセージの待ち時間
+#define ENDD_TIMEOUT_ADC_ms (200) //!< ADCの待ち時間
 
 
 /**

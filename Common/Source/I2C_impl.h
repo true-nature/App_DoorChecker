@@ -26,7 +26,7 @@
 #include <jendefs.h>
 #include <AppHardwareApi.h>
 
-#define USE_I2C_AQM0802A
+#undef USE_I2C_AQM0802A
 #define USE_I2C_ACM1620
 
 /****************************************************************************/

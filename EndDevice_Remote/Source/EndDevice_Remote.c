@@ -85,7 +85,7 @@
 
 #define LCD_COLUMNS (16)
 #define VOLT_LOW (2400)
-#define VOLT_REMOTE (2400)
+#define VOLT_REMOTE (2450)
 
 #ifdef USE_LCD
 #define V_PRINTF_LCD(...) vfPrintf(&sLcdStream, __VA_ARGS__)
@@ -244,15 +244,9 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 		if (eEvent == E_EVENT_START_UP) {
 			// リセット解除
 			vPortSetHi(DIO_SPEAK_RESET);
-			// I2Cバス初期化
-			// リセットに近すぎて不都合があれば、ネットワーク開始後へ移動する
-			vSMBusInit();
 			// ADC の開始
 			vADC_WaitInit();
 			vSnsObj_Process(&sAppData.sADC, E_ORDER_KICK);
-#ifdef USE_I2C_LCD
-			bInit2LinesLcd_AQM0802A();
-#endif
 			if (IS_APPCONF_OPT_SECURE()) {
 				bool_t bRes = bRegAesKey(sAppData.sFlash.sData.u32EncKey);
 				V_PRINTF(LB "*** Register AES key (%d) ***", bRes);
@@ -378,21 +372,34 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 
 	case E_STATE_APP_IO_RECV_ERROR:
 	case E_STATE_APP_WAIT_DISPLAY:
-		if (pEv->eState == E_STATE_APP_WAIT_DISPLAY) {
-			V_PRINTF(LB"[E_STATE_APP_WAIT_DISPLAY:%d]", u32TickCount_ms & 0xFFFF);
-			sAppData.eLedState = E_LED_RESULT;
-		} else {
-			V_PRINTF(LB"[E_STATE_APP_IO_RECV_ERROR:%d]", u32TickCount_ms & 0xFFFF);
-			sAppData.eLedState = E_LED_ERROR;
+		if (eEvent == E_EVENT_NEW_STATE) {
+			if (pEv->eState == E_STATE_APP_WAIT_DISPLAY) {
+				V_PRINTF(LB"[E_STATE_APP_WAIT_DISPLAY:%d]", u32TickCount_ms & 0xFFFF);
+				sAppData.eLedState = E_LED_RESULT;
+			} else {
+				V_PRINTF(LB"[E_STATE_APP_IO_RECV_ERROR:%d]", u32TickCount_ms & 0xFFFF);
+				sAppData.eLedState = E_LED_ERROR;
+			}
+			// I2Cバス初期化
+			// リセットに近すぎて不都合があれば、ネットワーク開始後へ移動する
+			vSMBusInit();
+	#ifdef bInit2LinesLcd_AQM0802A
+			bInit2LinesLcd_AQM0802A();
+	#endif
+	#ifdef USE_I2C_ACM1620
+			bDraw2LinesLcd_ACM1602(NULL, NULL);
+	#endif
 		}
-		// LCDの表示変更。
-		vDisplayMessageData(su8MessagePoolData);
-		// 状態に応じてLED点滅
-		vBlinkLeds(eEvent);
-		// 音声合成で状態通知。
-		bAtpPrepareMessage(&sAppData.sDoorState, pAtpMessages[0], pAtpMessages[1]);
-		u8SpeakPtr = 0;
-		ToCoNet_Event_SetState(pEv, E_STATE_APP_WAIT_SPEAK);
+		if (bSnsObj_isComplete(&sAppData.sADC) || ToCoNet_Event_u32TickFrNewState(pEv) > ENDD_TIMEOUT_ADC_ms) {
+			// LCDの表示変更。
+			vDisplayMessageData(su8MessagePoolData);
+			// 状態に応じてLED点滅
+			vBlinkLeds(eEvent);
+			// 音声合成で状態通知。
+			bAtpPrepareMessage(&sAppData.sDoorState, pAtpMessages[0], pAtpMessages[1]);
+			u8SpeakPtr = 0;
+			ToCoNet_Event_SetState(pEv, E_STATE_APP_WAIT_SPEAK);
+		}
 		break;
 	case E_STATE_APP_WAIT_SPEAK:
 		{
@@ -424,8 +431,9 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 							if ((u32TickCount_ms - u32LastButtonPressed_ms) > 200) {
 								// Speak中断
 								bAtpAbort();
-								// MessagePool requestのやり直し
-								ToCoNet_Event_SetState(pEv, E_STATE_RUNNING);
+								// ADC の再スタート
+								vSnsObj_Process(&sAppData.sADC, E_ORDER_KICK);
+								ToCoNet_Event_SetState(pEv, E_STATE_APP_WAIT_ABORT);
 							}
 						} else {
 							u32LastButtonPressed_ms = u32TickCount_ms;
@@ -435,6 +443,13 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 					}
 				}
 			}
+		}
+		break;
+	case E_STATE_APP_WAIT_ABORT:
+		// 200ms以上待って再問い合わせ
+		if (ToCoNet_Event_u32TickFrNewState(pEv) > 200 && !bIsAtpBusy()) {
+			// MessagePool requestのやり直し
+			ToCoNet_Event_SetState(pEv, E_STATE_APP_SLEEP);
 		}
 		break;
 	/*
@@ -995,13 +1010,12 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 	tsDoorStateData sDoorState;
 
 	memset(&sDoorState, 0, sizeof(tsDoorStateData));
-	if (bSnsObj_isComplete(&sAppData.sADC)) {
-		uint16 volt = DECODE_VOLT(sAppData.sSns.u8Batt);
-		V_PRINTF(LB"[REMOTE V=%dmV]", volt);
-		if (volt < VOLT_REMOTE) {
-			sDoorState.u32LowBattMap |= 1;
-		}
+	uint16 volt = DECODE_VOLT(sAppData.sSns.u8Batt);
+	V_PRINTF(LB"[ENDPOINT_REMOTE V=%dmV]", volt);
+	if (volt < VOLT_REMOTE) {
+		sDoorState.u32LowBattMap |= 1;
 	}
+
 	vInitLcdBuffer();
 	p = pMessageData;
 	tail = pMessageData + TOCONET_MOD_MESSAGE_POOL_MAX_MESSAGE;
@@ -1044,8 +1058,10 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 	} else {
 		msg = cu8MsgOk;
 	}
-#ifdef USE_I2C_LCD
+#ifdef USE_I2C_ACM1620
 	ret &= bDraw2LinesLcd_ACM1602((const char *)&sStatusLcdBuffer[0], (const char *)msg);
+#endif
+#ifdef USE_I2C_AQM0802A
 	ret &= bDraw2LinesLcd_AQM0802A((const char *)&sStatusLcdBuffer[0], (const char *)&sStatusLcdBuffer[8]);
 #endif
 	return ret;
