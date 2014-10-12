@@ -79,7 +79,7 @@
 /****************************************************************************/
 #define PWM_IDX_DOOR_ALERT 0  // 赤
 #define PWM_IDX_COMM_ALERT 1  // 橙
-#define PWM_IDX_POWER_ALERT 3 // 緑
+#define PWM_IDX_BATT_ALERT 3  // 緑
 
 #define LCD_COLUMNS (16)
 #define VOLT_LOW (2400)
@@ -183,9 +183,9 @@ static void vBlinkLeds(teEvent eEvent)
 		bBlinkPositive = TRUE;
 	}
 	// 電源警告
-	sTimerPWM[PWM_IDX_POWER_ALERT].u16duty = (sAppData.sDoorState.u32LowBattMap ? 1024 - u16dutyWarn : 1024);
-	vTimerConfig(&sTimerPWM[PWM_IDX_POWER_ALERT]);
-	vTimerStart(&sTimerPWM[PWM_IDX_POWER_ALERT]);
+	sTimerPWM[PWM_IDX_BATT_ALERT].u16duty = (sAppData.sDoorState.u32LowBattMap ? 1024 - u16dutyWarn : 1024);
+	vTimerConfig(&sTimerPWM[PWM_IDX_BATT_ALERT]);
+	vTimerStart(&sTimerPWM[PWM_IDX_BATT_ALERT]);
 	// 窓空き警告 正常時は消灯
 	sTimerPWM[PWM_IDX_DOOR_ALERT].u16duty = (sAppData.sDoorState.u32OpenedMap ? u16dutyWarn : 1024);
 	vTimerConfig(&sTimerPWM[PWM_IDX_DOOR_ALERT]);
@@ -468,7 +468,7 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 			SERIAL_vFlush(UART_PORT);
 			// PWM切り離し
 			vAHI_TimerFineGrainDIOControl(0x7F);
-			vPortSetHi(sTimerPWM[PWM_IDX_POWER_ALERT].u8Device);
+			vPortSetHi(sTimerPWM[PWM_IDX_BATT_ALERT].u8Device);
 			vPortSetHi(sTimerPWM[PWM_IDX_DOOR_ALERT].u8Device);
 			vPortSetHi(sTimerPWM[PWM_IDX_COMM_ALERT].u8Device);
 
