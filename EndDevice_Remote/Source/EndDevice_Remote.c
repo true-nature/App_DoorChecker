@@ -77,11 +77,9 @@
 /****************************************************************************/
 /***        Macro Definitions                                             ***/
 /****************************************************************************/
-#define PWM_IDX_POWER_ALERT 0
-#define PWM_IDX_DOOR_ALERT 1
-#define PWM_IDX_COMM_ALERT 3
-
-
+#define PWM_IDX_DOOR_ALERT 0  // 赤
+#define PWM_IDX_COMM_ALERT 1  // 橙
+#define PWM_IDX_POWER_ALERT 3 // 緑
 
 #define LCD_COLUMNS (16)
 #define VOLT_LOW (2400)
@@ -157,7 +155,7 @@ const uint8 su8MessageIfReceiveFailed[] = {0x00, 0x00, 0x00, 0xFF, 0xFF};
 const uint8 cu8MsgDoorWarn[] = "!WINDOW OPENED! ";
 const uint8 cu8MsgBattWarn[] = " !LOW BATTERY!  ";
 const uint8 cu8MsgCommWarn[] = " !NO RESPONSE!  ";
-const uint8 cu8MsgOk[]       = "\xC4\xBC\xDE\xCF\xD8 OK.       ";	// ﾄｼﾞﾏﾘ OK.
+//const uint8 cu8MsgOk[]       = "\xC4\xBC\xDE\xCF\xD8OK.        ";	// ﾄｼﾞﾏﾘOK.
 const uint8 cu8MsgParentErr[]= "\xB1\xB8\xBE\xBD\xCE\xDF\xB2\xDD\xC4 \xB5\xB3\xC4\xB3\xC5\xBC";	// ｱｸｾｽﾎﾟｲﾝﾄ ｵｳﾄｳﾅｼ
 ////////////////////////////////1234567890123456
 
@@ -184,15 +182,15 @@ static void vBlinkLeds(teEvent eEvent)
 		u16dutyWarn = 0;
 		bBlinkPositive = TRUE;
 	}
-	// 電源警告(PWM1) 正常時は常時点灯
-	sTimerPWM[PWM_IDX_POWER_ALERT].u16duty = (sAppData.sDoorState.u32LowBattMap ? 1024 - u16dutyWarn : 0);
+	// 電源警告
+	sTimerPWM[PWM_IDX_POWER_ALERT].u16duty = (sAppData.sDoorState.u32LowBattMap ? 1024 - u16dutyWarn : 1024);
 	vTimerConfig(&sTimerPWM[PWM_IDX_POWER_ALERT]);
 	vTimerStart(&sTimerPWM[PWM_IDX_POWER_ALERT]);
-	// 窓空き警告(PWM2) 正常時は消灯
+	// 窓空き警告 正常時は消灯
 	sTimerPWM[PWM_IDX_DOOR_ALERT].u16duty = (sAppData.sDoorState.u32OpenedMap ? u16dutyWarn : 1024);
 	vTimerConfig(&sTimerPWM[PWM_IDX_DOOR_ALERT]);
 	vTimerStart(&sTimerPWM[PWM_IDX_DOOR_ALERT]);
-	// 通信警告(PWM4) 正常時は消灯
+	// 通信警告 正常時は消灯
 	sTimerPWM[PWM_IDX_COMM_ALERT].u16duty = (sAppData.sDoorState.u32CommErrMap ? u16dutyWarn : 1024);
 	vTimerConfig(&sTimerPWM[PWM_IDX_COMM_ALERT]);
 	vTimerStart(&sTimerPWM[PWM_IDX_COMM_ALERT]);
@@ -1007,6 +1005,7 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 	uint8 *p;
 	uint8 *tail;
 	const uint8 *msg = NULL;
+	char buf[16];
 	tsDoorStateData sDoorState;
 
 	memset(&sDoorState, 0, sizeof(tsDoorStateData));
@@ -1056,7 +1055,8 @@ static bool_t vDisplayMessageData(uint8 *pMessageData) {
 		}
 		msg = cu8MsgCommWarn;
 	} else {
-		msg = cu8MsgOk;
+		sprintf(buf, "\xC4\xBC\xDE\xCF\xD8OK.V=%4dmV", volt);
+		msg = (const uint8*)buf;
 	}
 #ifdef USE_I2C_ACM1620
 	ret &= bDraw2LinesLcd_ACM1602((const char *)&sStatusLcdBuffer[0], (const char *)msg);
