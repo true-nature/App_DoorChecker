@@ -1,38 +1,31 @@
-Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 2014/10/09 15:57:04
+Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 2014/10/13 16:08:05
 
 BeginCmp
 TimeStamp = /54360EC8;
 Reference = 0.22F1;
 ValeurCmp = C;
-IdModule  = C2V8;
+IdModule  = C1V5;
 EndCmp
 
 BeginCmp
 TimeStamp = /54360F12;
-Reference = 1M1;
+Reference = 2M1;
 ValeurCmp = R;
-IdModule  = R1;
+IdModule  = R3;
 EndCmp
 
 BeginCmp
-TimeStamp = /54360838;
+TimeStamp = /543B60F0;
 Reference = BT1;
 ValeurCmp = BATTERY;
-IdModule  = PIN_ARRAY_2X1;
+IdModule  = CR2032H;
 EndCmp
 
 BeginCmp
 TimeStamp = /5436105C;
-Reference = P1;
+Reference = CFG1;
 ValeurCmp = CONN_2;
 IdModule  = PIN_ARRAY_2X1;
-EndCmp
-
-BeginCmp
-TimeStamp = /54360F7C;
-Reference = P2;
-ValeurCmp = CONN_5;
-IdModule  = PIN_ARRAY_5x1;
 EndCmp
 
 BeginCmp
@@ -43,10 +36,17 @@ IdModule  = PIN_ARRAY_2X1;
 EndCmp
 
 BeginCmp
-TimeStamp = /54360EB9;
+TimeStamp = /5436A16D;
 Reference = U1;
 ValeurCmp = LITE_LITE;
-IdModule  = LITE;
+IdModule  = TQFP32;
+EndCmp
+
+BeginCmp
+TimeStamp = /54360F7C;
+Reference = WRITER1;
+ValeurCmp = CONN_5;
+IdModule  = PIN_ARRAY_5x1;
 EndCmp
 
 EndListe
