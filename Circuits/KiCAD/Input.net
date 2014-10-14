@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source C:/TWESDK/Wks_ToCoNet/App_DoorChecker/Circuits/KiCAD/Input.sch)
-    (date "2014/10/13 14:56:33")
+    (date "2014/10/14 14:26:59")
     (tool "eeschema (2013-07-07 BZR 4022)-stable"))
   (components
     (comp (ref 0.22F1)
@@ -30,7 +30,7 @@
       (sheetpath (names /) (tstamps /))
       (tstamp 5436105C))
     (comp (ref U1)
-      (value LITE_LITE)
+      (value TWE-Lite_SMD)
       (libsource (lib TWELite) (part LITE_LITE))
       (sheetpath (names /) (tstamps /))
       (tstamp 5436A16D))
@@ -47,8 +47,8 @@
         (field (name Footprint) ~)
         (field (name Datasheet) ~))
       (pins
-        (pin (num 1) (name +) (type power_out))
-        (pin (num 2) (name -) (type power_out))))
+        (pin (num 1) (name +) (type passive))
+        (pin (num 2) (name -) (type passive))))
     (libpart (lib device) (part C)
       (description "Condensateur non polarise")
       (footprints

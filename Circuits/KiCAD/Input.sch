@@ -38,7 +38,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "DoorChecker EndPoint_Input"
-Date "13 oct 2014"
+Date "14 oct 2014"
 Rev ""
 Comp "true-nature"
 Comment1 ""
@@ -143,7 +143,7 @@ L LITE_LITE U1
 U 2 1 5436A16D
 P 4450 3550
 F 0 "U1" H 4450 3550 60  0001 C CNN
-F 1 "LITE_LITE" H 4450 3550 60  0001 C CNN
+F 1 "TWE-Lite_SMD" H 4450 3550 60  0001 C CNN
 F 2 "" H 4450 3550 60  0000 C CNN
 F 3 "" H 4450 3550 60  0000 C CNN
 	2    4450 3550
