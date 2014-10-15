@@ -1,10 +1,22 @@
-PCBNEW-LibModule-V1  2014/10/14 14:22:27
+PCBNEW-LibModule-V1  2014/10/15 14:18:26
 # encoding utf-8
 Units mm
 $INDEX
+CST-2032
 LITE
 TWE-Lite_SMD
 $EndINDEX
+$MODULE CST-2032
+Po 0 0 0 15 543E036A 00000000 ~~
+Li CST-2032
+Cd http://www.takachi-el.co.jp/data/pdf/11-14.pdf
+Kw CR2032,Battery
+Sc 0
+AR 
+Op 0 0 0
+T0 0 -1.016 1 1 0 0.15 N V 21 N "V"
+T1 0 0.254 1 1 0 0.15 N V 21 N "CST-2032"
+$EndMODULE CST-2032
 $MODULE LITE
 Po 0 0 0 15 543B7589 00000000 ~~
 Li LITE
