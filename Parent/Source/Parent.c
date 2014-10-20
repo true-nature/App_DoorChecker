@@ -1298,12 +1298,17 @@ void vSerOutput_Uart(tsRxPktInfo *pRxPktInfo, uint8 *p) {
 	case PKT_ID_LM61:
 	case PKT_ID_SHT21:
 		_C {
-			S_OCTET(G_OCTET()); // batt
-
-			S_BE_WORD(G_BE_WORD());
-			S_BE_WORD(G_BE_WORD());
-			S_BE_WORD(G_BE_WORD());
-			S_BE_WORD(G_BE_WORD());
+			// S_OCTET(G_OCTET()) ではコピー結果が化ける
+			size_t len = 9;
+			memcpy(q, p, len);
+			q += len;
+			p += len;
+//			S_OCTET(G_OCTET()); // batt
+//
+//			S_BE_WORD(G_BE_WORD());
+//			S_BE_WORD(G_BE_WORD());
+//			S_BE_WORD(G_BE_WORD());
+//			S_BE_WORD(G_BE_WORD());
 		}
 		break;
 
@@ -1353,11 +1358,16 @@ void vSerOutput_Uart(tsRxPktInfo *pRxPktInfo, uint8 *p) {
 	//	押しボタン
 	case PKT_ID_BOTTON:
 		_C {
-			S_OCTET(G_OCTET()); // batt
-			S_BE_WORD(G_BE_WORD());
-			S_BE_WORD(G_BE_WORD());
-			S_OCTET(G_OCTET());
-			S_OCTET(G_OCTET());
+			// S_OCTET(G_OCTET()) ではコピー結果が化ける
+			size_t len = 7;
+			memcpy(q, p, len);
+			q += len;
+			p += len;
+//			S_OCTET(G_OCTET()); // batt
+//			S_BE_WORD(G_BE_WORD());
+//			S_BE_WORD(G_BE_WORD());
+//			S_OCTET(G_OCTET());
+//			S_OCTET(G_OCTET());
 		}
 		break;
 
