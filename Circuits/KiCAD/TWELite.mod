@@ -1,13 +1,14 @@
-PCBNEW-LibModule-V1  2014/10/15 14:18:26
+PCBNEW-LibModule-V1  2014/10/16 17:03:04
 # encoding utf-8
 Units mm
 $INDEX
 CST-2032
+CST-2032-CSPB
 LITE
 TWE-Lite_SMD
 $EndINDEX
 $MODULE CST-2032
-Po 0 0 0 15 543E036A 00000000 ~~
+Po 0 0 0 15 543F70E7 00000000 ~~
 Li CST-2032
 Cd http://www.takachi-el.co.jp/data/pdf/11-14.pdf
 Kw CR2032,Battery
@@ -16,7 +17,90 @@ AR
 Op 0 0 0
 T0 0 -1.016 1 1 0 0.15 N V 21 N "V"
 T1 0 0.254 1 1 0 0.15 N V 21 N "CST-2032"
+DC 0 0 10 0 0.15 21
+$PAD
+Sh "1" C 1.9 1.9 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po -1.6 -13
+$EndPAD
+$PAD
+Sh "2" C 1.9 1.9 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po 1.6 -13
+$EndPAD
+$PAD
+Sh "3" C 1.9 1.9 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po -13.2 0
+$EndPAD
+$PAD
+Sh "4" C 1.9 1.9 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po 13.2 0
+$EndPAD
 $EndMODULE CST-2032
+$MODULE CST-2032-CSPB
+Po 0 0 0 15 543F7B41 00000000 ~~
+Li CST-2032-CSPB
+Cd http://www.takachi-el.co.jp/data/pdf/11-14.pdf
+Kw CR2032,Battery
+Sc 0
+AR 
+Op 0 0 0
+T0 0 -1.016 1 1 0 0.15 N V 21 N "V"
+T1 0 0.254 1 1 0 0.15 N V 21 N "CST-2032-CSPB"
+DC 0 0 10 0 0.15 21
+$PAD
+Sh "2" C 1.9 1.9 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po -10.458 -7.886
+$EndPAD
+$PAD
+Sh "1" C 1.9 1.9 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po -12.058 -5.114
+$EndPAD
+$PAD
+Sh "3" C 1.9 1.9 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po -6.6 11.432
+$EndPAD
+$PAD
+Sh "4" C 1.9 1.9 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po 6.6 -11.432
+$EndPAD
+$PAD
+Sh "5" C 1.9 1.9 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po -10.458 -10.886
+$EndPAD
+$PAD
+Sh "6" C 1.9 1.9 0 0 0
+Dr 1 0 0
+At STD N 00E0FFFF
+Ne 0 ""
+Po 9.6 -11.432
+$EndPAD
+$EndMODULE CST-2032-CSPB
 $MODULE LITE
 Po 0 0 0 15 543B7589 00000000 ~~
 Li LITE
