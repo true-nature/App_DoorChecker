@@ -293,7 +293,7 @@ void cbToCoNet_vRxEvent(tsRxDataApp *pRx) {
 		}
 
 		// データベースへ登録（線形配列に格納している）
-		if (sRxPktInfo.u8pkt == PKT_ID_BOTTON) {
+		if (sRxPktInfo.u8pkt == PKT_ID_BUTTON) {
 			// ID,状態,電源電圧を登録
 			uint32 u32key = (sRxPktInfo.u8id|sRxPktInfo.u8btn<<8|sRxPktInfo.u8batt<<16);
 			ADDRKEYA_vAdd(&sEndDevList, sRxPktInfo.u32addr_1st, u32key);
@@ -582,7 +582,7 @@ void vSerOutput_Standard(tsRxPktInfo *pRxPktInfo, uint8 *p) {
 	A_PRINTF(":ed=%08X:id=%X", pRxPktInfo->u32addr_1st, pRxPktInfo->u8id);
 
 	switch(pRxPktInfo->u8pkt) {
-	case PKT_ID_BOTTON:
+	case PKT_ID_BUTTON:
 		_C {
 			pRxPktInfo->u8batt = G_OCTET();
 
@@ -830,7 +830,7 @@ void vSerOutput_Standard(tsRxPktInfo *pRxPktInfo, uint8 *p) {
  */
 void vSerOutput_SmplTag3( tsRxPktInfo *pRxPktInfo, uint8 *p) {
 	//	押しボタン
-	if ( pRxPktInfo->u8pkt == PKT_ID_BOTTON ) {
+	if ( pRxPktInfo->u8pkt == PKT_ID_BUTTON ) {
 		pRxPktInfo->u8batt = G_OCTET();
 		pRxPktInfo->u16adc1 = G_BE_WORD();
 		pRxPktInfo->u16adc2 = G_BE_WORD();
@@ -1356,7 +1356,7 @@ void vSerOutput_Uart(tsRxPktInfo *pRxPktInfo, uint8 *p) {
 		break;
 
 	//	押しボタン
-	case PKT_ID_BOTTON:
+	case PKT_ID_BUTTON:
 		_C {
 			// S_OCTET(G_OCTET()) ではコピー結果が化ける
 			size_t len = 7;

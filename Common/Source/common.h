@@ -48,7 +48,7 @@ extern const uint8 au8EncKey[];
 #define PKT_ID_LIS3DH 0x34
 #define PKT_ID_IO_TIMER 0x51
 #define PKT_ID_UART 0x81
-#define PKT_ID_BOTTON 0xFE
+#define PKT_ID_BUTTON 0xFE
 
 /*
  * 標準ポート定義 (TWE-Lite DIP)
