@@ -1358,16 +1358,16 @@ void vSerOutput_Uart(tsRxPktInfo *pRxPktInfo, uint8 *p) {
 	//	押しボタン
 	case PKT_ID_BUTTON:
 		_C {
-			// S_OCTET(G_OCTET()) ではコピー結果が化ける
-			size_t len = 7;
-			memcpy(q, p, len);
-			q += len;
-			p += len;
-//			S_OCTET(G_OCTET()); // batt
-//			S_BE_WORD(G_BE_WORD());
-//			S_BE_WORD(G_BE_WORD());
-//			S_OCTET(G_OCTET());
-//			S_OCTET(G_OCTET());
+			pRxPktInfo->u8batt = G_OCTET();
+			pRxPktInfo->u16adc1 = G_BE_WORD();
+			pRxPktInfo->u16adc2 = G_BE_WORD();
+			uint8 u8mode = G_OCTET();(void)u8mode;
+			pRxPktInfo->u8btn = G_OCTET();
+			S_OCTET(pRxPktInfo->u8batt);
+			S_BE_WORD(pRxPktInfo->u16adc1);
+			S_BE_WORD(pRxPktInfo->u16adc2);
+			S_OCTET(u8mode);
+			S_OCTET(pRxPktInfo->u8btn);
 		}
 		break;
 
