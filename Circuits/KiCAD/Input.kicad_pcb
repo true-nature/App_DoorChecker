@@ -5,7 +5,7 @@
     (no_connects 15)
     (area 28.0416 39.430546 94.9325 69.024501)
     (thickness 1.6)
-    (drawings 0)
+    (drawings 2)
     (tracks 0)
     (zones 0)
     (modules 7)
@@ -434,5 +434,8 @@
       (layers F.Cu F.Paste F.Mask)
     )
   )
+
+  (gr_line (start 25.781 71.374) (end 25.654 71.374) (angle 90) (layer Edge.Cuts) (width 0.1))
+  (gr_line (start 24.757 38.778) (end 24.757 67.678) (angle 90) (layer Edge.Cuts) (width 0.1))
 
 )
