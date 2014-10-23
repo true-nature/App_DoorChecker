@@ -44,9 +44,9 @@
 extern uint32 u32TickCount_ms; //!< TOCONETのタイムスタンプ @ingroup DUPCHK
 
 /** @ingroup DUPCHK
- * ノードリストをクリアする数
+ * ノードリストをクリアする秒数
  */
-#define ADDRKEYA_TIMEOUT 60000
+#define ADDRKEYA_TIMEOUT_ms 180000
 
 /** @ingroup DUPCHK
  * ノードリストの要素数

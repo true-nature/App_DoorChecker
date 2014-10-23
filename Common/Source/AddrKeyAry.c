@@ -39,7 +39,7 @@ void ADDRKEYA_vInit(tsAdrKeyA_Context *p) {
 bool_t ADDRKEYA_bFind(tsAdrKeyA_Context *p, uint32 u32Addr, uint32 *pu32Key) {
 	int i;
 	for(i = 0; i < ADDRKEYA_MAX_HISTORY; i++) {
-		if (u32TickCount_ms - p->au32ScanListTick[i] > ADDRKEYA_TIMEOUT) {
+		if (u32TickCount_ms - p->au32ScanListTick[i] > ADDRKEYA_TIMEOUT_ms) {
 			p->au32ScanListTick[i] = 0;
 			p->au32ScanListAddr[i] = 0;
 			p->au32ScanListKey[i] = 0;
