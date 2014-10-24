@@ -164,7 +164,7 @@ void cbAppColdStart(bool_t bAfterAhiInit) {
 
 		//	入力ボタンのプルアップを停止する
 		if ((sAppData.sFlash.sData.u8mode == PKT_ID_IO_TIMER)	// ドアタイマー
-			|| (sAppData.sFlash.sData.u8mode == PKT_ID_BOTTON && sAppData.sFlash.sData.i16param == 1 ) ) {	// 押しボタンの立ち上がり検出時
+			|| (sAppData.sFlash.sData.u8mode == PKT_ID_BUTTON && sAppData.sFlash.sData.i16param == 1 ) ) {	// 押しボタンの立ち上がり検出時
 			vPortDisablePullup(DIO_BUTTON); // 外部プルアップのため
 		}
 
@@ -207,7 +207,7 @@ void cbAppColdStart(bool_t bAfterAhiInit) {
 			Interactive_vInit();
 		} else
 		//	ボタン起動モード
-		if ( sAppData.sFlash.sData.u8mode == PKT_ID_BOTTON ) {
+		if ( sAppData.sFlash.sData.u8mode == PKT_ID_BUTTON ) {
 			sToCoNet_AppContext.u8MacInitPending = TRUE; // 起動時の MAC 初期化を省略する(送信する時に初期化する)
 			sToCoNet_AppContext.bSkipBootCalib = TRUE; // 起動時のキャリブレーションを省略する(保存した値を確認)
 
@@ -371,7 +371,7 @@ void cbAppWarmStart(bool_t bAfterAhiInit) {
 		ToCoNet_vDebugLevel(TOCONET_DEBUG_LEVEL);
 
 		// センサ特有の初期化
-		if ( sAppData.sFlash.sData.u8mode == PKT_ID_BOTTON ) {
+		if ( sAppData.sFlash.sData.u8mode == PKT_ID_BUTTON ) {
 			// ADC の初期化
 			vInitADC();
 		} else
