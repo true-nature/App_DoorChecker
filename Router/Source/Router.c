@@ -60,6 +60,8 @@
 /****************************************************************************/
 #define TOCONET_DEBUG_LEVEL 0
 
+#define PWM_IDX_POWER 3  // 緑
+
 /****************************************************************************/
 /***        Type Definitions                                              ***/
 /****************************************************************************/
@@ -90,10 +92,29 @@ tsSerialPortSetup sSerPort;
 
 // Timer object
 tsTimerContext sTimerApp;
+tsTimerContext sTimerPWM[4]; //!< タイマー管理構造体(PWM)
 
 /****************************************************************************/
 /***        FUNCTIONS                                                     ***/
 /****************************************************************************/
+
+static void vBlinkLed()
+{
+	static uint16 u16duty = 0;
+	static bool_t bBlinkPositive = TRUE;
+	// 電源
+	sTimerPWM[PWM_IDX_POWER].u16duty = u16duty;
+	vTimerConfig(&sTimerPWM[PWM_IDX_POWER]);
+	vTimerStart(&sTimerPWM[PWM_IDX_POWER]);
+
+	if (bBlinkPositive) {
+		u16duty += 4;
+		bBlinkPositive = (u16duty < 1024);
+	} else {
+		u16duty -= 4;
+		bBlinkPositive = !(u16duty >= 4);
+	}
+}
 
 /****************************************************************************
  *
@@ -135,6 +156,10 @@ static void vProcessEvCore(tsEvent *pEv, teEvent eEvent, uint32 u32evarg) {
 		break;
 
 	case E_STATE_RUNNING:
+		if (eEvent == E_EVENT_TICK_TIMER) {
+			// 動作中はLED点滅
+			vBlinkLed();
+		}
 		break;
 
 	default:
@@ -515,6 +540,35 @@ PRIVATE void vInitHardware(int f_warm_start) {
 	sTimerApp.u8PreScale = 10;
 	vTimerConfig(&sTimerApp);
 	vTimerStart(&sTimerApp);
+
+# ifdef JN516x
+	{
+		vAHI_TimerFineGrainDIOControl(0x7); // bit 0,1,2 をセット (TIMER0 の各ピンを解放する, PWM1..4 は使用する)
+		vAHI_TimerSetLocation(E_AHI_TIMER_1, TRUE, TRUE); // IOの割り当てを設定
+
+		// PWM
+		const uint8 au8TimTbl[] = {
+			E_AHI_DEVICE_TIMER1,
+			E_AHI_DEVICE_TIMER2,
+			E_AHI_DEVICE_TIMER3,
+			E_AHI_DEVICE_TIMER4
+		};
+		int i;
+		for (i = 0; i < 4; i++) {
+			memset(&sTimerPWM[i], 0, sizeof(tsTimerContext));
+			sTimerPWM[i].u16Hz = 1000;
+			sTimerPWM[i].u8PreScale = 0;
+			sTimerPWM[i].u16duty = 1024; // 1024=Hi, 0:Lo
+			sTimerPWM[i].bPWMout = TRUE;
+			sTimerPWM[i].bDisableInt = TRUE; // 割り込みを禁止する指定
+			sTimerPWM[i].u8Device = au8TimTbl[i];
+		}
+		// 基本的な設定だけ行い、状態判定後にduty比を再設定して点灯する
+		for (i = 0; i < 4; i++) {
+			vTimerConfig(&sTimerPWM[i]);
+		}
+	}
+# endif
 }
 
 /****************************************************************************
