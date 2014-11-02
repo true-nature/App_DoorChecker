@@ -127,6 +127,7 @@ PRSEV_HANDLER_DEF(E_STATE_RUNNING, tsEvent *pEv, teEvent eEvent, uint32 u32evarg
 		/*	DIの入力状態を取得	*/
 		uint8 DI_Bitmap = readInput();
 		S_OCTET( DI_Bitmap );
+		sAppData.bDI1_Now_Opened = ((DI_Bitmap & 1) == 0);
 
 
 		sTx.u8Len = q - sTx.auData; // パケットのサイズ
@@ -203,10 +204,11 @@ PRSEV_HANDLER_DEF(E_STATE_APP_SLEEP, tsEvent *pEv, teEvent eEvent, uint32 u32eva
 
 		vAHI_DioWakeEnable(PORT_INPUT_MASK, 0); // also use as DIO WAKE SOURCE
 
-		if(sAppData.sFlash.sData.i16param == 1){
-			vAHI_DioWakeEdge(PORT_INPUT_MASK, 0); // 割り込みエッジ（立上がりに設定）
-		} else {
+		// i16paramに関わらず状態の変化で起床
+		if(sAppData.bDI1_Now_Opened) {
 			vAHI_DioWakeEdge(0, PORT_INPUT_MASK); // 割り込みエッジ（立下りに設定）
+		} else {
+			vAHI_DioWakeEdge(PORT_INPUT_MASK, 0); // 割り込みエッジ（立上がりに設定）
 		}
 
 		// wake up using wakeup timer as well.
