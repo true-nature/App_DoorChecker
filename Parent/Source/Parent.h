@@ -41,6 +41,8 @@ typedef struct _tsRxPktInfo{
 	uint16 u16adc1;			// ADC 1
 	uint16 u16adc2;			// ADC 2
 	uint8 u8btn;			// DI input status
+	uint16 u16PC1;
+	uint16 u16PC2;
 } tsRxPktInfo;
 
 /****************************************************************************/

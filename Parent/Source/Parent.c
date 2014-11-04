@@ -1299,16 +1299,17 @@ void vSerOutput_Uart(tsRxPktInfo *pRxPktInfo, uint8 *p) {
 	case PKT_ID_SHT21:
 		_C {
 			// S_OCTET(G_OCTET()) ではコピー結果が化ける
-			size_t len = 9;
-			memcpy(q, p, len);
-			q += len;
-			p += len;
-//			S_OCTET(G_OCTET()); // batt
-//
-//			S_BE_WORD(G_BE_WORD());
-//			S_BE_WORD(G_BE_WORD());
-//			S_BE_WORD(G_BE_WORD());
-//			S_BE_WORD(G_BE_WORD());
+			pRxPktInfo->u8batt = G_OCTET();
+			pRxPktInfo->u16adc1 = G_BE_WORD();
+			pRxPktInfo->u16adc2 = G_BE_WORD();
+			pRxPktInfo->u16PC1 = G_BE_WORD();
+			pRxPktInfo->u16PC2 = G_BE_WORD();
+
+			S_OCTET(pRxPktInfo->u8batt);
+			S_BE_WORD(pRxPktInfo->u16adc1);
+			S_BE_WORD(pRxPktInfo->u16adc2);
+			S_BE_WORD(pRxPktInfo->u16PC1);
+			S_BE_WORD(pRxPktInfo->u16PC2);
 		}
 		break;
 
