@@ -1,0 +1,34 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides: twe-monitor
+# Required-Start:
+# Required-Stop:
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: TWE-Lite battery monitor
+# Description: Read battery status of TWE-Lite
+### END INIT INFO
+# 
+PIDFILE=/var/run/twe-monitor.pid
+case "$1" in
+        start)
+                if [ -f $PIDFILE ]; then
+                        echo $PIDFILE exists.
+                        exit 1
+                fi
+                start-stop-daemon -S -x /usr/local/sbin/twe-monitor.py -b -m -p $PIDFILE
+                ;;
+        stop)
+                if [ ! -f $PIDFILE ]; then
+                        echo $PIDFILE not found.
+                        exit 1
+                fi
+                start-stop-daemon -K -p $PIDFILE
+                rm $PIDFILE
+                ;;
+        *)
+                echo "Usage: /etc/init.d/twe-monitor {start|stop}"
+                exit 1
+                ;;
+esac
+exit 0
