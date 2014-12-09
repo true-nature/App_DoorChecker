@@ -286,4 +286,10 @@ Wire Wire Line
 Wire Wire Line
 	7300 2100 4650 2100
 Connection ~ 4650 2100
+Text Label 7250 5900 0    60   ~ 0
+Vcc
+Text Notes 6100 2200 0    60   ~ 0
+CFG
+Text Notes 4650 1850 0    60   ~ 0
+Vcc
 $EndSCHEMATC
