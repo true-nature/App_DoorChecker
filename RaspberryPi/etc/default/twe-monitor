@@ -1,0 +1,2 @@
+MAIL_FROM='twe@localhost'
+RCPT_TO='twe@localhost'

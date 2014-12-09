@@ -18,11 +18,6 @@ SerialDevice = "/dev/ttyUSB0"
 OutDir = "/var/run/twe"
 RainMarker = OutDir + "/RainMarker"
 
-# notify rain
-fromAddr="twe@localhost"
-toAddr="twe@localhost"
-
-
 def decodeVolt(batt):
     volt = 0
     if batt <= 170:
@@ -36,6 +31,12 @@ def touch(fname, times=None):
                 os.utime(fname, times)
 
 def notifyRain():
+    fromAddr="twe@localhost"
+    toAddr="twe@localhost"
+    if 'MAIL_FROM' in os.environ:
+        fromAddr = os.environ['MAIL_FROM']
+    if 'RCPT_TO' in os.environ:
+        toAddr = os.environ['RCPT_TO']
     msg = MIMEText("The weather is rain.")
     msg['Subject'] = "It's rain."
     msg['From'] = fromAddr
