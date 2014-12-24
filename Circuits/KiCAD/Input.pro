@@ -1,13 +1,8 @@
-update=2014/10/14 19:20:35
+update=2014/12/10 16:52:52
 version=1
-last_client=pcbnew
+last_client=cvpcb
 [general]
 version=1
-[cvpcb]
-version=1
-NetIExt=net
-[cvpcb/libraries]
-EquName1=devcms
 [eeschema]
 version=1
 LibDir=
@@ -49,6 +44,7 @@ LibName29=contrib
 LibName30=valves
 LibName31=relays
 LibName32=TWELite
+LibName33=w_connectors
 [pcbnew]
 version=1
 LastNetListRead=Input.net
@@ -69,7 +65,6 @@ DrawSegmentWidth=0.200000000000
 BoardOutlineThickness=0.100000000000
 ModuleOutlineThickness=0.150000000000
 [pcbnew/libraries]
-LibDir=
 LibName1=sockets
 LibName2=connect
 LibName3=discret
@@ -89,3 +84,11 @@ LibName16=valves
 LibName17=Reed
 LibName18=relay
 LibName19=TWELite
+LibName20=w_battery_holders
+LibName21=w_pin_strip
+LibDir=
+[cvpcb]
+version=1
+NetIExt=net
+[cvpcb/libraries]
+EquName1=devcms

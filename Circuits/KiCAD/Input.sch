@@ -38,7 +38,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "DoorChecker EndPoint_Input"
-Date "9 dec 2014"
+Date "24 dec 2014"
 Rev ""
 Comp "true-nature"
 Comment1 ""
@@ -286,7 +286,7 @@ Wire Wire Line
 Wire Wire Line
 	7300 2100 4650 2100
 Connection ~ 4650 2100
-Text Label 7250 5900 0    60   ~ 0
+Text Label 7300 5300 0    60   ~ 0
 Vcc
 Text Notes 6100 2200 0    60   ~ 0
 CFG
