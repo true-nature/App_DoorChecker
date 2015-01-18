@@ -1,6 +1,6 @@
-update=2014/12/25 14:55:57
+update=2015/01/18 20:12:14
 version=1
-last_client=eeschema
+last_client=cvpcb
 [general]
 version=1
 [pcbnew]
@@ -42,14 +42,7 @@ LibName16=valves
 LibName17=Reed
 LibName18=relay
 LibName19=TWELite
-LibName20=w_battery_holders
-LibName21=w_pin_strip
 LibDir=
-[cvpcb]
-version=1
-NetIExt=net
-[cvpcb/libraries]
-EquName1=devcms
 [eeschema]
 version=1
 LibDir=
@@ -90,4 +83,9 @@ LibName28=atmel
 LibName29=contrib
 LibName30=valves
 LibName31=relays
-LibName32=TWELite
+LibName32=DoorChecker
+[cvpcb]
+version=1
+NetIExt=net
+[cvpcb/libraries]
+EquName1=devcms

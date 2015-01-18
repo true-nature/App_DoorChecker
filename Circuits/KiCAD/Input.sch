@@ -30,7 +30,7 @@ LIBS:atmel
 LIBS:contrib
 LIBS:valves
 LIBS:relays
-LIBS:TWELite
+LIBS:DoorChecker
 LIBS:Input-cache
 EELAYER 27 0
 EELAYER END
@@ -38,7 +38,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "DoorChecker EndPoint_Input"
-Date "24 dec 2014"
+Date "18 jan 2015"
 Rev ""
 Comp "true-nature"
 Comment1 ""
@@ -177,13 +177,13 @@ Wire Wire Line
 Wire Wire Line
 	7100 3500 7100 5400
 Wire Wire Line
-	7100 5400 7350 5400
+	7100 5400 7700 5400
 Wire Wire Line
 	6900 3600 7000 3600
 Wire Wire Line
 	7000 2350 7000 6050
 Wire Wire Line
-	7000 5800 7350 5800
+	7000 5800 7700 5800
 Wire Wire Line
 	5500 4700 5500 4600
 Wire Wire Line
@@ -191,20 +191,20 @@ Wire Wire Line
 Wire Wire Line
 	4450 3900 4450 5700
 Wire Wire Line
-	4450 5700 7350 5700
+	4450 5700 7700 5700
 Wire Wire Line
 	4800 3300 4250 3300
 Wire Wire Line
 	4250 3300 4250 5600
 Wire Wire Line
-	4250 5600 7350 5600
+	4250 5600 7700 5600
 Wire Wire Line
 	4650 3600 4800 3600
 Wire Wire Line
 	4650 1350 4650 4100
 Connection ~ 4650 3600
 Wire Wire Line
-	6800 5500 7350 5500
+	6800 5500 7700 5500
 Wire Wire Line
 	5500 4700 6800 4700
 Wire Wire Line
@@ -259,14 +259,14 @@ Wire Wire Line
 Wire Wire Line
 	3350 2900 2800 2900
 $Comp
-L CONN_7 WRITER1
+L CONN_7 CN1
 U 1 1 5486A17C
-P 7700 5600
-F 0 "WRITER1" V 7670 5600 60  0000 C CNN
-F 1 "CONN_7" V 7770 5600 60  0000 C CNN
-F 2 "~" H 7700 5600 60  0000 C CNN
-F 3 "~" H 7700 5600 60  0000 C CNN
-	1    7700 5600
+P 8050 5600
+F 0 "CN1" V 8020 5600 60  0000 C CNN
+F 1 "WRITER" V 8120 5600 60  0000 C CNN
+F 2 "~" H 8050 5600 60  0000 C CNN
+F 3 "~" H 8050 5600 60  0000 C CNN
+	1    8050 5600
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
@@ -278,18 +278,51 @@ Wire Wire Line
 Wire Wire Line
 	7200 2200 7200 5900
 Wire Wire Line
-	7200 5900 7350 5900
+	7200 5900 7700 5900
 Wire Wire Line
-	7350 5300 7300 5300
+	7700 5300 7300 5300
 Wire Wire Line
 	7300 5300 7300 2100
 Wire Wire Line
 	7300 2100 4650 2100
 Connection ~ 4650 2100
-Text Label 7300 5300 0    60   ~ 0
+Text Label 7450 5300 0    60   ~ 0
 Vcc
-Text Notes 6100 2200 0    60   ~ 0
+Text Label 7450 5900 0    60   ~ 0
 CFG
-Text Notes 4650 1850 0    60   ~ 0
-Vcc
+Text Label 7450 5400 0    60   ~ 0
+RST
+Text Label 7450 5500 0    60   ~ 0
+RX
+Text Label 7450 5600 0    60   ~ 0
+PRG
+Text Label 7450 5700 0    60   ~ 0
+TX
+Text Label 7450 5800 0    60   ~ 0
+GND
+Text Label 5800 5000 0    60   ~ 0
+DOOR
+Text Label 4650 5000 0    60   ~ 0
+PULLUP
+$Comp
+L R R2
+U 1 1 54BB9578
+P 4800 4350
+F 0 "R2" V 4880 4350 40  0000 C CNN
+F 1 "2M" V 4807 4351 40  0000 C CNN
+F 2 "~" V 4730 4350 30  0000 C CNN
+F 3 "~" H 4800 4350 30  0000 C CNN
+	1    4800 4350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4800 4100 4800 4050
+Wire Wire Line
+	4800 4050 4650 4050
+Connection ~ 4650 4050
+Wire Wire Line
+	4800 4600 4800 4650
+Wire Wire Line
+	4800 4650 4650 4650
+Connection ~ 4650 4650
 $EndSCHEMATC

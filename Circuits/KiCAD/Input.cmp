@@ -1,31 +1,38 @@
-Cmp-Mod V01 Created by PcbNew date = 2014/10/14 14:08:54
-
-BeginCmp
-TimeStamp = /54360EC8;
-Reference = 0.22F1;
-ValeurCmp = C;
-IdModule  = C1V5;
-EndCmp
-
-BeginCmp
-TimeStamp = /54360F12;
-Reference = 2M1;
-ValeurCmp = R;
-IdModule  = R3;
-EndCmp
+Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 2015/01/18 20:15:46
 
 BeginCmp
 TimeStamp = /543B60F0;
 Reference = BT1;
-ValeurCmp = BATTERY;
+ValeurCmp = CR2032;
 IdModule  = CR2032H;
 EndCmp
 
 BeginCmp
-TimeStamp = /5436105C;
-Reference = CFG1;
-ValeurCmp = CONN_2;
-IdModule  = PIN_ARRAY_2X1;
+TimeStamp = /54360EC8;
+Reference = C1;
+ValeurCmp = 0.22;
+IdModule  = C1;
+EndCmp
+
+BeginCmp
+TimeStamp = /5486A17C;
+Reference = CN1;
+ValeurCmp = WRITER;
+IdModule  = SIL-7;
+EndCmp
+
+BeginCmp
+TimeStamp = /54360F12;
+Reference = R1;
+ValeurCmp = 2M;
+IdModule  = R3;
+EndCmp
+
+BeginCmp
+TimeStamp = /54BB9578;
+Reference = R2;
+ValeurCmp = 2M;
+IdModule  = SM0603;
 EndCmp
 
 BeginCmp
@@ -38,15 +45,8 @@ EndCmp
 BeginCmp
 TimeStamp = /5436A16D;
 Reference = U1;
-ValeurCmp = LITE_LITE;
+ValeurCmp = TWE-Lite_SMD;
 IdModule  = TWE-Lite_SMD;
-EndCmp
-
-BeginCmp
-TimeStamp = /54360F7C;
-Reference = WRITER1;
-ValeurCmp = CONN_5;
-IdModule  = PIN_ARRAY_5x1;
 EndCmp
 
 EndListe
