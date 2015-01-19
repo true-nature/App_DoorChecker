@@ -1,10 +1,10 @@
-Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 2015/01/18 20:15:46
+Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 2015/01/19 17:39:27
 
 BeginCmp
 TimeStamp = /543B60F0;
 Reference = BT1;
 ValeurCmp = CR2032;
-IdModule  = CR2032H;
+IdModule  = PBCS-75;
 EndCmp
 
 BeginCmp
@@ -39,14 +39,14 @@ BeginCmp
 TimeStamp = /54360F03;
 Reference = REED1;
 ValeurCmp = SPST;
-IdModule  = PIN_ARRAY_2X1;
+IdModule  = R6;
 EndCmp
 
 BeginCmp
 TimeStamp = /5436A16D;
 Reference = U1;
 ValeurCmp = TWE-Lite_SMD;
-IdModule  = TWE-Lite_SMD;
+IdModule  = TWE-001L-SMD;
 EndCmp
 
 EndListe
