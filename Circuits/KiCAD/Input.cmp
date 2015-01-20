@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by PcbNew date = 2015/01/20 7:33:28
+Cmp-Mod V01 Created by PcbNew date = 2015/01/20 15:07:58
 
 BeginCmp
 TimeStamp = /543B60F0;
@@ -8,7 +8,7 @@ IdModule  = PBCS-75;
 EndCmp
 
 BeginCmp
-TimeStamp = /54360EC8;
+TimeStamp = /54BDE16D;
 Reference = C1;
 ValeurCmp = 0.22;
 IdModule  = DCK-3R3E224-E;
@@ -25,28 +25,14 @@ BeginCmp
 TimeStamp = /54360F12;
 Reference = R1;
 ValeurCmp = 2M;
-IdModule  = R3;
-EndCmp
-
-BeginCmp
-TimeStamp = /54BB9578;
-Reference = R2;
-ValeurCmp = 2M;
 IdModule  = SM0603;
 EndCmp
 
 BeginCmp
 TimeStamp = /54BCF561;
-Reference = R3;
+Reference = R2;
 ValeurCmp = 75;
-IdModule  = R3;
-EndCmp
-
-BeginCmp
-TimeStamp = /54BCF5E9;
-Reference = R4;
-ValeurCmp = 75;
-IdModule  = SM1206;
+IdModule  = SM0603;
 EndCmp
 
 BeginCmp

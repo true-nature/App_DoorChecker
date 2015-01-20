@@ -38,7 +38,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "DoorChecker EndPoint_Input"
-Date "19 jan 2015"
+Date "20 jan 2015"
 Rev ""
 Comp "true-nature"
 Comment1 ""
@@ -46,17 +46,6 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-$Comp
-L C C1
-U 1 1 54360EC8
-P 3400 2600
-F 0 "C1" H 3400 2700 40  0000 L CNN
-F 1 "0.22" H 3406 2515 40  0000 L CNN
-F 2 "~" H 3438 2450 30  0000 C CNN
-F 3 "~" H 3400 2600 60  0000 C CNN
-	1    3400 2600
-	-1   0    0    1   
-$EndComp
 $Comp
 L SPST REED1
 U 1 1 54360F03
@@ -298,63 +287,36 @@ Text Label 5800 5000 0    60   ~ 0
 DOOR
 Text Label 4650 5000 0    60   ~ 0
 PULLUP
-$Comp
-L R R2
-U 1 1 54BB9578
-P 4800 4350
-F 0 "R2" V 4880 4350 40  0000 C CNN
-F 1 "2M" V 4807 4351 40  0000 C CNN
-F 2 "~" V 4730 4350 30  0000 C CNN
-F 3 "~" H 4800 4350 30  0000 C CNN
-	1    4800 4350
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	4800 4100 4800 4050
-Wire Wire Line
-	4800 4050 4650 4050
-Connection ~ 4650 4050
-Wire Wire Line
-	4800 4600 4800 4650
-Wire Wire Line
-	4800 4650 4650 4650
-Connection ~ 4650 4650
 Wire Wire Line
 	2800 2100 2800 2300
+Connection ~ 3400 1850
+Wire Wire Line
+	3350 2100 3400 2100
+Connection ~ 3400 2100
+Wire Wire Line
+	2800 2100 2850 2100
+Text Label 2800 2200 1    60   ~ 0
+DC3V
 $Comp
-L R R3
+L R R2
 U 1 1 54BCF561
 P 3100 2100
-F 0 "R3" V 3180 2100 40  0000 C CNN
+F 0 "R2" V 3180 2100 40  0000 C CNN
 F 1 "75" V 3107 2101 40  0000 C CNN
 F 2 "~" V 3030 2100 30  0000 C CNN
 F 3 "~" H 3100 2100 30  0000 C CNN
 	1    3100 2100
 	0    -1   -1   0   
 $EndComp
-Connection ~ 3400 1850
-Connection ~ 3400 2250
 $Comp
-L R R4
-U 1 1 54BCF5E9
-P 3100 2250
-F 0 "R4" V 3180 2250 40  0000 C CNN
-F 1 "75" V 3107 2251 40  0000 C CNN
-F 2 "~" V 3030 2250 30  0000 C CNN
-F 3 "~" H 3100 2250 30  0000 C CNN
-	1    3100 2250
-	0    -1   -1   0   
+L CP1 C1
+U 1 1 54BDE16D
+P 3400 2600
+F 0 "C1" H 3450 2700 50  0000 L CNN
+F 1 "0.22" H 3450 2500 50  0000 L CNN
+F 2 "~" H 3400 2600 60  0000 C CNN
+F 3 "~" H 3400 2600 60  0000 C CNN
+	1    3400 2600
+	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	3350 2250 3400 2250
-Wire Wire Line
-	3350 2100 3400 2100
-Connection ~ 3400 2100
-Wire Wire Line
-	2800 2100 2850 2100
-Wire Wire Line
-	2850 2250 2800 2250
-Connection ~ 2800 2250
-Text Label 2800 2200 1    60   ~ 0
-DC3V
 $EndSCHEMATC
