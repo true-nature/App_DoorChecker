@@ -1,4 +1,5 @@
 EESchema Schematic File Version 2
+LIBS:TWE-Lite
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -30,7 +31,6 @@ LIBS:atmel
 LIBS:contrib
 LIBS:valves
 LIBS:relays
-LIBS:DoorChecker
 LIBS:Input-cache
 EELAYER 27 0
 EELAYER END
