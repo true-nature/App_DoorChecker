@@ -31,14 +31,13 @@ LIBS:atmel
 LIBS:contrib
 LIBS:valves
 LIBS:relays
-LIBS:Input-cache
 EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "DoorChecker EndPoint_Input"
-Date "20 jan 2015"
+Date "21 jan 2015"
 Rev ""
 Comp "true-nature"
 Comment1 ""
@@ -49,24 +48,24 @@ $EndDescr
 $Comp
 L SPST REED1
 U 1 1 54360F03
-P 5250 5000
-F 0 "REED1" H 5250 5100 70  0000 C CNN
-F 1 "SPST" H 5250 4900 70  0000 C CNN
-F 2 "~" H 5250 5000 60  0000 C CNN
-F 3 "~" H 5250 5000 60  0000 C CNN
-	1    5250 5000
+P 6450 5950
+F 0 "REED1" H 6450 6050 70  0000 C CNN
+F 1 "SPST" H 6450 5850 70  0000 C CNN
+F 2 "~" H 6450 5950 60  0000 C CNN
+F 3 "~" H 6450 5950 60  0000 C CNN
+	1    6450 5950
 	1    0    0    -1  
 $EndComp
 $Comp
 L R R1
 U 1 1 54360F12
-P 4650 4350
-F 0 "R1" V 4730 4350 40  0000 C CNN
-F 1 "2M" V 4657 4351 40  0000 C CNN
-F 2 "~" V 4580 4350 30  0000 C CNN
-F 3 "~" H 4650 4350 30  0000 C CNN
-	1    4650 4350
-	-1   0    0    1   
+P 5250 5000
+F 0 "R1" V 5330 5000 40  0000 C CNN
+F 1 "2M" V 5257 5001 40  0000 C CNN
+F 2 "~" V 5180 5000 30  0000 C CNN
+F 3 "~" H 5250 5000 30  0000 C CNN
+	1    5250 5000
+	0    1    1    0   
 $EndComp
 $Comp
 L LITE_LITE U1
@@ -138,12 +137,12 @@ NoConn ~ 6000 4600
 $Comp
 L GND #PWR04
 U 1 1 543B5A81
-P 7000 6050
-F 0 "#PWR04" H 7000 6050 30  0001 C CNN
-F 1 "GND" H 7000 5980 30  0001 C CNN
-F 2 "" H 7000 6050 60  0000 C CNN
-F 3 "" H 7000 6050 60  0000 C CNN
-	1    7000 6050
+P 7000 6200
+F 0 "#PWR04" H 7000 6200 30  0001 C CNN
+F 1 "GND" H 7000 6130 30  0001 C CNN
+F 2 "" H 7000 6200 60  0000 C CNN
+F 3 "" H 7000 6200 60  0000 C CNN
+	1    7000 6200
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -158,9 +157,9 @@ F 3 "~" H 2800 2600 60  0000 C CNN
 	0    1    1    0   
 $EndComp
 Wire Wire Line
-	4650 4600 4650 5000
+	4650 1350 4650 5000
 Wire Wire Line
-	4650 5000 4750 5000
+	4650 5000 5000 5000
 Wire Wire Line
 	6900 3500 7100 3500
 Wire Wire Line
@@ -170,7 +169,7 @@ Wire Wire Line
 Wire Wire Line
 	6900 3600 7000 3600
 Wire Wire Line
-	7000 2350 7000 6050
+	7000 3600 7000 6200
 Wire Wire Line
 	7000 5800 7700 5800
 Wire Wire Line
@@ -189,8 +188,6 @@ Wire Wire Line
 	4250 5600 7700 5600
 Wire Wire Line
 	4650 3600 4800 3600
-Wire Wire Line
-	4650 1350 4650 4100
 Connection ~ 4650 3600
 Wire Wire Line
 	6800 5500 7700 5500
@@ -203,13 +200,10 @@ Wire Wire Line
 Wire Wire Line
 	2800 2900 2800 3200
 Wire Wire Line
-	5900 4600 5900 5000
+	5900 4600 5900 5950
 Wire Wire Line
-	5900 5000 5750 5000
+	5500 5000 5900 5000
 Connection ~ 7000 5800
-Wire Wire Line
-	7000 2350 5900 2350
-Connection ~ 7000 3600
 $Comp
 L PWR_FLAG #FLG05
 U 1 1 54869ED2
@@ -253,8 +247,6 @@ F 3 "~" H 8050 5600 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	5900 2350 5900 2500
-Wire Wire Line
 	6000 2500 6000 2200
 Wire Wire Line
 	6000 2200 7200 2200
@@ -285,8 +277,6 @@ Text Label 7450 5800 0    60   ~ 0
 GND
 Text Label 5800 5000 0    60   ~ 0
 DOOR
-Text Label 4650 5000 0    60   ~ 0
-PULLUP
 Wire Wire Line
 	2800 2100 2800 2300
 Connection ~ 3400 1850
@@ -319,4 +309,11 @@ F 3 "~" H 3400 2600 60  0000 C CNN
 	1    3400 2600
 	1    0    0    -1  
 $EndComp
+Wire Wire Line
+	6950 5950 7000 5950
+Connection ~ 7000 5950
+Wire Wire Line
+	5900 5950 5950 5950
+Connection ~ 5900 5000
+NoConn ~ 5900 2500
 $EndSCHEMATC
