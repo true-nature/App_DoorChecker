@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 2015/01/23 15:33:30
+Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 2015/01/23 15:56:42
 
 BeginCmp
 TimeStamp = /54C2008B;
@@ -50,6 +50,13 @@ IdModule  = C2V8;
 EndCmp
 
 BeginCmp
+TimeStamp = /54C1E246;
+Reference = CN1;
+ValeurCmp = WRITER;
+IdModule  = SIL-6;
+EndCmp
+
+BeginCmp
 TimeStamp = /54C1DE3A;
 Reference = LCD1;
 ValeurCmp = AQM1602NI;
@@ -75,13 +82,6 @@ TimeStamp = /54BF642A;
 Reference = LD3;
 ValeurCmp = BATT;
 IdModule  = LED-3MM;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C1E246;
-Reference = P1;
-ValeurCmp = WRITER;
-IdModule  = SIL-6;
 EndCmp
 
 BeginCmp
