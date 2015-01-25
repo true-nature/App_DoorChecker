@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 2015/01/23 17:09:28
+Cmp-Mod V01 Created by PcbNew date = 2015/01/25 22:46:57
 
 BeginCmp
 TimeStamp = /54C2008B;
@@ -46,14 +46,14 @@ BeginCmp
 TimeStamp = /54C1FA5B;
 Reference = C6;
 ValeurCmp = 47u;
-IdModule  = C2V8;
+IdModule  = C1V5;
 EndCmp
 
 BeginCmp
 TimeStamp = /54C1E246;
 Reference = CN1;
 ValeurCmp = WRITER;
-IdModule  = SIL-6;
+IdModule  = PIN_ARRAY-6X1;
 EndCmp
 
 BeginCmp
@@ -116,14 +116,14 @@ BeginCmp
 TimeStamp = /54BFA335;
 Reference = R4;
 ValeurCmp = 1k;
-IdModule  = R1;
+IdModule  = R4;
 EndCmp
 
 BeginCmp
 TimeStamp = /54BFA36E;
 Reference = R5;
 ValeurCmp = 2.2M;
-IdModule  = R1;
+IdModule  = R4;
 EndCmp
 
 BeginCmp
@@ -179,28 +179,28 @@ BeginCmp
 TimeStamp = /54C1EE10;
 Reference = RV2;
 ValeurCmp = 10k;
-IdModule  = RV2;
+IdModule  = TSR-3386T;
 EndCmp
 
 BeginCmp
 TimeStamp = /54C1FF2E;
 Reference = SP1;
 ValeurCmp = SPEAKER;
-IdModule  = SIL-2;
+IdModule  = PIN_ARRAY_2X1;
 EndCmp
 
 BeginCmp
 TimeStamp = /54BF652D;
 Reference = SW1;
 ValeurCmp = WakeUp;
-IdModule  = SIL-2;
+IdModule  = PIN_ARRAY_2X1;
 EndCmp
 
 BeginCmp
-TimeStamp = /54BF5D85;
+TimeStamp = /54C2E178;
 Reference = U1;
-ValeurCmp = TWE_LITE_DIP;
-IdModule  = DIP-28__600;
+ValeurCmp = TWE_LITE_SMD;
+IdModule  = TWE-001L-SMD;
 EndCmp
 
 BeginCmp

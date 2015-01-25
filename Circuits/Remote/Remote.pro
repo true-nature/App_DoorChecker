@@ -1,5 +1,5 @@
-update=2015/01/23 15:18:51
-last_client=pcbnew
+update=2015/01/24 8:48:08
+last_client=cvpcb
 [general]
 version=1
 [eeschema]
@@ -46,10 +46,10 @@ LibName31=valves
 version=1
 LastNetListRead=Remote.net
 UseCmpFile=1
-PadDrill=0.600000000000
-PadDrillOvalY=0.600000000000
-PadSizeH=1.500000000000
-PadSizeV=1.500000000000
+PadDrill=3.200000000000
+PadDrillOvalY=3.200000000000
+PadSizeH=3.200000000000
+PadSizeV=3.200000000000
 PcbTextSizeV=1.500000000000
 PcbTextSizeH=1.500000000000
 PcbTextThickness=0.300000000000
@@ -62,7 +62,6 @@ DrawSegmentWidth=0.200000000000
 BoardOutlineThickness=0.100000000000
 ModuleOutlineThickness=0.150000000000
 [pcbnew/libraries]
-LibDir=../../../kicad-twe/modules
 LibName1=TWE-Lite
 LibName2=sockets
 LibName3=connect
@@ -80,3 +79,9 @@ LibName14=led
 LibName15=dip_sockets
 LibName16=pga_sockets
 LibName17=valves
+LibDir=../../../kicad-twe/modules
+[cvpcb]
+version=1
+NetIExt=net
+[cvpcb/libraries]
+EquName1=devcms
