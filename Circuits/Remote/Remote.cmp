@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by PcbNew date = 2015/01/25 22:46:57
+Cmp-Mod V01 Created by PcbNew date = 2015/01/25 23:28:53
 
 BeginCmp
 TimeStamp = /54C2008B;
@@ -172,7 +172,7 @@ BeginCmp
 TimeStamp = /54C1E669;
 Reference = RV1;
 ValeurCmp = 20k;
-IdModule  = RV2;
+IdModule  = RV-3362P;
 EndCmp
 
 BeginCmp
