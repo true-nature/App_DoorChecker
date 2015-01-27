@@ -4,7 +4,7 @@
     (links 74)
     (no_connects 0)
     (area 12.192 12.7 102.108001 78.740001)
-    (thickness 1.0)
+    (thickness 1)
     (drawings 0)
     (tracks 257)
     (zones 0)
@@ -1520,7 +1520,12 @@
     )
     (model SGM-135-Lower.wrl
       (at (xyz 0 0 0))
-      (scale (xyz 0.3937007874 0.3937007874 0.3937007874))
+      (scale (xyz 0.393701 0.393701 0.393701))
+      (rotate (xyz 0 0 0))
+    )
+    (model SGM-135-Upper.wrl
+      (at (xyz 0 0 0))
+      (scale (xyz 0.393701 0.393701 0.393701))
       (rotate (xyz 0 0 0))
     )
   )
