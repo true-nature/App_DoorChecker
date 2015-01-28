@@ -37,7 +37,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title ""
-Date "25 jan 2015"
+Date "28 jan 2015"
 Rev ""
 Comp ""
 Comment1 ""
@@ -59,12 +59,12 @@ $EndComp
 $Comp
 L VCC #PWR01
 U 1 1 54BF6362
-P 3950 900
-F 0 "#PWR01" H 3950 1000 30  0001 C CNN
-F 1 "VCC" H 3950 1000 30  0000 C CNN
-F 2 "~" H 3950 900 60  0000 C CNN
-F 3 "~" H 3950 900 60  0000 C CNN
-	1    3950 900 
+P 3000 750
+F 0 "#PWR01" H 3000 850 30  0001 C CNN
+F 1 "VCC" H 3000 850 30  0000 C CNN
+F 2 "~" H 3000 750 60  0000 C CNN
+F 3 "~" H 3000 750 60  0000 C CNN
+	1    3000 750 
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -110,39 +110,6 @@ F 2 "~" V 3230 2050 30  0000 C CNN
 F 3 "~" H 3300 2050 30  0000 C CNN
 	1    3300 2050
 	1    0    0    -1  
-$EndComp
-$Comp
-L LED LD1
-U 1 1 54BF63DA
-P 3300 1400
-F 0 "LD1" H 3300 1500 50  0000 C CNN
-F 1 "DOOR" H 3300 1300 50  0000 C CNN
-F 2 "~" H 3300 1400 60  0000 C CNN
-F 3 "~" H 3300 1400 60  0000 C CNN
-	1    3300 1400
-	0    1    1    0   
-$EndComp
-$Comp
-L LED LD2
-U 1 1 54BF6402
-P 3650 1400
-F 0 "LD2" H 3650 1500 50  0000 C CNN
-F 1 "COMM" H 3650 1300 50  0000 C CNN
-F 2 "~" H 3650 1400 60  0000 C CNN
-F 3 "~" H 3650 1400 60  0000 C CNN
-	1    3650 1400
-	0    1    1    0   
-$EndComp
-$Comp
-L LED LD3
-U 1 1 54BF642A
-P 3950 1400
-F 0 "LD3" H 3950 1500 50  0000 C CNN
-F 1 "BATT" H 3950 1300 50  0000 C CNN
-F 2 "~" H 3950 1400 60  0000 C CNN
-F 3 "~" H 3950 1400 60  0000 C CNN
-	1    3950 1400
-	0    1    1    0   
 $EndComp
 $Comp
 L SW_PUSH SW1
@@ -246,24 +213,24 @@ $EndComp
 $Comp
 L AQM1602NI LCD1
 U 1 1 54C1DE3A
-P 4950 1950
-F 0 "LCD1" V 5100 1950 60  0000 C CNN
-F 1 "AQM1602NI" V 5200 1950 60  0000 C CNN
-F 2 "~" H 4950 1950 60  0000 C CNN
-F 3 "~" H 4950 1950 60  0000 C CNN
-	1    4950 1950
+P 4800 1950
+F 0 "LCD1" V 4950 1950 60  0000 C CNN
+F 1 "AQM1602NI" V 5050 1950 60  0000 C CNN
+F 2 "~" H 4800 1950 60  0000 C CNN
+F 3 "~" H 4800 1950 60  0000 C CNN
+	1    4800 1950
 	0    -1   -1   0   
 $EndComp
 $Comp
 L POT RV1
 U 1 1 54C1E669
-P 5000 3050
-F 0 "RV1" H 5000 2950 50  0000 C CNN
-F 1 "20k" H 5000 3050 50  0000 C CNN
-F 2 "~" H 5000 3050 60  0000 C CNN
-F 3 "~" H 5000 3050 60  0000 C CNN
-	1    5000 3050
-	0    -1   1    0   
+P 5200 3150
+F 0 "RV1" H 5200 3050 50  0000 C CNN
+F 1 "20k" H 5200 3150 50  0000 C CNN
+F 2 "~" H 5200 3150 60  0000 C CNN
+F 3 "~" H 5200 3150 60  0000 C CNN
+	1    5200 3150
+	-1   0    0    -1  
 $EndComp
 $Comp
 L C C1
@@ -512,7 +479,7 @@ Text Label 9950 5250 0    60   ~ 0
 SPK+
 Text Label 9950 5350 0    60   ~ 0
 SPK-
-Text Label 4850 3000 0    60   ~ 0
+Text Label 4900 2900 0    60   ~ 0
 V0
 Text Label 4100 4150 1    60   ~ 0
 GND_SW
@@ -531,11 +498,11 @@ AudioIn
 Text Label 7250 5600 0    60   ~ 0
 PLAY#
 Text Label 3300 1800 1    60   ~ 0
-LD1
+DOOR
 Text Label 3650 1800 1    60   ~ 0
-LD2
+COMM
 Text Label 3950 1800 1    60   ~ 0
-LD3
+BATT
 Text Label 8600 5400 0    60   ~ 0
 VREF
 $Comp
@@ -661,19 +628,8 @@ Wire Wire Line
 	4500 3050 4500 2600
 Wire Wire Line
 	3000 3050 4500 3050
-Connection ~ 3300 1100
 Wire Wire Line
-	3300 1200 3300 1100
-Connection ~ 3650 1100
-Wire Wire Line
-	3650 1100 3650 1200
-Connection ~ 3950 1100
-Wire Wire Line
-	3950 900  3950 1200
-Wire Wire Line
-	3000 1100 3950 1100
-Wire Wire Line
-	3000 2900 3000 1100
+	3000 750  3000 2900
 Wire Wire Line
 	3200 3950 3000 3950
 Wire Wire Line
@@ -715,11 +671,11 @@ Wire Wire Line
 Wire Wire Line
 	1050 6200 1050 6400
 Wire Wire Line
-	3300 1800 3300 1600
+	3300 1450 3300 1800
 Wire Wire Line
-	3650 1800 3650 1600
+	3650 1500 3650 1800
 Wire Wire Line
-	3950 1800 3950 1600
+	3950 1800 3950 1300
 Connection ~ 9600 1250
 Wire Wire Line
 	9850 1250 9600 1250
@@ -822,31 +778,18 @@ Wire Wire Line
 Connection ~ 6000 4500
 Wire Wire Line
 	6400 3700 6650 3700
-Connection ~ 5000 3500
 Wire Wire Line
-	5000 3300 5000 3500
-Connection ~ 5150 2800
-Wire Wire Line
-	5000 2800 5150 2800
-Wire Wire Line
-	4850 2300 4850 3050
+	4850 2300 4850 2900
 Wire Wire Line
 	4950 2600 4950 2300
 Wire Wire Line
 	5050 2500 5050 2300
-Connection ~ 5150 3400
-Wire Wire Line
-	5150 2300 5150 3400
 Wire Wire Line
 	4750 3400 6250 3400
 Wire Wire Line
 	4750 2300 4750 3400
 Wire Wire Line
 	4650 2300 4650 4550
-Wire Wire Line
-	4650 3500 5250 3500
-Wire Wire Line
-	5250 3500 5250 2300
 Wire Wire Line
 	4650 5250 4650 6600
 Wire Wire Line
@@ -897,7 +840,6 @@ Connection ~ 6250 4500
 Connection ~ 6250 3400
 Connection ~ 5900 3400
 Connection ~ 4650 4500
-Connection ~ 4650 3500
 Wire Wire Line
 	4200 4900 4100 4900
 Connection ~ 4100 4900
@@ -908,4 +850,38 @@ Wire Wire Line
 Connection ~ 4650 5700
 Text Label 1050 5500 1    60   ~ 0
 SW
+$Comp
+L CONN_4 CN2
+U 1 1 54C88FAE
+P 3800 950
+F 0 "CN2" V 4000 950 50  0000 C CNN
+F 1 "CONN_4" V 4100 950 50  0000 C CNN
+F 2 "~" H 3800 950 60  0000 C CNN
+F 3 "~" H 3800 950 60  0000 C CNN
+	1    3800 950 
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	3850 1300 3850 1500
+Wire Wire Line
+	3850 1500 3650 1500
+Wire Wire Line
+	3750 1300 3750 1450
+Wire Wire Line
+	3750 1450 3300 1450
+Wire Wire Line
+	3650 1300 3000 1300
+Connection ~ 3000 1300
+Wire Wire Line
+	5200 3000 5200 2900
+Wire Wire Line
+	5200 2900 4850 2900
+Wire Wire Line
+	4950 3150 4650 3150
+Connection ~ 4650 3150
+Wire Wire Line
+	5450 3150 5500 3150
+Wire Wire Line
+	5500 3150 5500 3400
+Connection ~ 5500 3400
 $EndSCHEMATC

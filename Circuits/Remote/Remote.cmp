@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by PcbNew date = 2015/01/28 7:30:21
+Cmp-Mod V01 Created by PcbNew date = 2015/01/28 17:03:11
 
 BeginCmp
 TimeStamp = /54C2008B;
@@ -57,31 +57,17 @@ IdModule  = PIN_ARRAY-6X1;
 EndCmp
 
 BeginCmp
+TimeStamp = /54C88FAE;
+Reference = CN2;
+ValeurCmp = CONN_4;
+IdModule  = PIN_ARRAY_4x1;
+EndCmp
+
+BeginCmp
 TimeStamp = /54C1DE3A;
 Reference = LCD1;
 ValeurCmp = AQM1602NI;
-IdModule  = SIL-7;
-EndCmp
-
-BeginCmp
-TimeStamp = /54BF63DA;
-Reference = LD1;
-ValeurCmp = DOOR;
-IdModule  = LED-3MM;
-EndCmp
-
-BeginCmp
-TimeStamp = /54BF6402;
-Reference = LD2;
-ValeurCmp = COMM;
-IdModule  = LED-3MM;
-EndCmp
-
-BeginCmp
-TimeStamp = /54BF642A;
-Reference = LD3;
-ValeurCmp = BATT;
-IdModule  = LED-3MM;
+IdModule  = PIN_ARRAY_5x1;
 EndCmp
 
 BeginCmp
@@ -200,7 +186,7 @@ BeginCmp
 TimeStamp = /54C2E178;
 Reference = U1;
 ValeurCmp = TWE_LITE_SMD;
-IdModule  = TWE-001L-SMD-noNTH;
+IdModule  = TWE-001L-SMD;
 EndCmp
 
 BeginCmp
