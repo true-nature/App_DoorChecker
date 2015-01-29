@@ -46,13 +46,14 @@ def notifyRain():
     s.sendmail(fromAddr, [toAddr], msg.as_string())
     s.close()
                 
-def checkRain(weather):
+def checkRain(weather, volt):
     hasMarker = os.path.exists(RainMarker)
-    if weather < 1200 and not hasMarker:
+    ratio = float(weather) / volt
+    if ratio < 0.5 and not hasMarker:
         # It's rain
         touch(RainMarker)
         notifyRain()
-    elif weather > 2000 and hasMarker:
+    elif ratio > 0.8 and hasMarker:
         # remove rain report
         os.remove(RainMarker)
 
@@ -80,11 +81,11 @@ def parseTWELite(raw):
             "pkt": parsed[5],
             "volt": volt,
             "vc2" : 2 * parsed[7],
-            "adc2" : parsed[8],
+            "adc2" : 1.5 * parsed[8],
             "PC1" : parsed[9],
             "PC2" : parsed[10]
         }
-        checkRain(result["adc2"])
+        checkRain(result["adc2"], volt)
     elif pkt == 'FE':
         # relay,LQI,FRAME,src,u8id,u8pkt,batt,adc1,adc2,param,DIbitmap,CRC
         ssFE = struct.Struct(">IBHIBBBHHBBB")
