@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by PcbNew date = 2015/01/21 21:22:12
+Cmp-Mod V01 Created by PcbNew date = 2015/01/29 14:03:51
 
 BeginCmp
 TimeStamp = /543B60F0;
@@ -15,9 +15,16 @@ IdModule  = DCK-3R3E224-E;
 EndCmp
 
 BeginCmp
-TimeStamp = /5486A17C;
-Reference = CN1;
-ValeurCmp = WRITER;
+TimeStamp = /54C9BF01;
+Reference = C2;
+ValeurCmp = 0.22;
+IdModule  = DCK-3R3E224-E;
+EndCmp
+
+BeginCmp
+TimeStamp = /54C9BECD;
+Reference = P1;
+ValeurCmp = WRITER-VCC;
 IdModule  = 2211R-07G-LP;
 EndCmp
 
@@ -46,7 +53,7 @@ BeginCmp
 TimeStamp = /5436A16D;
 Reference = U1;
 ValeurCmp = TWE-Lite_SMD;
-IdModule  = TWE-001L-SMD;
+IdModule  = TWE-001L-SMD-noNTH;
 EndCmp
 
 EndListe
