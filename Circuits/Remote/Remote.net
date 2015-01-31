@@ -1,7 +1,7 @@
 (export (version D)
   (design
-    (source C:\TWESDK\Wks_ToCoNet\App_DoorChecker\Circuits\Remote\Remote.sch)
-    (date "2015/01/28 16:42:15")
+    (source C:/TWESDK/Wks_ToCoNet/App_DoorChecker/Circuits/Remote/Remote.sch)
+    (date "2015/01/31 13:36:39")
     (tool "eeschema (2013-07-07 BZR 4022)-stable"))
   (components
     (comp (ref U3)
@@ -210,6 +210,18 @@
         (pin (num 26) (name PC3) (type BiDi))
         (pin (num 27) (name SDA) (type BiDi))
         (pin (num 28) (name SCL) (type BiDi))))
+    (libpart (lib TWE-Lite) (part CONN_4)
+      (description "Symbole general de connecteur")
+      (fields
+        (field (name Reference) P)
+        (field (name Value) CONN_4)
+        (field (name Footprint) ~)
+        (field (name Datasheet) ~))
+      (pins
+        (pin (num 1) (name Vcc) (type passive))
+        (pin (num 2) (name DOOR) (type passive))
+        (pin (num 3) (name COMM) (type passive))
+        (pin (num 4) (name BATT) (type passive))))
     (libpart (lib TWE-Lite) (part HT82V739)
       (fields
         (field (name Reference) U)
@@ -383,19 +395,7 @@
         (field (name Datasheet) ~))
       (pins
         (pin (num 1) (name 1) (type passive))
-        (pin (num 2) (name 2) (type passive))))
-    (libpart (lib TWE-Lite) (part CONN_4)
-      (description "Symbole general de connecteur")
-      (fields
-        (field (name Reference) P)
-        (field (name Value) CONN_4)
-        (field (name Footprint) ~)
-        (field (name Datasheet) ~))
-      (pins
-        (pin (num 1) (name Vcc) (type passive))
-        (pin (num 2) (name DOOR) (type passive))
-        (pin (num 3) (name COMM) (type passive))
-        (pin (num 4) (name BATT) (type passive)))))
+        (pin (num 2) (name 2) (type passive)))))
   (libraries
     (library (logical TWE-Lite)
       (uri ..\..\..\kicad-twe\library\TWE-Lite.lib))
