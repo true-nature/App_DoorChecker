@@ -1,10 +1,15 @@
-update=2015/01/24 8:48:08
-last_client=cvpcb
+update=2015/02/06 14:03:02
+last_client=pcbnew
 [general]
 version=1
+[cvpcb]
+version=1
+NetIExt=net
+[cvpcb/libraries]
+EquName1=devcms
 [eeschema]
 version=1
-LibDir=../../../kicad-twe/library
+LibDir=../../../kicad-lib/library
 NetFmtName=
 RptD_X=0
 RptD_Y=100
@@ -62,6 +67,7 @@ DrawSegmentWidth=0.200000000000
 BoardOutlineThickness=0.100000000000
 ModuleOutlineThickness=0.150000000000
 [pcbnew/libraries]
+LibDir=../../../kicad-lib/modules
 LibName1=TWE-Lite
 LibName2=sockets
 LibName3=connect
@@ -79,9 +85,3 @@ LibName14=led
 LibName15=dip_sockets
 LibName16=pga_sockets
 LibName17=valves
-LibDir=../../../kicad-twe/modules
-[cvpcb]
-version=1
-NetIExt=net
-[cvpcb/libraries]
-EquName1=devcms
