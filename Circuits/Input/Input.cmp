@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by PcbNew date = 2015/01/29 15:28:31
+Cmp-Mod V01 Created by PcbNew date = 2015/02/23 15:06:27
 
 BeginCmp
 TimeStamp = /543B60F0;
@@ -10,22 +10,43 @@ EndCmp
 BeginCmp
 TimeStamp = /54BDE16D;
 Reference = C1;
-ValeurCmp = 0.22;
-IdModule  = DCK-3R3E224-E;
+ValeurCmp = 100u;
+IdModule  = c_1210;
 EndCmp
 
 BeginCmp
-TimeStamp = /54C9BF01;
+TimeStamp = /54EAB9CB;
 Reference = C2;
-ValeurCmp = 0.22;
-IdModule  = DCK-3R3E224-E;
+ValeurCmp = 100u;
+IdModule  = c_1210;
+EndCmp
+
+BeginCmp
+TimeStamp = /54EAB9D1;
+Reference = C3;
+ValeurCmp = 100u;
+IdModule  = c_1210;
+EndCmp
+
+BeginCmp
+TimeStamp = /54EAB9D7;
+Reference = C4;
+ValeurCmp = 100u;
+IdModule  = c_1210;
+EndCmp
+
+BeginCmp
+TimeStamp = /54EAB9DD;
+Reference = C5;
+ValeurCmp = 100u;
+IdModule  = c_1210;
 EndCmp
 
 BeginCmp
 TimeStamp = /54C9BECD;
 Reference = P1;
 ValeurCmp = WRITER-VCC;
-IdModule  = 2211R-07G-LP;
+IdModule  = WRITE-7P;
 EndCmp
 
 BeginCmp
@@ -46,14 +67,14 @@ BeginCmp
 TimeStamp = /54360F03;
 Reference = REED1;
 ValeurCmp = SPST;
-IdModule  = R6;
+IdModule  = REEDSW;
 EndCmp
 
 BeginCmp
-TimeStamp = /5436A16D;
+TimeStamp = /54EABB18;
 Reference = U1;
-ValeurCmp = TWE-Lite_SMD;
-IdModule  = TWE-001L-SMD;
+ValeurCmp = TWE_LITE_SMD;
+IdModule  = TWE-001L-SMD-noNTH;
 EndCmp
 
 EndListe
