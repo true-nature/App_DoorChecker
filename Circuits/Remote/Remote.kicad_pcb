@@ -1423,6 +1423,11 @@
       (layers *.Cu *.Mask F.SilkS)
       (clearance 1.4)
     )
+    (model ../../../kicad-lib/packages3d/SGM-135-LCD.wrl
+      (at (xyz 0 0 0))
+      (scale (xyz 0.3937007874015748 0.3937007874015748 0.3937007874015748))
+      (rotate (xyz 0 0 0))
+    )
   )
 
   (gr_text CFG (at 46.99 73.914 90) (layer F.SilkS)
