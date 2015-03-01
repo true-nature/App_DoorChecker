@@ -96,6 +96,7 @@ void vProcessSerialCmd(tsSerCmd_Context *pCmd);
 /****************************************************************************/
 /***        Exported Variables                                            ***/
 /****************************************************************************/
+bool_t bResetOnBrownOut;
 
 /****************************************************************************/
 /***        Local Variables                                               ***/
@@ -117,29 +118,30 @@ void (*pf_cbProcessSerialCmd)(tsSerCmd_Context *);
  * 始動時の処理
  */
 void cbAppColdStart(bool_t bAfterAhiInit) {
+	static bool_t bWakeupByButton;
 	if (!bAfterAhiInit) {
 		// before AHI initialization (very first of code)
 		pvProcessEv1 = NULL;
 		pvProcessEv2 = NULL;
 		pf_cbProcessSerialCmd = NULL;
 
+		bWakeupByButton = FALSE;
 		// check DIO source
-		sAppData.bWakeupByButton = FALSE;
 		if(u8AHI_WakeTimerFiredStatus()) {
 		} else
-    	if(u32AHI_DioWakeStatus() & u32DioPortWakeUp) {
+		if(u32AHI_DioWakeStatus() & u32DioPortWakeUp) {
 			// woke up from DIO events
-    		sAppData.bWakeupByButton = TRUE;
+			bWakeupByButton = TRUE;
 		}
 
 		// Module Registration
 		ToCoNet_REG_MOD_ALL();
 	} else {
 		// disable brown out detect
-		vAHI_BrownOutConfigure(0,//0:2.0V 1:2.3V
-				FALSE,
-				FALSE,
-				FALSE,
+		vAHI_BrownOutConfigure(0,//0:1.95V 1:2.0V(default), 2:2.1V, 3:2.2V, 4:2.3V
+				FALSE,	// bVboRestEn
+				FALSE,	// bVboEn
+				FALSE,	// bVboIntEnFalling, bVboIntEnRising
 				FALSE);
 
 		// リセットICの無効化
@@ -161,6 +163,7 @@ void cbAppColdStart(bool_t bAfterAhiInit) {
 		// フラッシュメモリからの読み出し
 		//   フラッシュからの読み込みが失敗した場合、ID=15 で設定する
 		sAppData.bFlashLoaded = Config_bLoad(&sAppData.sFlash);
+		sAppData.bWakeupByButton = bWakeupByButton;
 
 		//	入力ボタンのプルアップを停止する
 		if ((sAppData.sFlash.sData.u8mode == PKT_ID_IO_TIMER)	// ドアタイマー
