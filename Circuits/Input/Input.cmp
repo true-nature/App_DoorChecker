@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by PcbNew date = 2015/02/23 15:06:27
+Cmp-Mod V01 Created by PcbNew date = 2015/03/02 16:29:58
 
 BeginCmp
 TimeStamp = /543B60F0;
@@ -50,17 +50,38 @@ IdModule  = WRITE-7P;
 EndCmp
 
 BeginCmp
+TimeStamp = /54F40867;
+Reference = Q1;
+ValeurCmp = MOS_N;
+IdModule  = EMT3;
+EndCmp
+
+BeginCmp
 TimeStamp = /54360F12;
 Reference = R1;
 ValeurCmp = 2M;
-IdModule  = SM0603;
+IdModule  = SM0603_Resistor;
 EndCmp
 
 BeginCmp
 TimeStamp = /54BCF561;
 Reference = R2;
 ValeurCmp = 75;
-IdModule  = SM0603;
+IdModule  = SM0603_Resistor;
+EndCmp
+
+BeginCmp
+TimeStamp = /54F408D3;
+Reference = R3;
+ValeurCmp = 10M;
+IdModule  = SM0603_Resistor;
+EndCmp
+
+BeginCmp
+TimeStamp = /54F408A1;
+Reference = R4;
+ValeurCmp = 10M;
+IdModule  = SM0603_Resistor;
 EndCmp
 
 BeginCmp
@@ -74,7 +95,14 @@ BeginCmp
 TimeStamp = /54EABB18;
 Reference = U1;
 ValeurCmp = TWE_LITE_SMD;
-IdModule  = TWE-001L-SMD-noNTH;
+IdModule  = TWE-001L-NC7;
+EndCmp
+
+BeginCmp
+TimeStamp = /54F40815;
+Reference = U2;
+ValeurCmp = TCM809RVNB;
+IdModule  = sc70;
 EndCmp
 
 EndListe
