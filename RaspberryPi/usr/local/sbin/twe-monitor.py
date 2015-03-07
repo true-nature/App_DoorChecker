@@ -10,13 +10,21 @@ import struct
 import binascii
 import glob
 import pprint
-import logging
+from logging import getLogger,INFO,DEBUG,Formatter
+from logging.handlers import SysLogHandler
 import smtplib
 from email.mime.text import MIMEText
 
 SerialDevice = "/dev/ttyUSB0"
 OutDir = "/var/run/twe"
 RainMarker = OutDir + "/RainMarker"
+
+handler = SysLogHandler(address = '/dev/log', facility=SysLogHandler.LOG_USER)
+handler.setFormatter(Formatter("twe-monitor[%(process)d]: %(message)s"))
+handler.setLevel(INFO)
+logger = getLogger("twe-monitor")
+logger.setLevel(DEBUG)
+logger.addHandler(handler)
 
 def decodeVolt(batt):
     volt = 0
@@ -30,14 +38,17 @@ def touch(fname, times=None):
     with open(fname, 'a'):
                 os.utime(fname, times)
 
-def notifyRain():
+def notifyRain(results):
     fromAddr="twe@localhost"
     toAddr="twe@localhost"
     if 'MAIL_FROM' in os.environ:
         fromAddr = os.environ['MAIL_FROM']
     if 'RCPT_TO' in os.environ:
         toAddr = os.environ['RCPT_TO']
-    msg = MIMEText("The weather is rain.")
+    closed = ",".join(sorted([chr(0x40 + v["id"]) for v in results if v["pkt"] == 254 and v["button"] == 1]))
+    opened = ",".join(sorted([chr(0x40 + v["id"]) for v in results if v["pkt"] == 254 and v["button"] == 0]))
+    text = "\n".join(["The weather is rain.", "", " Opened: " + opened, " Closed: " + closed])
+    msg = MIMEText(text)
     msg['Subject'] = "It's rain."
     msg['From'] = fromAddr
     msg['To'] = toAddr
@@ -45,16 +56,25 @@ def notifyRain():
     s.connect()
     s.sendmail(fromAddr, [toAddr], msg.as_string())
     s.close()
-                
-def checkRain(weather, volt):
+
+def collectDoorStatus():
+    file_list = glob.glob(OutDir + "/8*.parsed")
+    for f in file_list:
+        mtime = os.stat(f).st_mtime
+        if (datetime.now() - datetime.fromtimestamp(mtime)) > timedelta(minutes=5):
+            os.unlink(f)
+
+def checkRain(weather, volt, results):
     hasMarker = os.path.exists(RainMarker)
     ratio = float(weather) / volt
     if ratio < 0.5 and not hasMarker:
         # It's rain
+        logger.info("It starts raining. adc2:%s, volt:%d", weather, volt)
         touch(RainMarker)
-        notifyRain()
+        notifyRain(results)
     elif ratio > 0.8 and hasMarker:
         # remove rain report
+        logger.info("It ends raining. adc2:%s, volt:%d", weather, volt)
         os.remove(RainMarker)
 
 # Decode output of vSerOutput_Uart().
@@ -66,6 +86,7 @@ def parseTWELite(raw):
     result = None
 
     if pkt == '10':
+        logger.debug("Received %s", raw)
         # relay,LQI,FRAME,src,u8id,u8pkt,batt,adc1,adc2,PC1,PC2,CRC
         ss10 = struct.Struct(">IBHIBBBHHHHB")
         parsed = ss10.unpack(data)
@@ -83,9 +104,9 @@ def parseTWELite(raw):
             "vc2" : 2 * parsed[7],
             "adc2" : 1.5 * parsed[8],
             "PC1" : parsed[9],
-            "PC2" : parsed[10]
+            "PC2" : parsed[10],
+            "updated" : datetime.now()
         }
-        checkRain(result["adc2"], volt)
     elif pkt == 'FE':
         # relay,LQI,FRAME,src,u8id,u8pkt,batt,adc1,adc2,param,DIbitmap,CRC
         ssFE = struct.Struct(">IBHIBBBHHBBB")
@@ -104,7 +125,8 @@ def parseTWELite(raw):
             "vc2" : 2 * parsed[7],
             "adc2" : parsed[8],
             "param" : parsed[9],
-            "button" : parsed[10]
+            "button" : parsed[10],
+            "updated" : datetime.now()
         }
     return result
 
@@ -116,16 +138,18 @@ def expireOldFile():
             os.unlink(f)
 
 if __name__ == '__main__':
+    logger.info("Started")
     if not os.path.exists(OutDir):
         os.mkdir(OutDir, 0775)
-        
-    sertty = serial.Serial(SerialDevice, 115200)
+    ioResults = {}
+    sertty = serial.Serial(port=SerialDevice, baudrate=115200, timeout=60)
     while True:
         try:
             rx = sertty.readline().rstrip()
             parsed = parseTWELite(rx)
             if "from" in parsed:
                 src = parsed["from"]
+                ioResults[src] = parsed
                 raw = open(OutDir + "/_" + src, "w")
                 raw.write(rx)
                 raw.close()
@@ -133,8 +157,12 @@ if __name__ == '__main__':
                 raw = open(OutDir + "/" + src + ".parsed", "w")
                 raw.write(pprint.pformat(parsed))
                 raw.close()
-                expireOldFile()
+                if parsed["pkt"] == 0x10:
+                    checkRain(parsed["adc2"], parsed["volt"], ioResults.values())
+            for k in ioResults.keys():
+                if (datetime.now() - ioResults[k]["updated"]) > timedelta(minutes=5):
+                    del ioResults[k]
         except Exception as e:
-            logging.error('twe-monitor.py', exc_info=True)
+            logger.error('twe-monitor.py', exc_info=True)
     
     sertty.close()
