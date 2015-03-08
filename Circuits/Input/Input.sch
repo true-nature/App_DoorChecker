@@ -38,7 +38,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "DoorChecker EndPoint_Input"
-Date "2 mar 2015"
+Date "8 mar 2015"
 Rev ""
 Comp "true-nature"
 Comment1 ""
@@ -175,7 +175,7 @@ Wire Wire Line
 Wire Wire Line
 	8700 4950 8300 4950
 Wire Wire Line
-	8300 4950 8300 1750
+	8300 1750 8300 4950
 Text Label 8450 4950 0    60   ~ 0
 Vcc
 Text Label 8450 5550 0    60   ~ 0
@@ -318,7 +318,7 @@ F 3 "DOCUMENTATION" H 7150 1500 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	8300 1750 3900 1750
+	3900 1750 8300 1750
 Wire Wire Line
 	7550 2100 7600 2100
 Wire Wire Line
@@ -357,9 +357,7 @@ Connection ~ 7600 3800
 Wire Wire Line
 	7700 3150 7700 5250
 Wire Wire Line
-	6050 2300 5600 2300
-Wire Wire Line
-	5600 2300 5600 5550
+	5600 2200 5600 5550
 Wire Wire Line
 	5100 5200 5100 4900
 Wire Wire Line
@@ -367,7 +365,6 @@ Wire Wire Line
 Wire Wire Line
 	5100 3400 6050 3400
 NoConn ~ 6050 2100
-NoConn ~ 6050 2200
 NoConn ~ 6050 2800
 Wire Wire Line
 	5400 3250 6050 3250
@@ -480,4 +477,7 @@ Text Label 4050 4000 0    60   ~ 0
 DO1
 Text Label 4500 3150 0    60   ~ 0
 QGND
+Wire Wire Line
+	6050 2200 5600 2200
+NoConn ~ 6050 2300
 $EndSCHEMATC
