@@ -192,7 +192,12 @@ void cbAppColdStart(bool_t bAfterAhiInit) {
 
 		// M2がLoなら、設定モードとして動作する
 		vPortAsInput(PORT_CONF2);
+		vPortAsInput(PORT_CONF3);
 		if (bPortRead(PORT_CONF2)) {
+			sAppData.bConfigMode = TRUE;
+		}
+		else if (bPortRead(PORT_CONF3)) {
+			// 基板設計ミスに対するworkaround
 			sAppData.bConfigMode = TRUE;
 		}
 
