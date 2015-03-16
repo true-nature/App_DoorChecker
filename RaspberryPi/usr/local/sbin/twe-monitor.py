@@ -150,13 +150,11 @@ if __name__ == '__main__':
             if "from" in parsed:
                 src = parsed["from"]
                 ioResults[src] = parsed
-                raw = open(OutDir + "/_" + src, "w")
-                raw.write(rx)
-                raw.close()
-                os.rename(OutDir + "/_" + src, OutDir + "/" + src)
-                raw = open(OutDir + "/" + src + ".parsed", "w")
+                raw = open(OutDir + "/_" + src + ".parsed", "w")
+                raw.write("#" + rx + "\n")
                 raw.write(pprint.pformat(parsed))
                 raw.close()
+                os.rename(OutDir + "/_" + src + ".parsed", OutDir + "/" + src + ".parsed")
                 if parsed["pkt"] == 0x10:
                     checkRain(parsed["adc2"], parsed["volt"], ioResults.values())
             for k in ioResults.keys():
