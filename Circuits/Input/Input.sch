@@ -32,7 +32,7 @@ LIBS:contrib
 LIBS:valves
 LIBS:relays
 LIBS:Input-cache
-EELAYER 27 0
+EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -136,7 +136,7 @@ Wire Wire Line
 Wire Wire Line
 	5800 5150 8700 5150
 Wire Wire Line
-	2200 1400 2200 2050
+	2200 1400 2200 2100
 Wire Wire Line
 	1600 2550 1600 2850
 $Comp
@@ -167,7 +167,7 @@ $EndComp
 Wire Wire Line
 	2450 1500 2200 1500
 Wire Wire Line
-	2200 2550 2200 2450
+	2200 2550 2200 2400
 Wire Wire Line
 	1600 2550 3400 2550
 Wire Wire Line
@@ -175,7 +175,7 @@ Wire Wire Line
 Wire Wire Line
 	8700 4950 8300 4950
 Wire Wire Line
-	8300 1750 8300 4950
+	8300 4950 8300 1750
 Text Label 8450 4950 0    60   ~ 0
 Vcc
 Text Label 8450 5550 0    60   ~ 0
@@ -196,10 +196,10 @@ Wire Wire Line
 	1600 1750 1600 1950
 Connection ~ 2200 1500
 Wire Wire Line
-	2150 1750 3400 1750
+	2050 1750 3400 1750
 Connection ~ 2200 1750
 Wire Wire Line
-	1600 1750 1650 1750
+	1600 1750 1750 1750
 Text Label 1600 1850 1    60   ~ 0
 DC3V
 $Comp
@@ -284,27 +284,27 @@ F 3 "~" H 3400 2250 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3400 1750 3400 2050
+	3400 1750 3400 2100
 Wire Wire Line
-	3400 2550 3400 2450
+	3400 2550 3400 2400
 Connection ~ 2200 2550
 Wire Wire Line
-	2500 2450 2500 2550
+	2500 2400 2500 2550
 Connection ~ 2500 2550
 Wire Wire Line
-	2800 2450 2800 2550
+	2800 2400 2800 2550
 Connection ~ 2800 2550
 Wire Wire Line
-	3100 2450 3100 2550
+	3100 2400 3100 2550
 Connection ~ 3100 2550
 Wire Wire Line
-	3100 2050 3100 1750
+	3100 2100 3100 1750
 Connection ~ 3100 1750
 Wire Wire Line
-	2800 2050 2800 1750
+	2800 2100 2800 1750
 Connection ~ 2800 1750
 Wire Wire Line
-	2500 1750 2500 2050
+	2500 1750 2500 2100
 Connection ~ 2500 1750
 $Comp
 L TWE_LITE_SMD U1
@@ -318,7 +318,7 @@ F 3 "DOCUMENTATION" H 7150 1500 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3900 1750 8300 1750
+	8300 1750 3900 1750
 Wire Wire Line
 	7550 2100 7600 2100
 Wire Wire Line
@@ -359,9 +359,9 @@ Wire Wire Line
 Wire Wire Line
 	5600 2200 5600 5550
 Wire Wire Line
-	5100 5200 5100 4900
+	5100 5200 5100 4800
 Wire Wire Line
-	5100 4400 5100 3400
+	5100 4500 5100 3400
 Wire Wire Line
 	5100 3400 6050 3400
 NoConn ~ 6050 2100
@@ -414,17 +414,6 @@ F 3 "~" H 4400 3450 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R4
-U 1 1 54F408A1
-P 5000 2150
-F 0 "R4" V 5080 2150 40  0000 C CNN
-F 1 "10M" V 5007 2151 40  0000 C CNN
-F 2 "~" V 4930 2150 30  0000 C CNN
-F 3 "~" H 5000 2150 30  0000 C CNN
-	1    5000 2150
-	1    0    0    -1  
-$EndComp
-$Comp
 L R R3
 U 1 1 54F408D3
 P 3900 2150
@@ -436,21 +425,15 @@ F 3 "~" H 3900 2150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3900 1750 3900 1900
-Wire Wire Line
-	5000 1900 5000 1750
-Connection ~ 5000 1750
+	3900 1750 3900 2000
 Wire Wire Line
 	4150 2700 4150 1750
 Connection ~ 4150 1750
-Wire Wire Line
-	5000 2400 5000 2700
 Connection ~ 5900 2700
-Connection ~ 5000 2700
 Wire Wire Line
 	4500 3250 4500 3050
 Wire Wire Line
-	3900 2400 3900 4000
+	3900 2300 3900 4000
 Wire Wire Line
 	3900 3450 4200 3450
 Wire Wire Line
