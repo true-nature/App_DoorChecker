@@ -1,108 +1,108 @@
-Cmp-Mod V01 Created by PcbNew date = 2015/03/02 16:29:58
+Cmp-Mod V01 Created by Cvpcb (after 2015-mar-04 BZR unknown)-product   date = 2015/03/23 7:54:10
 
 BeginCmp
 TimeStamp = /543B60F0;
 Reference = BT1;
 ValeurCmp = CR2032;
-IdModule  = PBCS-75;
+IdModule  = favorites:PBCS-75;
 EndCmp
 
 BeginCmp
 TimeStamp = /54BDE16D;
 Reference = C1;
 ValeurCmp = 100u;
-IdModule  = c_1210;
+IdModule  = Capacitors_SMD:C_1210_HandSoldering;
 EndCmp
 
 BeginCmp
 TimeStamp = /54EAB9CB;
 Reference = C2;
 ValeurCmp = 100u;
-IdModule  = c_1210;
+IdModule  = Capacitors_SMD:C_1210_HandSoldering;
 EndCmp
 
 BeginCmp
 TimeStamp = /54EAB9D1;
 Reference = C3;
 ValeurCmp = 100u;
-IdModule  = c_1210;
+IdModule  = Capacitors_SMD:C_1210_HandSoldering;
 EndCmp
 
 BeginCmp
 TimeStamp = /54EAB9D7;
 Reference = C4;
 ValeurCmp = 100u;
-IdModule  = c_1210;
+IdModule  = Capacitors_SMD:C_1210_HandSoldering;
 EndCmp
 
 BeginCmp
 TimeStamp = /54EAB9DD;
 Reference = C5;
 ValeurCmp = 100u;
-IdModule  = c_1210;
+IdModule  = Capacitors_SMD:C_1210_HandSoldering;
 EndCmp
 
 BeginCmp
 TimeStamp = /54C9BECD;
 Reference = P1;
 ValeurCmp = WRITER-VCC;
-IdModule  = WRITE-7P;
-EndCmp
-
-BeginCmp
-TimeStamp = /54F40867;
-Reference = Q1;
-ValeurCmp = MOS_N;
-IdModule  = EMT3;
+IdModule  = favorites:WRITE-7P;
 EndCmp
 
 BeginCmp
 TimeStamp = /54360F12;
 Reference = R1;
 ValeurCmp = 2M;
-IdModule  = SM0603_Resistor;
+IdModule  = Resistors_SMD:R_0603_HandSoldering;
 EndCmp
 
 BeginCmp
 TimeStamp = /54BCF561;
 Reference = R2;
-ValeurCmp = 75;
-IdModule  = SM0603_Resistor;
+ValeurCmp = 1k;
+IdModule  = Resistors_SMD:R_0603_HandSoldering;
 EndCmp
 
 BeginCmp
 TimeStamp = /54F408D3;
 Reference = R3;
 ValeurCmp = 10M;
-IdModule  = SM0603_Resistor;
+IdModule  = Resistors_SMD:R_0603_HandSoldering;
 EndCmp
 
 BeginCmp
-TimeStamp = /54F408A1;
+TimeStamp = /550F3995;
 Reference = R4;
 ValeurCmp = 10M;
-IdModule  = SM0603_Resistor;
+IdModule  = Resistors_SMD:R_0603_HandSoldering;
 EndCmp
 
 BeginCmp
 TimeStamp = /54360F03;
-Reference = REED1;
-ValeurCmp = SPST;
-IdModule  = REEDSW;
+Reference = SW1;
+ValeurCmp = MKA-10110;
+IdModule  = favorites:MKA-10110;
 EndCmp
 
 BeginCmp
 TimeStamp = /54EABB18;
 Reference = U1;
 ValeurCmp = TWE_LITE_SMD;
-IdModule  = TWE-001L-NC7;
+IdModule  = favorites:TWE-001L-NC7;
 EndCmp
 
 BeginCmp
 TimeStamp = /54F40815;
 Reference = U2;
 ValeurCmp = TCM809RVNB;
-IdModule  = sc70;
+IdModule  = Transistors_SMD:sc70;
+EndCmp
+
+BeginCmp
+TimeStamp = /550F37E6;
+Reference = U3;
+ValeurCmp = 2N7002DW;
+IdModule  = Housings_SOT-23_SOT-143_TSOT-6:SC-70-6_Handsoldering;
 EndCmp
 
 EndListe
