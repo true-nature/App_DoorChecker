@@ -1,6 +1,6 @@
-update=2015/03/08 22:50:55
+update=2015/03/28 19:24:15
 version=1
-last_client=eeschema
+last_client=kicad
 [general]
 version=1
 [cvpcb]
@@ -49,13 +49,8 @@ LibName17=valves
 [eeschema]
 version=1
 LibDir=../../../kicad-lib/library
-NetFmtName=
-RptD_X=0
-RptD_Y=100
-RptLab=1
-LabSize=60
 [eeschema/libraries]
-LibName1=TWE-Lite
+LibName1=favorites
 LibName2=power
 LibName3=device
 LibName4=transistors
