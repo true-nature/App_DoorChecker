@@ -73,9 +73,11 @@ def checkRain(weather, volt, results):
         touch(RainMarker)
         notifyRain(results)
     elif ratio > 0.8 and hasMarker:
-        # remove rain report
-        logger.info("It ends raining. adc2:%s, volt:%d", weather, volt)
-        os.remove(RainMarker)
+        mtime = datetime.fromtimestamp(os.stat(RainMarker).st_mtime)
+        if datetime.now() - mtime > timedelta(hours=1):
+            # remove rain report
+            logger.info("It ends raining. adc2:%s, volt:%d", weather, volt)
+            os.remove(RainMarker)
 
 # Decode output of vSerOutput_Uart().
 def parseTWELite(raw):
