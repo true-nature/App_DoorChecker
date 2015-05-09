@@ -54,7 +54,7 @@ def notifyRain(results):
     msg['To'] = toAddr
     s = smtplib.SMTP()
     s.connect()
-    s.sendmail(fromAddr, [toAddr], msg.as_string())
+    s.sendmail(fromAddr, toAddr.split(','), msg.as_string())
     s.close()
 
 def collectDoorStatus():
@@ -152,11 +152,15 @@ if __name__ == '__main__':
             if "from" in parsed:
                 src = parsed["from"]
                 ioResults[src] = parsed
-                raw = open(OutDir + "/_" + src + ".parsed", "w")
+                raw = open(OutDir + "/_" + src, "w")
+                raw.write(rx)
+                raw.close()
+                os.rename(OutDir + "/_" + src, OutDir + "/" + src)
+                raw = open(OutDir + "/_" + src + ".raw", "w")
                 raw.write("#" + rx + "\n")
                 raw.write(pprint.pformat(parsed))
                 raw.close()
-                os.rename(OutDir + "/_" + src + ".parsed", OutDir + "/" + src + ".parsed")
+                os.rename(OutDir + "/_" + src + ".raw", OutDir + "/" + src + ".parsed")
                 if parsed["pkt"] == 0x10:
                     checkRain(parsed["adc2"], parsed["volt"], ioResults.values())
             for k in ioResults.keys():
