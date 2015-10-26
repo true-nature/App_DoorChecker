@@ -86,6 +86,8 @@ void vSerInitMessage();
 void vProcessSerialCmd(tsSerCmd_Context *pCmd);
 
 void vLED_Toggle(void);
+void vLED_asDisplay(void);
+
 static uint8 vRescanDoorStatus();
 
 #ifdef USE_LCD
@@ -278,7 +280,7 @@ void cbToCoNet_vRxEvent(tsRxDataApp *pRx) {
 
 #if 0
 		// 戸締りチェッカーとしては不要な動作
-		if( sRxPktInfo.u8pkt == PKT_ID_BOTTON ){
+		if( sRxPktInfo.u8pkt == PKT_ID_BUTTON ){
 			vLED_Toggle();
 		}
 #endif
@@ -297,6 +299,9 @@ void cbToCoNet_vRxEvent(tsRxDataApp *pRx) {
 			// ID,状態,電源電圧を登録
 			uint32 u32key = (sRxPktInfo.u8id|sRxPktInfo.u8btn<<8|sRxPktInfo.u8batt<<16);
 			ADDRKEYA_vAdd(&sEndDevList, sRxPktInfo.u32addr_1st, u32key);
+			// 窓が開いていたらパイロットランプ消灯。
+			vRescanDoorStatus();
+			vLED_asDisplay();
 		} else {
 			ADDRKEYA_vAdd(&sEndDevList, sRxPktInfo.u32addr_1st, 0); // アドレスだけ登録。
 		}
@@ -1430,7 +1435,28 @@ void vLED_Toggle( void )
 	}
 }
 
-
+/**
+ * 1箇所でも窓が開いていたらDO1のLEDを消灯させる。
+ */
+void vLED_asDisplay(void) {
+	uint32 bit = 1;
+	uint8 u8id = 1;
+	uint8 u8Opened = 0;
+	while (bit != 0 && u8id <= ADDRKEYA_MAX_HISTORY)
+	{
+		if (sAppData.sFlash.sData.u32idmask & bit) {
+//			A_PRINTF("vLED_asDisplay: ID=%d %2x ***"LB, u8id, su8MessagePoolData[3 * (u8id - 1) + 1]);
+			if (su8MessagePoolData[3 * (u8id - 1) + 1] == 0) {
+				u8Opened = TRUE;
+				break;
+			}
+		}
+		bit <<= 1;
+		u8id++;
+	}
+	// 1箇所以上開いていたらDO1のLEDを消灯させる
+	vPortSet_TrueAsLo( PORT_OUT1, !u8Opened );
+}
 
 /**
  * 子機の発報情報データベース(sEndDevList)をスキャンしてMessagePool用データを再構築する。
