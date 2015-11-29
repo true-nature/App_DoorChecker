@@ -1,0 +1,10 @@
+#!/bin/sh
+MAIL_FROM='twe@localhost'
+RCPT_TO='twe@localhost'
+
+test -f /etc/default/twe-filter && . /etc/default/twe-filter
+export RCPT_TO
+export MAIL_FROM
+
+/usr/local/bin/twe-filter.py
+exit $?

@@ -10,6 +10,14 @@
 ### END INIT INFO
 # 
 PIDFILE=/var/run/twe-monitor.pid
+
+MAIL_FROM='twe@localhost'
+RCPT_TO='twe@localhost'
+
+test -f /etc/default/twe-monitor && . /etc/default/twe-monitor
+export RCPT_TO
+export MAIL_FROM
+
 case "$1" in
         start)
                 if [ -f $PIDFILE ]; then

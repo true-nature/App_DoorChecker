@@ -2,27 +2,29 @@
 # -*- mode:python; coding:utf-8 -*-
 
 import time
+import sys
 from datetime import datetime,timedelta
 import syslog
 import os
-import serial
 import struct
 import binascii
 import glob
 import pprint
 from logging import getLogger,INFO,DEBUG,Formatter
 from logging.handlers import SysLogHandler
+from email.Header import decode_header
+from email.Parser import Parser
 import smtplib
+import email
 from email.mime.text import MIMEText
 
-SerialDevice = "/dev/ttyUSB0"
 OutDir = "/var/run/twe"
 RainMarker = OutDir + "/RainMarker"
 
 handler = SysLogHandler(address = '/dev/log', facility=SysLogHandler.LOG_USER)
-handler.setFormatter(Formatter("twe-monitor[%(process)d]: %(message)s"))
+handler.setFormatter(Formatter("twe-filter[%(process)d]: %(message)s"))
 handler.setLevel(INFO)
-logger = getLogger("twe-monitor")
+logger = getLogger("twe-filter")
 logger.setLevel(DEBUG)
 logger.addHandler(handler)
 
@@ -34,22 +36,15 @@ def decodeVolt(batt):
         volt = 2800 + 10 * (batt - 170)
     return volt
 
-def touch(fname, times=None):
-    with open(fname, 'a'):
-                os.utime(fname, times)
-
-def notifyRain(results):
+def notifyStats(weather, voltage, results, toAddr):
     fromAddr="twe@localhost"
-    toAddr="twe@localhost"
     if 'MAIL_FROM' in os.environ:
         fromAddr = os.environ['MAIL_FROM']
-    if 'RCPT_TO' in os.environ:
-        toAddr = os.environ['RCPT_TO']
     closed = ",".join(sorted([chr(0x40 + v["id"]) for v in results if v["pkt"] == 254 and v["button"] == 1]))
     opened = ",".join(sorted([chr(0x40 + v["id"]) for v in results if v["pkt"] == 254 and v["button"] == 0]))
-    text = "\n".join(["The weather is rain.", "", " Opened: " + opened, " Closed: " + closed])
+    text = "\n".join([weather, voltage, "", " Opened: " + opened, " Closed: " + closed])
     msg = MIMEText(text)
-    msg['Subject'] = "It's rain."
+    msg['Subject'] = weather
     msg['From'] = fromAddr
     msg['To'] = toAddr
     recipients = toAddr.split(',')
@@ -59,26 +54,39 @@ def notifyRain(results):
     s.close()
 
 def collectDoorStatus():
-    file_list = glob.glob(OutDir + "/8*.parsed")
+    results = {}
+    file_list = glob.glob(OutDir + "/8*")
     for f in file_list:
-        mtime = os.stat(f).st_mtime
-        if (datetime.now() - datetime.fromtimestamp(mtime)) > timedelta(minutes=5):
-            os.unlink(f)
+        if f.endswith(".parsed"):
+            continue
+        raw = open(f, "r")
+        rx = raw.readline()
+        parsed = parseTWELite(rx)
+        if "from" in parsed:
+            src = parsed["from"]
+            results[src] = parsed
+    return results
 
-def checkRain(weather, volt, results):
-    hasMarker = os.path.exists(RainMarker)
-    ratio = float(weather) / volt
-    if ratio < 0.5 and not hasMarker:
+def checkRain(parsed, results, rcpt):
+    adc2 = int(parsed["adc2"])
+    volt = int(parsed["volt"])
+    ratio = float(adc2) / volt
+    subject = "The weather"
+    weather = ""
+    if ratio < 0.5:
         # It's rain
-        logger.info("It starts raining. adc2:%s, volt:%d", weather, volt)
-        touch(RainMarker)
-        notifyRain(results)
-    elif ratio > 0.8 and hasMarker:
-        mtime = datetime.fromtimestamp(os.stat(RainMarker).st_mtime)
-        if datetime.now() - mtime > timedelta(hours=1):
-            # remove rain report
-            logger.info("It ends raining. adc2:%s, volt:%d", weather, volt)
-            os.remove(RainMarker)
+        weather = "It's rain."
+    else:
+        weather = "It's NOT rain."
+    voltage = " adc2:{0:d}mV, volt:{1:d}mV".format(adc2, volt)
+    notifyStats(weather, voltage, results, rcpt)
+
+def reportStats(results, rcpt):
+    for parsed in results:
+        if parsed["pkt"] == 0x10:
+            checkRain(parsed, results, rcpt)
+            break
+        
 
 # Decode output of vSerOutput_Uart().
 def parseTWELite(raw):
@@ -133,41 +141,24 @@ def parseTWELite(raw):
         }
     return result
 
-def expireOldFile():
-    file_list = glob.glob(OutDir + "/8*")
-    for f in file_list:
-        mtime = os.stat(f).st_mtime
-        if (datetime.now() - datetime.fromtimestamp(mtime)) > timedelta(minutes=5):
-            os.unlink(f)
-
-if __name__ == '__main__':
-    logger.info("Started")
-    if not os.path.exists(OutDir):
-        os.mkdir(OutDir, 0775)
-    ioResults = {}
-    sertty = serial.Serial(port=SerialDevice, baudrate=115200, timeout=60)
-    while True:
-        try:
-            rx = sertty.readline().rstrip()
-            parsed = parseTWELite(rx)
-            if "from" in parsed:
-                src = parsed["from"]
-                ioResults[src] = parsed
-                raw = open(OutDir + "/_" + src, "w")
-                raw.write(rx)
-                raw.close()
-                os.rename(OutDir + "/_" + src, OutDir + "/" + src)
-                raw = open(OutDir + "/_" + src + ".raw", "w")
-                raw.write("#" + rx + "\n")
-                raw.write(pprint.pformat(parsed))
-                raw.close()
-                os.rename(OutDir + "/_" + src + ".raw", OutDir + "/" + src + ".parsed")
-                if parsed["pkt"] == 0x10:
-                    checkRain(parsed["adc2"], parsed["volt"], ioResults.values())
-            for k in ioResults.keys():
-                if (datetime.now() - ioResults[k]["updated"]) > timedelta(minutes=5):
-                    del ioResults[k]
-        except Exception as e:
-            logger.error('twe-monitor.py', exc_info=True)
+def main():
+    raw = sys.stdin.readlines()
+    msg = email.message_from_string(''.join(raw))
+    (name, fromAdddr) = email.utils.getaddresses(msg.get_all('From',''))[0]
+    recipients="twe@localhost"
+    if 'RCPT_TO' in os.environ:
+        recipients = os.environ['RCPT_TO']
+    if fromAdddr in recipients.split(','):
+        ioResults = collectDoorStatus()
+        reportStats(ioResults.values(), fromAdddr)
+    else:
+        logger.warn("Unknown recipeint %s.", fromAdddr)
+    return
     
-    sertty.close()
+if __name__ == '__main__':
+    if not os.path.exists(OutDir):
+        sys.exit(0)
+    try:
+        main()
+    except Exception as e:
+        logger.error('twe-filter.py', exc_info=True)
