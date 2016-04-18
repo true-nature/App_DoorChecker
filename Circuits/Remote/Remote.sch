@@ -1,5 +1,6 @@
 EESchema Schematic File Version 2
-LIBS:TWE-Lite
+LIBS:Remote-rescue
+LIBS:favorites
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -11,7 +12,6 @@ LIBS:cmos4000
 LIBS:adc-dac
 LIBS:memory
 LIBS:xilinx
-LIBS:special
 LIBS:microcontrollers
 LIBS:dsp
 LIBS:microchip
@@ -30,7 +30,6 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
-LIBS:Remote-cache
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
@@ -380,7 +379,7 @@ F 3 "~" H 10400 5350 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L BATTERY BT1
+L Battery BT1
 U 1 1 54C2008B
 P 9600 1600
 F 0 "BT1" H 9600 1800 50  0000 C CNN

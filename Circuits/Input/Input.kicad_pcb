@@ -1,4 +1,4 @@
-(kicad_pcb (version 4) (host pcbnew "(2015-09-28 BZR 6225, Git 2a4f8db)-product")
+(kicad_pcb (version 4) (host pcbnew 4.0.2-stable)
 
   (general
     (links 24)
@@ -155,25 +155,6 @@
     (add_net /DC3V)
     (add_net GND)
     (add_net VCC)
-  )
-
-  (module favorites:MKA-10110 (layer F.Cu) (tedit 550D773B) (tstamp 550FADDA)
-    (at 28.956 16.002 180)
-    (path /54360F03)
-    (fp_text reference SW1 (at 0 0 180) (layer F.SilkS)
-      (effects (font (size 1 1) (thickness 0.15)))
-    )
-    (fp_text value MKA-10110 (at 3.175 0 180) (layer F.SilkS) hide
-      (effects (font (size 0.4 0.4) (thickness 0.1)))
-    )
-    (fp_line (start -5 -0.9) (end 5 -0.9) (layer F.SilkS) (width 0.15))
-    (fp_line (start 5 -0.9) (end 5 0.9) (layer F.SilkS) (width 0.15))
-    (fp_line (start 5 0.9) (end -5 0.9) (layer F.SilkS) (width 0.15))
-    (fp_line (start -5 0.9) (end -5 -0.9) (layer F.SilkS) (width 0.15))
-    (pad 1 thru_hole circle (at -6.985 0 180) (size 1.4 1.4) (drill 0.7) (layers *.Cu *.Mask F.SilkS)
-      (net 9 GND))
-    (pad 2 thru_hole circle (at 6.985 0 180) (size 1.4 1.4) (drill 0.7) (layers *.Cu *.Mask F.SilkS)
-      (net 11 "Net-(R1-Pad2)"))
   )
 
   (module favorites:WRITE-7P (layer F.Cu) (tedit 54E984FA) (tstamp 54EB7DEA)
@@ -437,16 +418,35 @@
       (net 9 GND))
     (pad 32 smd rect (at -4.445 7.1 180) (size 0.9 0.6) (layers B.Cu B.Paste B.Mask)
       (net 9 GND))
-    (model favorites/TWE-001L-SMD.wrl
+    (model favorites.3dshapes/TWE-001L-SMD.wrl
       (at (xyz 0 0 0))
       (scale (xyz 0.393701 0.393701 0.393701))
       (rotate (xyz 0 0 0))
     )
-    (model favorites/TWE-001L-QAntenna.wrl
+    (model favorites.3dshapes/TWE-001L-QAntenna.wrl
       (at (xyz 0 0 0))
       (scale (xyz 0.393701 0.393701 0.393701))
       (rotate (xyz 0 0 0))
     )
+  )
+
+  (module favorites:MKA-10110 (layer F.Cu) (tedit 550D773B) (tstamp 550FADDA)
+    (at 28.956 16.002 180)
+    (path /54360F03)
+    (fp_text reference SW1 (at 0 0 180) (layer F.SilkS)
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+    (fp_text value MKA-10110 (at 3.175 0 180) (layer F.SilkS) hide
+      (effects (font (size 0.4 0.4) (thickness 0.1)))
+    )
+    (fp_line (start -5 -0.9) (end 5 -0.9) (layer F.SilkS) (width 0.15))
+    (fp_line (start 5 -0.9) (end 5 0.9) (layer F.SilkS) (width 0.15))
+    (fp_line (start 5 0.9) (end -5 0.9) (layer F.SilkS) (width 0.15))
+    (fp_line (start -5 0.9) (end -5 -0.9) (layer F.SilkS) (width 0.15))
+    (pad 1 thru_hole circle (at -6.985 0 180) (size 1.4 1.4) (drill 0.7) (layers *.Cu *.Mask F.SilkS)
+      (net 9 GND))
+    (pad 2 thru_hole circle (at 6.985 0 180) (size 1.4 1.4) (drill 0.7) (layers *.Cu *.Mask F.SilkS)
+      (net 11 "Net-(R1-Pad2)"))
   )
 
   (gr_text "DoorChecker\nInput" (at 31.496 80.264) (layer F.SilkS)

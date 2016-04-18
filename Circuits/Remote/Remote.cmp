@@ -1,213 +1,251 @@
-Cmp-Mod V01 Created by Cvpcb (after 2015-mar-04 BZR unknown)-product   date = 2015/03/23 15:48:42
+Cmp-Mod V01 Created by PcbNew   date = 2016/04/18 10:53:22
 
 BeginCmp
-TimeStamp = /54C2008B;
-Reference = BT1;
-ValeurCmp = BATTERY;
-IdModule  = Pin_Headers:Pin_Header_Straight_1x02;
+TimeStamp = 54C2B5EA
+Path = 
+Reference = DoorChecker Remote;
+ValeurCmp = VAL**;
+IdModule  = PB-SGM-135;
 EndCmp
 
 BeginCmp
-TimeStamp = /54C1EA7E;
-Reference = C1;
-ValeurCmp = 0.1u;
-IdModule  = Discret:C1;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C1EE56;
-Reference = C2;
-ValeurCmp = 0.047u;
-IdModule  = Discret:C1;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C1EE47;
-Reference = C3;
-ValeurCmp = 0.01u;
-IdModule  = Discret:C1;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C1EE29;
-Reference = C4;
-ValeurCmp = 1u;
-IdModule  = Discret:C1;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C1F40A;
-Reference = C5;
-ValeurCmp = 1u;
-IdModule  = Discret:C1;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C1FA5B;
-Reference = C6;
-ValeurCmp = 47u;
-IdModule  = Discret:C1V5;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C88FAE;
-Reference = CN2;
-ValeurCmp = CONN_4;
-IdModule  = Pin_Headers:Pin_Header_Straight_1x04;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C1DE3A;
-Reference = LCD1;
-ValeurCmp = AQM1602NI;
-IdModule  = Pin_Headers:Pin_Header_Straight_1x05;
-EndCmp
-
-BeginCmp
-TimeStamp = /55104A77;
+TimeStamp = 550FB782
+Path = /55104A77
 Reference = P1;
 ValeurCmp = WRITER-VCC;
 IdModule  = favorites:WRITE-7P;
 EndCmp
 
 BeginCmp
-TimeStamp = /54BFA29A;
+TimeStamp = 54C2DE24
+Path = /54C2E178
+Reference = U1;
+ValeurCmp = TWE_LITE_SMD;
+IdModule  = favorites:TWE-001L-SMD-noNTH;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C1E3CF
+Path = /54BFA29A
 Reference = Q1;
 ValeurCmp = 2SK4017;
 IdModule  = favorites:TO220_VERT_GDS;
 EndCmp
 
 BeginCmp
-TimeStamp = /54BF63B7;
-Reference = R1;
-ValeurCmp = 680;
-IdModule  = Discret:R1;
-EndCmp
-
-BeginCmp
-TimeStamp = /54BF6399;
-Reference = R2;
-ValeurCmp = 680;
-IdModule  = Discret:R1;
-EndCmp
-
-BeginCmp
-TimeStamp = /54BF63A8;
-Reference = R3;
-ValeurCmp = 680;
-IdModule  = Discret:R1;
-EndCmp
-
-BeginCmp
-TimeStamp = /54BFA335;
-Reference = R4;
-ValeurCmp = 1k;
-IdModule  = Discret:R4;
-EndCmp
-
-BeginCmp
-TimeStamp = /54BFA36E;
-Reference = R5;
-ValeurCmp = 2.2M;
-IdModule  = Discret:R4;
-EndCmp
-
-BeginCmp
-TimeStamp = /54BF65A8;
-Reference = R6;
-ValeurCmp = 10k;
-IdModule  = Discret:R1;
-EndCmp
-
-BeginCmp
-TimeStamp = /54BF65B7;
-Reference = R7;
-ValeurCmp = 10k;
-IdModule  = Discret:R1;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C1ECFB;
-Reference = R8;
-ValeurCmp = 1k;
-IdModule  = Discret:R1;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C1EDBA;
-Reference = R9;
-ValeurCmp = 4.7k;
-IdModule  = Discret:R1;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C1EDCE;
-Reference = R10;
-ValeurCmp = 10k;
-IdModule  = Discret:R1;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C2024A;
-Reference = R11;
-ValeurCmp = 10k;
-IdModule  = Discret:R4;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C1E669;
-Reference = RV1;
-ValeurCmp = 20k;
-IdModule  = favorites:RV-3362P;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C1EE10;
+TimeStamp = 54C1E4A8
+Path = /54C1EE10
 Reference = RV2;
 ValeurCmp = 10k;
 IdModule  = favorites:RV-TSR-3386T;
 EndCmp
 
 BeginCmp
-TimeStamp = /54C1FF2E;
-Reference = SP1;
-ValeurCmp = SPEAKER;
-IdModule  = Pin_Headers:Pin_Header_Straight_1x02;
+TimeStamp = 54C1E4B6
+Path = /54C1E669
+Reference = RV1;
+ValeurCmp = 20k;
+IdModule  = favorites:RV-3362P;
 EndCmp
 
 BeginCmp
-TimeStamp = /54BF652D;
-Reference = SW1;
-ValeurCmp = WakeUp;
-IdModule  = Pin_Headers:Pin_Header_Straight_1x02;
-EndCmp
-
-BeginCmp
-TimeStamp = /54C2E178;
-Reference = U1;
-ValeurCmp = TWE_LITE_SMD;
-IdModule  = favorites:TWE-001L-SMD;
-EndCmp
-
-BeginCmp
-TimeStamp = /55102EDB;
-Reference = U2;
-ValeurCmp = STEPUP3.3V;
-IdModule  = Sockets_DIP:DIP-8__300;
-EndCmp
-
-BeginCmp
-TimeStamp = /54BF6333;
+TimeStamp = 54C1E576
+Path = /54BF6333
 Reference = U3;
 ValeurCmp = ATP3011-PU;
 IdModule  = Sockets_DIP:DIP-28__300;
 EndCmp
 
 BeginCmp
-TimeStamp = /54C1F3FB;
+TimeStamp = 54C1E514
+Path = /54C1F3FB
 Reference = U4;
 ValeurCmp = HT82V739;
 IdModule  = Sockets_DIP:DIP-8__300;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C1E527
+Path = /55102EDB
+Reference = U2;
+ValeurCmp = STEPUP3.3V;
+IdModule  = Sockets_DIP:DIP-8__300;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C8F40A
+Path = /54C1DE3A
+Reference = LCD1;
+ValeurCmp = AQM1602NI;
+IdModule  = Pin_Headers:Pin_Header_Straight_1x05;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C893E7
+Path = /54C1FF2E
+Reference = SP1;
+ValeurCmp = SPEAKER;
+IdModule  = Pin_Headers:Pin_Header_Straight_1x02;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C893DC
+Path = /54BF652D
+Reference = SW1;
+ValeurCmp = WakeUp;
+IdModule  = Pin_Headers:Pin_Header_Straight_1x02;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C893D1
+Path = /54C88FAE
+Reference = CN2;
+ValeurCmp = CONN_4;
+IdModule  = Pin_Headers:Pin_Header_Straight_1x04;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C32A93
+Path = /54BF63B7
+Reference = R1;
+ValeurCmp = 680;
+IdModule  = Discret:R1;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C32A9B
+Path = /54BF6399
+Reference = R2;
+ValeurCmp = 680;
+IdModule  = Discret:R1;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C32AB3
+Path = /54BF63A8
+Reference = R3;
+ValeurCmp = 680;
+IdModule  = Discret:R1;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C32AA3
+Path = /54BF65B7
+Reference = R7;
+ValeurCmp = 10k;
+IdModule  = Discret:R1;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C32A8B
+Path = /54BF65A8
+Reference = R6;
+ValeurCmp = 10k;
+IdModule  = Discret:R1;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C32AC3
+Path = /54C1EDCE
+Reference = R10;
+ValeurCmp = 10k;
+IdModule  = Discret:R1;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C32ABB
+Path = /54C1EDBA
+Reference = R9;
+ValeurCmp = 4.7k;
+IdModule  = Discret:R1;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C55813
+Path = /54C1ECFB
+Reference = R8;
+ValeurCmp = 1k;
+IdModule  = Discret:R1;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C201E9
+Path = /54C2024A
+Reference = R11;
+ValeurCmp = 10k;
+IdModule  = Discret:R4;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C7B547
+Path = /54BFA335
+Reference = R4;
+ValeurCmp = 1k;
+IdModule  = Discret:R4;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C32A83
+Path = /54BFA36E
+Reference = R5;
+ValeurCmp = 2.2M;
+IdModule  = Discret:R4;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C1E5BC
+Path = /54C1FA5B
+Reference = C6;
+ValeurCmp = 47u;
+IdModule  = Discret:C1V5;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C1E588
+Path = /54C1EE56
+Reference = C2;
+ValeurCmp = 0.047u;
+IdModule  = Discret:C1;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C1E593
+Path = /54C1EE47
+Reference = C3;
+ValeurCmp = 0.01u;
+IdModule  = Discret:C1;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C5582B
+Path = /54C1EA7E
+Reference = C1;
+ValeurCmp = 0.1u;
+IdModule  = Discret:C1;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C1E59E
+Path = /54C1F40A
+Reference = C5;
+ValeurCmp = 1u;
+IdModule  = Discret:C1;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C1E5A9
+Path = /54C1EE29
+Reference = C4;
+ValeurCmp = 1u;
+IdModule  = Discret:C1;
+EndCmp
+
+BeginCmp
+TimeStamp = 54C557E1
+Path = /54C2008B
+Reference = BT1;
+ValeurCmp = BATTERY;
+IdModule  = Pin_Headers:Pin_Header_Straight_1x02;
 EndCmp
 
 EndListe
