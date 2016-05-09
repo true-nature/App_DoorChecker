@@ -30,6 +30,7 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
+LIBS:Remote-cache
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
@@ -144,14 +145,14 @@ F 3 "~" H 6000 1900 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L FET_N Q1
+L Q_NMOS_GDS Q1
 U 1 1 54BFA29A
-P 4500 4900
-F 0 "Q1" H 4403 5150 70  0000 C CNN
-F 1 "2SK4017" H 4353 4653 60  0000 C CNN
-F 2 "favorites:TO220_VERT_GDS" H 4500 4900 60  0000 C CNN
-F 3 "~" H 4500 4900 60  0000 C CNN
-	1    4500 4900
+P 4550 4900
+F 0 "Q1" H 4453 5150 70  0000 C CNN
+F 1 "2SK4017" H 4403 4653 60  0000 C CNN
+F 2 "favorites:TO220_VERT_GDS" H 4550 4900 60  0000 C CNN
+F 3 "~" H 4550 4900 60  0000 C CNN
+	1    4550 4900
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -387,7 +388,7 @@ F 1 "BATTERY" H 9600 1410 50  0000 C CNN
 F 2 "Pin_Headers:Pin_Header_Straight_1x02" H 9600 1600 60  0000 C CNN
 F 3 "~" H 9600 1600 60  0000 C CNN
 	1    9600 1600
-	0    1    1    0   
+	1    0    0    -1  
 $EndComp
 $Comp
 L VCC #PWR06
@@ -664,9 +665,9 @@ Wire Wire Line
 Wire Wire Line
 	9850 1900 9850 1950
 Wire Wire Line
-	9600 1100 9600 1300
+	9600 1100 9600 1450
 Wire Wire Line
-	9600 1900 9600 2100
+	9600 1750 9600 2100
 Wire Wire Line
 	10000 5450 10100 5450
 Wire Wire Line
@@ -766,9 +767,9 @@ Wire Wire Line
 Wire Wire Line
 	4750 2300 4750 3400
 Wire Wire Line
-	4650 2300 4650 4550
+	4650 2300 4650 4700
 Wire Wire Line
-	4650 5250 4650 6600
+	4650 5100 4650 6600
 Wire Wire Line
 	6250 3600 6650 3600
 Wire Wire Line
@@ -818,7 +819,7 @@ Connection ~ 6250 3400
 Connection ~ 5900 3400
 Connection ~ 4650 4500
 Wire Wire Line
-	4200 4900 4100 4900
+	4350 4900 4100 4900
 Connection ~ 4100 4900
 Wire Wire Line
 	4100 5550 4100 5700
