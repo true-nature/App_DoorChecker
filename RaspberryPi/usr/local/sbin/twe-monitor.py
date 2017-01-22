@@ -84,7 +84,15 @@ def checkRain(weather, volt, results):
 def parseTWELite(raw):
     if raw[0] != ":":
         return {}
-    data = binascii.unhexlify(raw[1:])
+    data = None
+    try:
+        data = binascii.unhexlify(raw[1:])
+    except TypeError as e:
+        logger.error('twe-monitor.py', exc_info=True)
+
+    if data is None:
+        return {}
+
     pkt = raw[25:27]
     result = None
 
