@@ -65,15 +65,15 @@ def collectDoorStatus():
         if (datetime.now() - datetime.fromtimestamp(mtime)) > timedelta(minutes=5):
             os.unlink(f)
 
-def checkRain(weather, volt, results):
+def checkRain(weather, volt, rainRatioLow, rainRatioHigh, results):
     hasMarker = os.path.exists(RainMarker)
     ratio = float(weather) / volt
-    if ratio < 0.5 and not hasMarker:
+    if ratio < rainRatioLow and not hasMarker:
         # It's rain
         logger.info("It starts raining. adc2:%s, volt:%d", weather, volt)
         touch(RainMarker)
         notifyRain(results)
-    elif ratio > 0.8 and hasMarker:
+    elif ratio > rainRatioHigh and hasMarker:
         mtime = datetime.fromtimestamp(os.stat(RainMarker).st_mtime)
         if datetime.now() - mtime > timedelta(hours=1):
             # remove rain report
@@ -113,7 +113,7 @@ def parseTWELite(raw):
             "pkt": parsed[5],
             "volt": volt,
             "vc2" : 2 * parsed[7],
-            "adc2" : 1.5 * parsed[8],
+            "adc2" : parsed[8],
             "PC1" : parsed[9],
             "PC2" : parsed[10],
             "updated" : datetime.now()
@@ -154,6 +154,15 @@ if __name__ == '__main__':
         os.mkdir(OutDir, 0775)
     ioResults = {}
     sertty = serial.Serial(port=SerialDevice, baudrate=115200, timeout=60)
+    rainSensorId=256
+    if 'RAIN_SENSOR_ID' in os.environ:
+        rainSensorId=int(os.environ['RAIN_SENSOR_ID'])
+    rainRatioLow=0.4
+    rainRatioHigh=0.7
+    if 'RAIN_RATIO_LOW' in os.environ:
+        rainRatioLow=float(os.environ['RAIN_RATIO_LOW'])
+    if 'RAIN_RATIO_HIGH' in os.environ:
+        rainRatioHigh=float(os.environ['RAIN_RATIO_HIGH'])
     while True:
         try:
             rx = sertty.readline().rstrip()
@@ -170,8 +179,8 @@ if __name__ == '__main__':
                 raw.write(pprint.pformat(parsed))
                 raw.close()
                 os.rename(OutDir + "/_" + src + ".raw", OutDir + "/" + src + ".parsed")
-                if parsed["pkt"] == 0x10:
-                    checkRain(parsed["adc2"], parsed["volt"], ioResults.values())
+                if parsed["id"] == rainSensorId:
+                    checkRain(parsed["adc2"], parsed["volt"], rainRatioLow, rainRatioHigh, ioResults.values())
             for k in ioResults.keys():
                 if (datetime.now() - ioResults[k]["updated"]) > timedelta(minutes=5):
                     del ioResults[k]

@@ -113,7 +113,7 @@ def parseTWELite(raw):
             "pkt": parsed[5],
             "volt": volt,
             "vc2" : 2 * parsed[7],
-            "adc2" : 1.5 * parsed[8],
+            "adc2" : parsed[8],
             "PC1" : parsed[9],
             "PC2" : parsed[10],
             "updated" : datetime.now()

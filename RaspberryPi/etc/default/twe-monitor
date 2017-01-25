@@ -1,2 +1,5 @@
 MAIL_FROM='twe@localhost'
 RCPT_TO='twe@localhost'
+RAIN_SENSOR_ID=99
+RAIN_RATIO_LOW=0.3
+RAIN_RATIO_HIGH=0.7
