@@ -70,14 +70,14 @@ def checkRain(weather, volt, rainRatioLow, rainRatioHigh, results):
     ratio = float(weather) / volt
     if ratio < rainRatioLow and not hasMarker:
         # It's rain
-        logger.info("It starts raining. adc2:%s, volt:%d", weather, volt)
+        logger.info("It starts raining. adc2:%d, volt:%d", weather, volt)
         touch(RainMarker)
         notifyRain(results)
     elif ratio > rainRatioHigh and hasMarker:
         mtime = datetime.fromtimestamp(os.stat(RainMarker).st_mtime)
         if datetime.now() - mtime > timedelta(hours=1):
             # remove rain report
-            logger.info("It ends raining. adc2:%s, volt:%d", weather, volt)
+            logger.info("It ends raining. adc2:%d, volt:%d", weather, volt)
             os.remove(RainMarker)
 
 # Decode output of vSerOutput_Uart().
@@ -163,6 +163,7 @@ if __name__ == '__main__':
         rainRatioLow=float(os.environ['RAIN_RATIO_LOW'])
     if 'RAIN_RATIO_HIGH' in os.environ:
         rainRatioHigh=float(os.environ['RAIN_RATIO_HIGH'])
+    logger.info("rainSensorId %d, rainRatioLow %f, rainRatioHigh %f", rainSensorId, rainRatioLow, rainRatioHigh)
     while True:
         try:
             rx = sertty.readline().rstrip()
