@@ -167,7 +167,7 @@ if __name__ == '__main__':
     logger.info("rainSensorId %d, rainRatioLow %f, rainRatioHigh %f", rainSensorId, rainRatioLow, rainRatioHigh)
     while True:
         try:
-            rx = sertty.readline().rstrip()
+            rx = sertty.readline().decode('utf-8').rstrip()
             parsed = parseTWELite(rx)
             if "from" in parsed:
                 src = parsed["from"]
