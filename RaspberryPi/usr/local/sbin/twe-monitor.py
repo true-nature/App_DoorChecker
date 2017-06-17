@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- mode:python; coding:utf-8 -*-
 
 import time
@@ -151,7 +151,8 @@ def expireOldFile():
 if __name__ == '__main__':
     logger.info("Started")
     if not os.path.exists(OutDir):
-        os.mkdir(OutDir, 0775)
+        os.mkdir(OutDir)
+        os.chmod(OutDir, 0o775)
     ioResults = {}
     sertty = serial.Serial(port=SerialDevice, baudrate=115200, timeout=60)
     rainSensorId=256
