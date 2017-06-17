@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- mode:python; coding:utf-8 -*-
 
 import time
@@ -12,8 +12,8 @@ import glob
 import pprint
 from logging import getLogger,INFO,DEBUG,Formatter
 from logging.handlers import SysLogHandler
-from email.Header import decode_header
-from email.Parser import Parser
+from email.header import decode_header
+from email.parser import Parser
 import smtplib
 import email
 from email.mime.text import MIMEText

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- mode:python; coding:utf-8 -*-
 
 import time
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     lastWakeUpTime = datetime.now() - timedelta(seconds=WAKEUP_INTERVAL_MIN)
     while True:
         try:
-            rx = sertty.readline().rstrip()
+            rx = sertty.readline().decode('utf-8').rstrip()
             if rx.startswith("::rc="):
                 currentTime = datetime.now()
                 if timedelta(seconds=WAKEUP_INTERVAL_MIN) < (currentTime - lastWakeUpTime):
