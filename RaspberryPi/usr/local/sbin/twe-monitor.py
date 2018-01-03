@@ -82,7 +82,7 @@ def checkRain(weather, volt, rainRatioLow, rainRatioHigh, results):
 
 # Decode output of vSerOutput_Uart().
 def parseTWELite(raw):
-    if raw[0] != ":":
+    if len(raw) == 0 or raw[0] != ":":
         return {}
     data = None
     try:
@@ -100,17 +100,17 @@ def parseTWELite(raw):
         logger.debug("Received %s", raw)
         # relay,LQI,FRAME,src,u8id,u8pkt,batt,adc1,adc2,PC1,PC2,CRC
         ss10 = struct.Struct(">IBHIBBBHHHHB")
-        parsed = ss10.unpack(data)
+        binary = ss10.unpack(data)
 
-        volt = decodeVolt(parsed[6])
+        volt = decodeVolt(binary[6])
 
         result = {
-            "relay" : "{0:08X}".format(parsed[0]),
-            "lqi" : parsed[1],
-            "frame" : parsed[2],
-            "from" : "{0:08X}".format(parsed[3]),
-            "id": parsed[4],
-            "pkt": parsed[5],
+            "relay" : "{0:08X}".format(binary[0]),
+            "lqi" : binary[1],
+            "frame" : binary[2],
+            "from" : "{0:08X}".format(binary[3]),
+            "id": binary[4],
+            "pkt": binary[5],
             "volt": volt,
             "vc2" : 2 * parsed[7],
             "adc2" : parsed[8],
@@ -121,22 +121,22 @@ def parseTWELite(raw):
     elif pkt == 'FE':
         # relay,LQI,FRAME,src,u8id,u8pkt,batt,adc1,adc2,param,DIbitmap,CRC
         ssFE = struct.Struct(">IBHIBBBHHBBB")
-        parsed = ssFE.unpack(data)
+        binary = ssFE.unpack(data)
 
-        volt = decodeVolt(parsed[6])
+        volt = decodeVolt(binary[6])
 
         result = {
-            "relay" : "{0:08X}".format(parsed[0]),
-            "lqi" : parsed[1],
-            "frame" : parsed[2],
-            "from" : "{0:08X}".format(parsed[3]),
-            "id": parsed[4],
-            "pkt": parsed[5],
+            "relay" : "{0:08X}".format(binary[0]),
+            "lqi" : binary[1],
+            "frame" : binary[2],
+            "from" : "{0:08X}".format(binary[3]),
+            "id": binary[4],
+            "pkt": binary[5],
             "volt": volt,
-            "vc2" : 2 * parsed[7],
-            "adc2" : parsed[8],
-            "param" : parsed[9],
-            "button" : parsed[10],
+            "vc2" : 2 * binary[7],
+            "adc2" : binary[8],
+            "param" : binary[9],
+            "button" : binary[10],
             "updated" : datetime.now()
         }
     return result
