@@ -6,16 +6,16 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "DoorChecker EndPoint_Input"
-Date "8 mar 2015"
+Date "2018-03-09"
 Rev ""
-Comp "true-nature"
+Comp "https://github.com/true-nature"
 Comment1 ""
 Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L Switch1:SW_Reed SW1
+L Switch:SW_Reed SW1
 U 1 1 54360F03
 P 5600 3950
 F 0 "SW1" H 5600 4050 70  0000 C CNN
@@ -26,7 +26,7 @@ F 3 "~" H 5600 3950 60  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L device:R R1
+L Device:R R1
 U 1 1 54360F12
 P 5600 4750
 F 0 "R1" V 5680 4750 40  0000 C CNN
@@ -37,7 +37,7 @@ F 3 "~" H 5600 4750 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power1:GND #PWR01
+L power:GND #PWR01
 U 1 1 543B58C8
 P 4450 2700
 F 0 "#PWR01" H 4450 2700 30  0001 C CNN
@@ -48,18 +48,18 @@ F 3 "" H 4450 2700 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Input-rescue:BATTERY-RESCUE-Input BT1
+L Device:Battery_Cell BT1
 U 1 1 543B60F0
 P 4450 2150
-F 0 "BT1" H 4450 2350 50  0000 C CNN
-F 1 "CR2032" H 4450 1960 50  0000 C CNN
+F 0 "BT1" H 4350 2300 50  0000 C CNN
+F 1 "CR2032" H 4300 2100 50  0000 C CNN
 F 2 "favorites:PBCS-75" H 4450 2150 60  0001 C CNN
 F 3 "~" H 4450 2150 60  0000 C CNN
 	1    4450 2150
-	0    1    1    0   
+	1    0    0    -1  
 $EndComp
 $Comp
-L power1:PWR_FLAG #FLG02
+L power:PWR_FLAG #FLG02
 U 1 1 5486A030
 P 4450 1600
 F 0 "#FLG02" H 4450 1695 30  0001 C CNN
@@ -99,7 +99,7 @@ RST
 Text Label 9250 4800 0    60   ~ 0
 PRG
 $Comp
-L power1:PWR_FLAG #FLG03
+L power:PWR_FLAG #FLG03
 U 1 1 550F8F4A
 P 4950 4900
 F 0 "#FLG03" H 4950 4995 50  0001 C CNN
@@ -110,7 +110,7 @@ F 3 "" H 4950 4900 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R3
+L Device:R R3
 U 1 1 587D4FBE
 P 9500 1750
 F 0 "R3" V 9580 1750 40  0000 C CNN
@@ -121,7 +121,7 @@ F 3 "~" H 9500 1750 30  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Connector:Conn_01x02 J1
+L Connector_Generic:Conn_01x02 J1
 U 1 1 587D57BC
 P 9950 2000
 F 0 "J1" H 10150 2050 50  0000 L CNN
@@ -132,7 +132,7 @@ F 3 "" H 9950 2000 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R2
+L Device:R R2
 U 1 1 5A82DDEB
 P 9750 3050
 F 0 "R2" V 9830 3050 40  0000 C CNN
@@ -159,7 +159,7 @@ Wire Wire Line
 	4450 2550 5150 2550
 Connection ~ 4450 2550
 Wire Wire Line
-	4450 2450 4450 2550
+	4450 2250 4450 2550
 Wire Wire Line
 	4450 1600 4450 1750
 Wire Wire Line
@@ -222,7 +222,7 @@ Wire Wire Line
 Wire Wire Line
 	5150 3300 5150 5000
 Wire Wire Line
-	4450 1750 4450 1850
+	4450 1750 4450 1950
 Wire Wire Line
 	4450 2550 4450 2700
 Wire Wire Line
@@ -252,7 +252,7 @@ Wire Wire Line
 Wire Wire Line
 	8900 2700 8900 4800
 $Comp
-L device:C_Small C1
+L Device:C_Small C1
 U 1 1 5A845ABD
 P 7900 4350
 F 0 "C1" H 7910 4420 50  0000 L CNN
