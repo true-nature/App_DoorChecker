@@ -120,29 +120,18 @@ F 3 "~" H 6550 2700 30  0000 C CNN
 	1    6550 2700
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	6550 1300 2800 1300
-Wire Wire Line
-	2800 1300 2800 3050
 Connection ~ 6000 1400
 Wire Wire Line
 	6550 1750 6550 1950
 Wire Wire Line
 	5050 1950 6550 1950
-Connection ~ 1950 2950
-Wire Wire Line
-	1950 2950 3450 2950
 Wire Wire Line
 	1250 2200 1950 2200
 Connection ~ 1250 2200
 Wire Wire Line
 	1250 1900 1250 2200
 Wire Wire Line
-	2700 1400 2700 3150
-Wire Wire Line
 	6000 4550 6300 4550
-Wire Wire Line
-	1250 1400 2700 1400
 Wire Wire Line
 	3450 2150 3100 2150
 Wire Wire Line
@@ -155,8 +144,6 @@ Wire Wire Line
 	2400 3400 2400 2450
 Wire Wire Line
 	2400 2450 3450 2450
-Wire Wire Line
-	2700 3150 3450 3150
 Wire Wire Line
 	3450 1850 2900 1850
 Wire Wire Line
@@ -178,13 +165,10 @@ Wire Wire Line
 Connection ~ 2400 4000
 Wire Wire Line
 	6450 1400 6550 1400
-Connection ~ 6550 1400
 Wire Wire Line
 	6550 1650 6550 1400
 Wire Wire Line
 	6000 1400 6150 1400
-Wire Wire Line
-	1950 2950 1950 4650
 Wire Wire Line
 	1250 1400 1250 1600
 Wire Wire Line
@@ -192,20 +176,13 @@ Wire Wire Line
 Wire Wire Line
 	1950 4650 2400 4650
 Wire Wire Line
-	1950 2850 1950 2950
-Wire Wire Line
 	6550 1950 6550 2550
 Wire Wire Line
 	2400 4000 2400 4250
 Wire Wire Line
-	6550 1400 6550 1300
-Wire Wire Line
 	2900 5150 6300 5150
 Wire Wire Line
 	4150 3450 4150 3550
-Connection ~ 2700 1400
-Wire Wire Line
-	2700 1400 4250 1400
 NoConn ~ 5050 1750
 NoConn ~ 5050 1850
 NoConn ~ 5050 2050
@@ -242,8 +219,6 @@ NoConn ~ 5050 2150
 NoConn ~ 5050 2250
 NoConn ~ 5050 2450
 NoConn ~ 3450 2250
-Wire Wire Line
-	3450 3050 2800 3050
 NoConn ~ 3450 2550
 NoConn ~ 3450 2650
 NoConn ~ 3450 2750
@@ -314,10 +289,10 @@ F 3 "" H 1250 1250 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:PWR_FLAG #FLG?
+L power:PWR_FLAG #FLG0101
 U 1 1 5AAF2C2D
 P 1750 4550
-F 0 "#FLG?" H 1750 4645 30  0001 C CNN
+F 0 "#FLG0101" H 1750 4645 30  0001 C CNN
 F 1 "PWR_FLAG" H 1750 4730 30  0000 C CNN
 F 2 "" H 1750 4550 60  0000 C CNN
 F 3 "" H 1750 4550 60  0000 C CNN
@@ -329,4 +304,15 @@ Wire Wire Line
 Wire Wire Line
 	1750 4650 1950 4650
 Connection ~ 1950 4650
+Wire Wire Line
+	1950 2850 1950 3050
+Wire Wire Line
+	3450 3050 1950 3050
+Connection ~ 1950 3050
+Wire Wire Line
+	1950 3050 1950 4650
+Wire Wire Line
+	1250 1400 4250 1400
+NoConn ~ 3450 2950
+NoConn ~ 3450 3150
 $EndSCHEMATC
