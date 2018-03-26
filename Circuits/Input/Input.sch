@@ -79,10 +79,10 @@ F 3 "~" H 6650 4800 60  0000 C CNN
 	1    6700 4850
 	1    0    0    -1  
 $EndComp
-NoConn ~ 3450 1750
+NoConn ~ 3550 1750
 Text Label 2500 2450 0    60   ~ 0
 DI1
-NoConn ~ 3450 1950
+NoConn ~ 3550 1950
 Text Label 6050 4650 0    60   ~ 0
 RST
 Text Label 6050 4850 0    60   ~ 0
@@ -124,7 +124,7 @@ Connection ~ 6000 1400
 Wire Wire Line
 	6550 1750 6550 1950
 Wire Wire Line
-	5050 1950 6550 1950
+	4950 1950 6550 1950
 Wire Wire Line
 	1250 2200 1950 2200
 Connection ~ 1250 2200
@@ -133,19 +133,19 @@ Wire Wire Line
 Wire Wire Line
 	6000 4550 6300 4550
 Wire Wire Line
-	3450 2150 3100 2150
+	3550 2150 3100 2150
 Wire Wire Line
 	3100 2150 3100 4650
 Wire Wire Line
-	5050 2350 5700 2350
+	4950 2350 5700 2350
 Wire Wire Line
 	2900 1850 2900 5150
 Wire Wire Line
 	2400 3400 2400 2450
 Wire Wire Line
-	2400 2450 3450 2450
+	2400 2450 3550 2450
 Wire Wire Line
-	3450 1850 2900 1850
+	3550 1850 2900 1850
 Wire Wire Line
 	2400 4650 2400 4550
 Wire Wire Line
@@ -155,7 +155,7 @@ Wire Wire Line
 Wire Wire Line
 	1950 2200 1950 2850
 Wire Wire Line
-	3450 2850 1950 2850
+	3550 2850 1950 2850
 Connection ~ 1950 2850
 Wire Wire Line
 	2400 3800 2400 4000
@@ -182,14 +182,14 @@ Wire Wire Line
 Wire Wire Line
 	2900 5150 6300 5150
 Wire Wire Line
-	4150 3450 4150 3550
-NoConn ~ 5050 1750
-NoConn ~ 5050 1850
-NoConn ~ 5050 2050
-NoConn ~ 5050 2850
-NoConn ~ 5050 2950
+	4250 3350 4250 3550
+NoConn ~ 4950 1750
+NoConn ~ 4950 1850
+NoConn ~ 4950 2050
+NoConn ~ 4950 2850
+NoConn ~ 4950 2950
 Wire Wire Line
-	4150 5050 6300 5050
+	4250 5050 6300 5050
 Wire Wire Line
 	5700 2350 5700 4850
 $Comp
@@ -204,53 +204,32 @@ F 3 "" H 5050 3550 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 Wire Wire Line
-	5050 2750 5300 2750
+	4950 2750 5300 2750
 Wire Wire Line
 	5300 2750 5300 4950
 Wire Wire Line
 	5300 4950 6300 4950
 Wire Wire Line
-	5050 2650 5400 2650
+	4950 2650 5400 2650
 Wire Wire Line
 	5400 2650 5400 4750
 Wire Wire Line
 	5400 4750 6300 4750
-NoConn ~ 5050 2150
-NoConn ~ 5050 2250
-NoConn ~ 5050 2450
-NoConn ~ 3450 2250
-NoConn ~ 3450 2550
-NoConn ~ 3450 2650
-NoConn ~ 3450 2750
+NoConn ~ 4950 2150
+NoConn ~ 4950 2250
+NoConn ~ 4950 2450
+NoConn ~ 3550 2250
+NoConn ~ 3550 2550
+NoConn ~ 3550 2650
+NoConn ~ 3550 2750
 Wire Wire Line
-	4250 1450 4250 1400
+	4250 1550 4250 1400
 Connection ~ 4250 1400
 Wire Wire Line
 	4250 1400 6000 1400
-Wire Wire Line
-	4550 3450 4550 3550
-Wire Wire Line
-	4550 3550 4450 3550
-Connection ~ 4150 3550
-Wire Wire Line
-	4250 3450 4250 3550
 Connection ~ 4250 3550
 Wire Wire Line
-	4250 3550 4150 3550
-Wire Wire Line
-	4350 3450 4350 3550
-Connection ~ 4350 3550
-Wire Wire Line
-	4350 3550 4250 3550
-Wire Wire Line
-	4450 3450 4450 3550
-Connection ~ 4450 3550
-Wire Wire Line
-	4450 3550 4350 3550
-Wire Wire Line
-	4950 3550 4550 3550
-Wire Wire Line
-	4150 3550 4150 5050
+	4250 3550 4250 5050
 Wire Wire Line
 	6000 3550 6000 4550
 Wire Wire Line
@@ -273,7 +252,6 @@ Text Notes 2550 5500 0    100  ~ 0
 R1 and R2 are exclusive.
 Wire Wire Line
 	2400 4000 6550 4000
-Connection ~ 4550 3550
 Connection ~ 1250 1400
 Wire Wire Line
 	1250 1250 1250 1400
@@ -307,12 +285,14 @@ Connection ~ 1950 4650
 Wire Wire Line
 	1950 2850 1950 3050
 Wire Wire Line
-	3450 3050 1950 3050
+	3550 3050 1950 3050
 Connection ~ 1950 3050
 Wire Wire Line
 	1950 3050 1950 4650
 Wire Wire Line
 	1250 1400 4250 1400
-NoConn ~ 3450 2950
-NoConn ~ 3450 3150
+NoConn ~ 3550 2950
+NoConn ~ 3550 3150
+Wire Wire Line
+	4250 3550 4950 3550
 $EndSCHEMATC
