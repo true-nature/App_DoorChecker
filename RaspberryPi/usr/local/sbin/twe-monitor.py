@@ -183,10 +183,14 @@ if __name__ == '__main__':
                 os.rename(OutDir + "/_" + src + ".raw", OutDir + "/" + src + ".parsed")
                 if parsed["id"] == rainSensorId:
                     checkRain(parsed["adc2"], parsed["volt"], rainRatioLow, rainRatioHigh, ioResults.values())
+            toExpire = {}
             for k in ioResults.keys():
                 if (datetime.now() - ioResults[k]["updated"]) > timedelta(minutes=5):
-                    del ioResults[k]
+                    toExpire[k] = True;
+            for k in toExpire.keys():
+                del ioResults[k]
         except Exception as e:
             logger.error('twe-monitor.py', exc_info=True)
+            break
     
     sertty.close()
